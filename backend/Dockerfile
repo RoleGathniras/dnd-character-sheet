@@ -2,7 +2,12 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir fastapi uvicorn[standard]
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn[standard] \
+    sqlmodel \
+    psycopg[binary]
+
 
 COPY app /app/app
 

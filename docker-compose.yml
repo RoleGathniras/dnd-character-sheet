@@ -1,6 +1,21 @@
 services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: dnd
+      POSTGRES_PASSWORD: dnd
+      POSTGRES_DB: dnd
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   api:
     build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://dnd:dnd@db:5432/dnd
+    depends_on:
+      - db
     ports:
       - "8000:8000"
 
@@ -10,3 +25,6 @@ services:
       - "8080:80"
     depends_on:
       - api
+
+volumes:
+  pgdata:
