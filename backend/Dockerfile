@@ -6,7 +6,13 @@ RUN pip install --no-cache-dir \
     fastapi \
     uvicorn[standard] \
     sqlmodel \
-    psycopg[binary]
+    psycopg[binary] \
+    python-jose[cryptography] \
+    passlib[argon2] \
+    python-multipart
+
+
+
 
 
 COPY app /app/app

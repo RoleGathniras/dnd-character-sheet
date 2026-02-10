@@ -1,11 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DnD Character Sheet</title>
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <h1>DnD Character Sheet</h1>
-  <p>Frontend läuft 🚀</p>
+  <!-- Appbar -->
+  <div class="appbar">
+    <button id="btnMenu" class="btn" aria-label="Menü">☰</button>
+
+    <select id="characterSelect" class="select" aria-label="Charakter auswählen">
+      <option value="">(nicht eingeloggt)</option>
+    </select>
+
+    <button id="btnLoad" class="btn" disabled>Laden</button>
+    <button id="btnSave" class="btn btn--primary" disabled>Speichern</button>
+
+    <button id="btnLogin" class="btn">Login</button>
+    <button id="btnLogout" class="btn" style="display:none">Logout</button>
+
+    <span id="appStatus" class="status" aria-live="polite">Frontend läuft 🚀</span>
+  </div>
+
+  <!-- Drawer -->
+  <div id="drawer" class="drawer" aria-hidden="true">
+    <div class="drawer__header">
+      <strong>Charaktere</strong>
+      <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+    </div>
+
+    <div class="drawer__content">
+      <div class="drawer__section">
+        <div class="drawer__title">Meine</div>
+        <div id="listMine" class="drawer__list">
+          <button class="drawer__item" disabled>(noch keine Daten)</button>
+        </div>
+      </div>
+
+      <div class="drawer__section">
+        <div class="drawer__title">NPCs</div>
+        <div id="listNpcs" class="drawer__list">
+          <button class="drawer__item" disabled>(noch keine Daten)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="backdrop" class="backdrop" hidden></div>
+
+  <!-- Content Placeholder -->
+  <main class="page">
+    <h1>DnD Character Sheet</h1>
+    <p>Als Nächstes binden wir das echte Sheet-HTML hier ein (oder ersetzen diesen Bereich).</p>
+    <p>UI: Appbar + Drawer ist bereit ✅</p>
+  </main>
+
+  <script src="/app.js"></script>
 </body>
 </html>
