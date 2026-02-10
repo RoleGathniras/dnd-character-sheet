@@ -1,6 +1,25 @@
+# ===== Python =====
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtualenv (falls jemals lokal)
 .venv/
-.env
-.idea/
+venv/
+env/
+
+# Test / Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+# ===== Docker =====
+*.log
+# ===== Frontend =====
+frontend/public/.DS_Store
+frontend/public/*.map
+# ===== OS / Editor =====
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
