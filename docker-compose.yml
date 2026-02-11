@@ -18,6 +18,9 @@ services:
   api:
     build: ./backend
     environment:
+      SECRET_KEY: ${SECRET_KEY:-CHANGE_ME_IN_PROD}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:8080}
       DATABASE_URL: postgresql+psycopg://dnd:dnd@db:5432/dnd
     depends_on:
       db:
