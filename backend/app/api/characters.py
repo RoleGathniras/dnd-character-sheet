@@ -84,21 +84,28 @@ def update_character(
 
     ensure_owner_or_dm(character, current_user)
 
-    # --- Optimistic locking (soft) ---
     if payload.updated_at is not None:
-        # normalize both to aware UTC if needed
-        current = character.updated_at
         incoming = payload.updated_at
-        # If incoming is naive, treat it as UTC (frontend will send ISO; usually with Z)
         if incoming.tzinfo is None:
             incoming = incoming.replace(tzinfo=timezone.utc)
+        incoming = incoming.astimezone(timezone.utc)
 
-        if current != incoming:
+        current = character.updated_at
+        if current.tzinfo is None:
+            current = current.replace(tzinfo=timezone.utc)
+        current = current.astimezone(timezone.utc)
+
+        # normalize string format (always with +00:00)
+        incoming_iso = incoming.isoformat()
+        current_iso = current.isoformat()
+
+        if current_iso != incoming_iso:
             raise HTTPException(
                 status_code=409,
                 detail={
                     "message": "Character has been modified since you loaded it.",
-                    "current_updated_at": character.updated_at.isoformat(),
+                    "current_updated_at": current_iso,
+                    "incoming_updated_at": incoming_iso,
                 },
             )
 

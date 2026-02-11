@@ -23,6 +23,7 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     // ===== State =====
     let currentCharacterId = Number(localStorage.getItem("dnd_current_character_id")) || null;
     let isDirty = false;
+    let currentCharacterUpdatedAt = null;
 
 
     // ===== Helpers =====
@@ -160,8 +161,15 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
 
         try {
             setStatus("Lade Charakter…");
+
             const c = await API.getCharacter(cid);
+
+            // wichtig: globaler State für Save + optimistic locking
+            currentCharacterId = c.id;
+            currentCharacterUpdatedAt = c.updated_at;
+
             console.log("CHAR:", c);
+            console.log("SET updated_at from loadCharacter:", currentCharacterUpdatedAt);
             console.log("DATA:", c.data);
 
             try {
@@ -172,18 +180,17 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
                 console.error("Mapping/Overlay failed", e);
             }
 
+            isDirty = false;
+            btnSave.disabled = true;
 
             setStatus(`Geladen: ${c.name} (${c.kind})`);
-            currentCharacterId = c.id; // zur Sicherheit
-            btnSave.disabled = false;
-
-
         } catch (e) {
             console.error(e);
             setStatus("Fehler beim Laden des Charakters ❌");
             alert("Fehler beim Laden des Charakters.");
         }
     }
+
 
     // ===== Auth =====
     async function doLogin() {
@@ -234,7 +241,7 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     });
 
     btnSave?.addEventListener("click", async () => {
-        console.log("SAVE CLICK", {currentCharacterId, token: !!API.token});
+        console.log("SENDING updated_at:", currentCharacterUpdatedAt);
 
         if (!currentCharacterId) {
             setStatus("Kein Charakter geladen.");
@@ -247,17 +254,28 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
             const data = sheetToJson();
             console.log("PAYLOAD", data);
 
-            const res = await API.patchCharacter(currentCharacterId, {data});
-            console.log("PATCH RESULT", res);
+            const res = await API.patchCharacter(currentCharacterId, {
+                data,
+                updated_at: currentCharacterUpdatedAt
+            });
 
-            const check = await API.getCharacter(currentCharacterId);
-            console.log("AFTER SAVE (reloaded)", check.data);
+            // wichtig: neuen Stand übernehmen
+            currentCharacterUpdatedAt = res.updated_at;
+
+            console.log("PATCH RESULT", res);
 
             isDirty = false;
             btnSave.disabled = true;
             setStatus("Gespeichert ✅");
         } catch (e) {
             console.error("SAVE ERROR", e);
+
+            if (String(e).includes("409")) {
+                alert("Konflikt: Der Charakter wurde zwischenzeitlich geändert. Ich lade neu.");
+                await loadCharacter(currentCharacterId); // setzt updated_at neu
+                return;
+            }
+
             setStatus("Speichern fehlgeschlagen ❌ (siehe Console)");
             alert(String(e));
         }
