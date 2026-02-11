@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
-
+from app.models import Character, User
 from app.deps import get_current_user, get_session
 from app.models import Character, User, Role
 from app.schemas import CharacterCreate, CharacterUpdate
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/characters", tags=["characters"])
 
@@ -17,8 +18,8 @@ def ensure_owner_or_dm(character: Character, user: User):
 
 @router.get("")
 def list_characters(
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user),
+        session: Session = Depends(get_session),
+        current_user: User = Depends(get_current_user),
 ):
     if current_user.role == Role.dm:
         return session.exec(select(Character)).all()
@@ -30,9 +31,9 @@ def list_characters(
 
 @router.post("")
 def create_character(
-    payload: CharacterCreate,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user),
+        payload: CharacterCreate,
+        session: Session = Depends(get_session),
+        current_user: User = Depends(get_current_user),
 ):
     # Player darf nur PC für sich selbst anlegen
     if current_user.role != Role.dm and payload.kind != "pc":
@@ -54,9 +55,9 @@ def create_character(
 
 @router.get("/{character_id}")
 def get_character(
-    character_id: int,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user),
+        character_id: int,
+        session: Session = Depends(get_session),
+        current_user: User = Depends(get_current_user),
 ):
     character = session.get(Character, character_id)
     if not character:
@@ -66,12 +67,16 @@ def get_character(
     return character
 
 
+def utcnow():
+    return datetime.now(timezone.utc)
+
+
 @router.patch("/{character_id}")
 def update_character(
-    character_id: int,
-    payload: CharacterUpdate,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user),
+        character_id: int,
+        payload: CharacterUpdate,
+        session: Session = Depends(get_session),
+        current_user: User = Depends(get_current_user),
 ):
     character = session.get(Character, character_id)
     if not character:
@@ -79,10 +84,30 @@ def update_character(
 
     ensure_owner_or_dm(character, current_user)
 
+    # --- Optimistic locking (soft) ---
+    if payload.updated_at is not None:
+        # normalize both to aware UTC if needed
+        current = character.updated_at
+        incoming = payload.updated_at
+        # If incoming is naive, treat it as UTC (frontend will send ISO; usually with Z)
+        if incoming.tzinfo is None:
+            incoming = incoming.replace(tzinfo=timezone.utc)
+
+        if current != incoming:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "message": "Character has been modified since you loaded it.",
+                    "current_updated_at": character.updated_at.isoformat(),
+                },
+            )
+
     if payload.name is not None:
         character.name = payload.name
     if payload.data is not None:
         character.data = payload.data
+
+    character.updated_at = utcnow()
 
     session.add(character)
     session.commit()
@@ -92,9 +117,9 @@ def update_character(
 
 @router.delete("/{character_id}")
 def delete_character(
-    character_id: int,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user),
+        character_id: int,
+        session: Session = Depends(get_session),
+        current_user: User = Depends(get_current_user),
 ):
     character = session.get(Character, character_id)
     if not character:

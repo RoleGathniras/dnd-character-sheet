@@ -6,9 +6,9 @@ __pycache__/
 
 # Virtualenv (falls jemals lokal)
 .venv/
-venv/
-.env
 
+.env
+.env.*
 # Test / Coverage
 .coverage
 htmlcov/
