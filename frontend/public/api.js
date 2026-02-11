@@ -1,63 +1,70 @@
-const API = {
-  tokenKey: "dnd_token",
+export const API = {
+    tokenKey: "dnd_token",
 
-  get token() {
-    return localStorage.getItem(this.tokenKey);
-  },
-  set token(v) {
-    if (v) localStorage.setItem(this.tokenKey, v);
-    else localStorage.removeItem(this.tokenKey);
-  },
+    get token() {
+        return localStorage.getItem(this.tokenKey);
+    },
 
-  async login(username, password) {
-    const body = new URLSearchParams();
-    body.set("username", username);
-    body.set("password", password);
+    set token(v) {
+        if (v) localStorage.setItem(this.tokenKey, v);
+        else localStorage.removeItem(this.tokenKey);
+    },
 
-    const res = await fetch("/api/auth/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body
-    });
+    async login(username, password) {
+        const body = new URLSearchParams();
+        body.set("username", username);
+        body.set("password", password);
 
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`Login failed (${res.status}): ${txt}`);
-    }
+        const res = await fetch("/api/auth/token", {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body,
+        });
 
-    const data = await res.json();
-    this.token = data.access_token;
-    return data;
-  },
+        if (!res.ok) {
+            const txt = await res.text();
+            throw new Error(`Login failed (${res.status}): ${txt}`);
+        }
 
-  async request(path, { method = "GET", json } = {}) {
-    const headers = {};
-    if (this.token) headers.Authorization = `Bearer ${this.token}`;
-    if (json !== undefined) headers["Content-Type"] = "application/json";
+        const data = await res.json();
+        this.token = data.access_token;
+        return data;
+    },
 
-    const res = await fetch(`/api${path}`, {
-      method,
-      headers,
-      body: json !== undefined ? JSON.stringify(json) : undefined
-    });
+    async request(path, opts = {}) {
+        const headers = new Headers(opts.headers || {});
+        const t = this.token;
+        if (t) headers.set("Authorization", `Bearer ${t}`);
 
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`API error (${res.status}) ${method} ${path}: ${txt}`);
-    }
+        const res = await fetch(`/api${path}`, {...opts, headers});
 
-    const ct = res.headers.get("content-type") || "";
-    return ct.includes("application/json") ? res.json() : res.text();
-  },
+        if (!res.ok) {
+            const txt = await res.text();
+            throw new Error(`API error (${res.status}) ${opts.method || "GET"} ${path}: ${txt}`);
+        }
 
-  me() {
-    return this.request("/users/me");
-  },
+        const ct = res.headers.get("content-type") || "";
+        return ct.includes("application/json") ? res.json() : res.text();
+    },
 
-  characters() {
-    return this.request("/characters");
-  },
-  getCharacter(id) {
-  return this.request(`/characters/${id}`);
-  }
+
+    me() {
+        return this.request("/users/me");
+    },
+
+    characters() {
+        return this.request("/characters");
+    },
+
+    getCharacter(id) {
+        return this.request(`/characters/${id}`);
+    },
+
+    patchCharacter(id, payload) {
+        return this.request(`/characters/${id}`, {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload),
+        });
+    },
 };

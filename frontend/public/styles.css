@@ -121,3 +121,9 @@ html, body{
   .status{ display: none; }
   .select{ max-width: 44vw; }
 }
+.sheet { max-width: 1100px; margin: 0 auto; padding: 16px; }
+.sheet .grid { display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.sheet label { display: grid; gap: 6px; font-size: 14px; }
+.sheet input, .sheet textarea { width: 100%; box-sizing: border-box; padding: 6px 8px; }
+@media (max-width: 900px) { .sheet .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .sheet .grid { grid-template-columns: 1fr; } }
