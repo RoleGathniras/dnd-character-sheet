@@ -95,17 +95,14 @@ def update_character(
             current = current.replace(tzinfo=timezone.utc)
         current = current.astimezone(timezone.utc)
 
-        # normalize string format (always with +00:00)
-        incoming_iso = incoming.isoformat()
-        current_iso = current.isoformat()
-
-        if current_iso != incoming_iso:
+        # compare instants with tiny tolerance (1 microsecond)
+        if abs((current - incoming).total_seconds()) > 1e-6:
             raise HTTPException(
                 status_code=409,
                 detail={
                     "message": "Character has been modified since you loaded it.",
-                    "current_updated_at": current_iso,
-                    "incoming_updated_at": incoming_iso,
+                    "current_updated_at": current.isoformat(),
+                    "incoming_updated_at": incoming.isoformat(),
                 },
             )
 
