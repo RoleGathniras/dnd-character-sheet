@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 class Role(str, Enum):
     player = "player"
     dm = "dm"
+    admin = "admin"
 
 
 class User(SQLModel, table=True):
