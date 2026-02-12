@@ -24,9 +24,11 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     const adminPanel = document.getElementById("adminPanel");
     const adminUsers = document.getElementById("adminUsers");
     const btnReloadUsers = document.getElementById("btnReloadUsers");
-
     const sheetRootEl = document.getElementById("sheetRoot");
+
     const btnDelete = document.getElementById("btnDelete");
+    const btnCreatePC = document.getElementById("btnCreatePC");
+    const btnCreateNPC = document.getElementById("btnCreateNPC"); // optional, wenn schon vorhanden
 
 
     // ===== State =====
@@ -60,6 +62,22 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         // Buttons erst sinnvoll, wenn ein Character gewählt ist
         btnLoad.disabled = !isLoggedIn || !currentCharacterId;
         btnSave.disabled = true; // erst aktiv wenn dirty
+        // Create-Buttons: PC immer ab Login möglich, NPC erst nach Role-Check
+        if (btnCreatePC) btnCreatePC.disabled = !isLoggedIn;
+        if (btnCreateNPC) btnCreateNPC.disabled = true; // Default: aus, bis wir role kennen
+
+    }
+
+    function applyRoleUI() {
+        // Nur sinnvoll, wenn eingeloggt und currentUser geladen ist
+        if (!btnCreateNPC) return;
+
+        const role = currentUser?.role;
+        const isDmOrAdmin = role === "dm" || role === "admin";
+
+        // NPC nur für DM/Admin
+        btnCreateNPC.style.display = isDmOrAdmin ? "inline-block" : "none";
+        btnCreateNPC.disabled = !isDmOrAdmin;
     }
 
     function setCurrentCharacter(id) {
@@ -105,6 +123,36 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     }
 
     // ===== Data =====
+    async function handleCreate(kind) {
+        const name = prompt(kind === "npc" ? "Name des NPC:" : "Name des Charakters:");
+        if (!name) return;
+
+        // Minimaler Startzustand für data
+        const payload = {
+            name: name.trim(),
+            kind, // "pc" oder "npc"
+            data: {schema_version: 1} // minimal, später erweitern
+        };
+
+        try {
+            const created = await API.createCharacter(payload);
+            setCurrentCharacter?.(created.id);
+
+            // Liste neu laden und neuen Character auswählen
+            await loadCharacters(); // deine bestehende Funktion
+            await loadCharacter(created.id); // deine bestehende Funktion
+            setStatus(`Erstellt: ${created.name}`); // oder wie euer Status heißt
+        } catch (err) {
+            // DM-only NPC Rule kommt als 403 zurück -> verständlich anzeigen
+            if (err.status === 403) {
+                alert("Nur DM/Admin darf NPCs anlegen.");
+                return;
+            }
+            console.error(err);
+            alert("Konnte Charakter nicht erstellen.");
+        }
+    }
+
     async function loadCharacters() {
         if (!listMine || !listNpcs) return;
 
@@ -296,10 +344,14 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         try {
             currentUser = await API.me();
             setAdminVisible(currentUser?.role === "admin");
+            applyRoleUI();
+
         } catch (e) {
             // Token vermutlich invalid
             console.error(e);
             currentUser = null;
+            applyRoleUI();
+
             setAdminVisible(false);
             throw e;
         }
@@ -315,6 +367,7 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
             setLoggedInUI(true);
 
             await refreshCurrentUserAndUI();
+            applyRoleUI();
 
             setStatus("Eingeloggt ✅");
             await loadCharacters();
@@ -342,6 +395,9 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
 
     btnLogin?.addEventListener("click", doLogin);
     btnLogout?.addEventListener("click", doLogout);
+    btnCreatePC?.addEventListener("click", () => handleCreate("pc"));
+    btnCreateNPC?.addEventListener("click", () => handleCreate("npc"));
+
 
     characterSelect?.addEventListener("change", async () => {
         const id = characterSelect.value;
@@ -434,6 +490,7 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
 
                 // currentUser laden (für Admin-Button etc.)
                 await refreshCurrentUserAndUI();
+                applyRoleUI();
 
                 await loadCharacters();
 
@@ -455,6 +512,7 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
                 setStatus("Bereit ✅");
             } else {
                 setLoggedInUI(false);
+                applyRoleUI();
                 setAdminVisible(false);
                 setStatus("UI bereit ✅");
             }

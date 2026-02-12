@@ -78,6 +78,7 @@ export const API = {
         return ct.includes("application/json") ? res.json() : res.text();
     },
 
+
     // ===== User =====
 
     me() {
@@ -92,6 +93,13 @@ export const API = {
 
     getCharacter(id) {
         return this.request(`/characters/${id}`);
+    },
+    createCharacter(payload) {
+        return this.request(`/characters`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload),
+        });
     },
 
     patchCharacter(id, payload) {
