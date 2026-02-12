@@ -26,6 +26,8 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     const btnReloadUsers = document.getElementById("btnReloadUsers");
 
     const sheetRootEl = document.getElementById("sheetRoot");
+    const btnDelete = document.getElementById("btnDelete");
+
 
     // ===== State =====
     let currentCharacterId = Number(localStorage.getItem("dnd_current_character_id")) || null;
@@ -123,14 +125,28 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
             // Drawer Button
             const b = document.createElement("button");
             b.className = "drawer__item";
-            b.textContent = `${c.name} (${c.kind})`;
+            const owner = c.owner_username ? ` – ${c.owner_username}` : "";
+            b.textContent = `${c.name} (${c.kind})${owner}`;
+
 
             b.addEventListener("click", async () => {
                 setCurrentCharacter(c.id);
                 closeDrawer();
                 showAdminPanel(false);
-                await loadCharacter(c.id);
+
+                try {
+                    await loadCharacter(c.id);
+                } catch (e) {
+                    // Wenn Character nicht sichtbar/weg: Auswahl zurücksetzen und Liste neu laden
+                    setCurrentCharacter(null); // oder "" je nach eurer Implementierung
+                    // optional: localStorage remove, falls setCurrentCharacter das nicht macht
+                    // localStorage.removeItem("selectedCharacterId");
+
+                    await loadCharacters();
+                    setStatus?.("Charakter nicht verfügbar oder kein Zugriff.");
+                }
             });
+
 
             if (c.kind === "npc") listNpcs.appendChild(b);
             else listMine.appendChild(b);
@@ -340,6 +356,25 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         await loadCharacter(currentCharacterId);
     });
 
+    btnDelete?.addEventListener("click", async () => {
+        if (!currentCharacterId) return;
+
+        const confirmed = confirm("Willst du diesen Charakter wirklich löschen?");
+        if (!confirmed) return;
+
+        try {
+            await API.deleteCharacter(currentCharacterId);
+
+            setCurrentCharacter(null);
+            await loadCharacters();
+            setStatus("Charakter gelöscht.");
+        } catch (e) {
+            setStatus(e.message);
+            console.error(e);
+        }
+    });
+
+
     btnSave?.addEventListener("click", async () => {
         console.log("SENDING updated_at:", currentCharacterUpdatedAt);
 
@@ -403,7 +438,18 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
                 await loadCharacters();
 
                 if (currentCharacterId) {
-                    await loadCharacter(currentCharacterId);
+                    try {
+                        await loadCharacter(currentCharacterId);
+                    } catch (e) {
+                        if (e?.status === 404) {
+                            console.warn("Last character not found/visible, clearing selection.");
+                            setCurrentCharacter(null); // oder "" je nach eurer Implementierung
+                            setStatus("Letzter Charakter nicht verfügbar – bitte neu wählen.");
+                        } else {
+                            // alles andere ist ein echter Fehler → nach außen werfen
+                            throw e;
+                        }
+                    }
                 }
 
                 setStatus("Bereit ✅");
@@ -415,11 +461,19 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         } catch (e) {
             // Token ungültig oder Startup-Fehler
             console.error(e);
-            API.token = null;
+
+            // Token nur killen, wenn es wirklich Auth ist
+            if (e?.status === 401) {
+                API.token = null;
+                setStatus("Token ungültig – bitte neu einloggen");
+            } else {
+                setStatus("Startup-Fehler – bitte Konsole prüfen");
+            }
+
             setLoggedInUI(false);
             setAdminVisible(false);
-            setStatus("Token ungültig – bitte neu einloggen");
         }
     })();
+
 
 })();

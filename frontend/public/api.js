@@ -23,7 +23,7 @@ export const API = {
 
         if (!res.ok) {
             const txt = await res.text();
-            throw new Error(`Login failed (${res.status}): ${txt}`);
+            throw new Error(`Login fehlgeschlagen: ${txt}`);
         }
 
         const data = await res.json();
@@ -39,18 +39,52 @@ export const API = {
         const res = await fetch(`/api${path}`, {...opts, headers});
 
         if (!res.ok) {
-            const txt = await res.text();
-            throw new Error(`API error (${res.status}) ${opts.method || "GET"} ${path}: ${txt}`);
+            const ct = res.headers.get("content-type") || "";
+            const body = ct.includes("application/json")
+                ? await res.json()
+                : await res.text();
+
+            const detail = body?.detail;
+            let reason = "";
+
+            if (typeof detail === "string") {
+                reason = detail;
+            } else if (detail?.message) {
+                reason = detail.message;
+            } else if (typeof body === "string") {
+                reason = body;
+            }
+
+            // Fallback-Meldungen
+            if (!reason) {
+                if (res.status === 401)
+                    reason = "Nicht eingeloggt oder Sitzung abgelaufen.";
+                else if (res.status === 404)
+                    reason = "Charakter nicht verfügbar oder kein Zugriff.";
+                else
+                    reason = "Unbekannter Fehler.";
+            }
+
+            const err = new Error(reason);
+            err.status = res.status;
+            err.path = path;
+            err.method = opts.method || "GET";
+            err.raw = body;
+
+            throw err;
         }
 
         const ct = res.headers.get("content-type") || "";
         return ct.includes("application/json") ? res.json() : res.text();
     },
 
+    // ===== User =====
 
     me() {
         return this.request("/users/me");
     },
+
+    // ===== Characters =====
 
     characters() {
         return this.request("/characters");
@@ -67,7 +101,15 @@ export const API = {
             body: JSON.stringify(payload),
         });
     },
-        // --- Admin ---
+    deleteCharacter(id) {
+        return this.request(`/characters/${id}`, {
+            method: "DELETE",
+        });
+    },
+
+
+    // ===== Admin =====
+
     listUsers() {
         return this.request("/users");
     },
@@ -76,8 +118,7 @@ export const API = {
         return this.request(`/users/${id}`, {
             method: "PATCH",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ role }),
+            body: JSON.stringify({role}),
         });
     },
-
 };
