@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from app.deps import get_current_user, get_session
-from app.models import User, Role
+from app.models import  Role, User, Character
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -67,3 +67,36 @@ def update_user_role(
     session.refresh(user)
 
     return {"id": user.id, "username": user.username, "role": user.role}
+@router.delete("/{user_id}")
+def delete_user(
+    user_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    # Nur Admin darf löschen
+    if current_user.role != Role.admin:
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    # User laden
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Admin darf sich nicht selbst löschen
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="Admin cannot delete itself")
+
+    # Prüfen ob Characters existieren
+    stmt = select(Character).where(Character.owner_id == user.id)
+    has_characters = session.exec(stmt).first()
+
+    if has_characters:
+        raise HTTPException(
+            status_code=400,
+            detail="User still owns characters"
+        )
+
+    session.delete(user)
+    session.commit()
+
+    return {"ok": True}
