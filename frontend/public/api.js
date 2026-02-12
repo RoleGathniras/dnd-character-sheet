@@ -67,4 +67,17 @@ export const API = {
             body: JSON.stringify(payload),
         });
     },
+        // --- Admin ---
+    listUsers() {
+        return this.request("/users");
+    },
+
+    patchUserRole(id, role) {
+        return this.request(`/users/${id}`, {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ role }),
+        });
+    },
+
 };

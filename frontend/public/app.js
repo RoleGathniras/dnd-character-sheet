@@ -20,11 +20,19 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     const listNpcs = document.getElementById("listNpcs");
     const characterSelect = document.getElementById("characterSelect");
 
+    const btnAdmin = document.getElementById("btnAdmin");
+    const adminPanel = document.getElementById("adminPanel");
+    const adminUsers = document.getElementById("adminUsers");
+    const btnReloadUsers = document.getElementById("btnReloadUsers");
+
+    const sheetRootEl = document.getElementById("sheetRoot");
+
     // ===== State =====
     let currentCharacterId = Number(localStorage.getItem("dnd_current_character_id")) || null;
     let isDirty = false;
     let currentCharacterUpdatedAt = null;
 
+    let currentUser = null;
 
     // ===== Helpers =====
     function setStatus(msg) {
@@ -49,7 +57,7 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
 
         // Buttons erst sinnvoll, wenn ein Character gewählt ist
         btnLoad.disabled = !isLoggedIn || !currentCharacterId;
-        btnSave.disabled = true; // Save kommt in 4.3
+        btnSave.disabled = true; // erst aktiv wenn dirty
     }
 
     function setCurrentCharacter(id) {
@@ -69,13 +77,30 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         btnSave.disabled = true;
     }
 
-
     function markDirty() {
         isDirty = true;
         btnSave.disabled = false;
         setStatus("Ungespeicherte Änderungen ⚠");
     }
 
+    function escapeHtml(s) {
+        return String(s)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function setAdminVisible(isAdmin) {
+        if (btnAdmin) btnAdmin.hidden = !isAdmin;
+        if (!isAdmin && adminPanel) adminPanel.hidden = true;
+    }
+
+    function showAdminPanel(show) {
+        if (!adminPanel) return;
+        adminPanel.hidden = !show;
+    }
 
     // ===== Data =====
     async function loadCharacters() {
@@ -95,7 +120,6 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         const chars = await API.characters();
 
         for (const c of chars) {
-
             // Drawer Button
             const b = document.createElement("button");
             b.className = "drawer__item";
@@ -104,6 +128,7 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
             b.addEventListener("click", async () => {
                 setCurrentCharacter(c.id);
                 closeDrawer();
+                showAdminPanel(false);
                 await loadCharacter(c.id);
             });
 
@@ -129,28 +154,22 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         }
     }
 
-    async function loadSheetTemplate() {
-        const root = document.getElementById("sheetRoot");
-        if (!root) return;
+    async function loadSheetTemplateOnce() {
+        if (!sheetRootEl) return;
 
         const res = await fetch("/sheet.html");
         if (!res.ok) {
-            root.innerHTML = "<p>Sheet konnte nicht geladen werden ❌</p>";
+            sheetRootEl.innerHTML = "<p>Sheet konnte nicht geladen werden ❌</p>";
             return;
         }
-        root.innerHTML = await res.text();
-    }
 
-    loadSheetTemplate()
-        .then(() => {
-            setStatus("Sheet geladen ✅");
-            const sheetRootEl = document.getElementById("sheetRoot");
-            sheetRootEl?.addEventListener("input", markDirty);
-        })
-        .catch((e) => {
-            console.error(e);
-            setStatus("Sheet-Template Fehler ❌");
-        });
+        sheetRootEl.innerHTML = await res.text();
+
+        // Dirty tracking
+        sheetRootEl.addEventListener("input", markDirty);
+
+        setStatus("Sheet geladen ✅");
+    }
 
     async function loadCharacter(id) {
         const cid = Number(id);
@@ -191,8 +210,85 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         }
     }
 
+    // ----- Admin UI -----
+    function renderUserRow(u) {
+        const row = document.createElement("div");
+        row.className = "userRow";
+
+        const meta = document.createElement("div");
+        meta.className = "userMeta";
+        meta.innerHTML = `
+            <div class="userName">${escapeHtml(u.username)}</div>
+            <div class="userId">ID: ${u.id}</div>
+        `;
+
+        const sel = document.createElement("select");
+        sel.className = "select";
+        ["player", "dm", "admin"].forEach(r => {
+            const opt = document.createElement("option");
+            opt.value = r;
+            opt.textContent = r;
+            sel.appendChild(opt);
+        });
+        sel.value = u.role;
+
+        const btnSaveRole = document.createElement("button");
+        btnSaveRole.className = "btn btn--primary";
+        btnSaveRole.textContent = "Speichern";
+
+        btnSaveRole.addEventListener("click", async () => {
+            btnSaveRole.disabled = true;
+            const newRole = sel.value;
+
+            try {
+                const updated = await API.patchUserRole(u.id, newRole);
+                u.role = updated.role ?? newRole;
+
+                btnSaveRole.textContent = "Gespeichert";
+                setTimeout(() => (btnSaveRole.textContent = "Speichern"), 900);
+            } catch (e) {
+                console.error(e);
+                sel.value = u.role; // rollback
+                btnSaveRole.textContent = "Fehler";
+                setTimeout(() => (btnSaveRole.textContent = "Speichern"), 900);
+                alert(e?.message || String(e));
+            } finally {
+                btnSaveRole.disabled = false;
+            }
+        });
+
+        row.append(meta, sel, btnSaveRole);
+        return row;
+    }
+
+    async function loadUsersIntoAdmin() {
+        if (!adminUsers) return;
+
+        adminUsers.textContent = "Lade…";
+        try {
+            const users = await API.listUsers();
+            adminUsers.innerHTML = "";
+            users.forEach(u => adminUsers.appendChild(renderUserRow(u)));
+        } catch (e) {
+            console.error(e);
+            adminUsers.textContent = "Fehler beim Laden der User ❌";
+        }
+    }
 
     // ===== Auth =====
+    async function refreshCurrentUserAndUI() {
+        try {
+            currentUser = await API.me();
+            setAdminVisible(currentUser?.role === "admin");
+        } catch (e) {
+            // Token vermutlich invalid
+            console.error(e);
+            currentUser = null;
+            setAdminVisible(false);
+            throw e;
+        }
+    }
+
     async function doLogin() {
         const username = prompt("Username");
         const password = prompt("Passwort");
@@ -201,8 +297,10 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         try {
             await API.login(username, password);
             setLoggedInUI(true);
-            setStatus("Eingeloggt ✅");
 
+            await refreshCurrentUserAndUI();
+
+            setStatus("Eingeloggt ✅");
             await loadCharacters();
 
             // Optional: direkt den ausgewählten Charakter laden
@@ -232,11 +330,13 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     characterSelect?.addEventListener("change", async () => {
         const id = characterSelect.value;
         setCurrentCharacter(id);
+        showAdminPanel(false);
         if (currentCharacterId) await loadCharacter(currentCharacterId);
     });
 
     btnLoad?.addEventListener("click", async () => {
         if (!currentCharacterId) return;
+        showAdminPanel(false);
         await loadCharacter(currentCharacterId);
     });
 
@@ -281,31 +381,45 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         }
     });
 
+    btnAdmin?.addEventListener("click", async () => {
+        closeDrawer();
+        showAdminPanel(true);
+        await loadUsersIntoAdmin();
+    });
+
+    btnReloadUsers?.addEventListener("click", loadUsersIntoAdmin);
 
     // ===== Startup =====
-    // Auto-resume: wenn Token existiert, versuchen wir Characters zu laden
-    loadSheetTemplate()
-        .then(() => setStatus("Sheet geladen ✅"))
-        .catch((e) => {
-            console.error(e);
-            setStatus("Sheet-Template Fehler ❌");
-        });
+    (async function startup() {
+        try {
+            await loadSheetTemplateOnce();
 
-    if (API.token) {
-        setLoggedInUI(true);
-        loadCharacters()
-            .then(async () => {
-                if (currentCharacterId) await loadCharacter(currentCharacterId);
-            })
-            .catch((e) => {
-                console.error(e);
-                API.token = null;
+            if (API.token) {
+                setLoggedInUI(true);
+
+                // currentUser laden (für Admin-Button etc.)
+                await refreshCurrentUserAndUI();
+
+                await loadCharacters();
+
+                if (currentCharacterId) {
+                    await loadCharacter(currentCharacterId);
+                }
+
+                setStatus("Bereit ✅");
+            } else {
                 setLoggedInUI(false);
-                setStatus("Token ungültig – bitte neu einloggen");
-            });
-    } else {
-        setLoggedInUI(false);
-        setStatus("UI bereit ✅");
-    }
+                setAdminVisible(false);
+                setStatus("UI bereit ✅");
+            }
+        } catch (e) {
+            // Token ungültig oder Startup-Fehler
+            console.error(e);
+            API.token = null;
+            setLoggedInUI(false);
+            setAdminVisible(false);
+            setStatus("Token ungültig – bitte neu einloggen");
+        }
+    })();
 
 })();
