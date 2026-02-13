@@ -9,16 +9,19 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     const backdrop = document.getElementById("backdrop");
     const btnMenu = document.getElementById("btnMenu");
     const btnClose = document.getElementById("btnCloseDrawer");
+    const btnActions = document.getElementById("btnActions");
+    const actionsMenu = document.getElementById("actionsMenu");
+
 
     const statusEl = document.getElementById("appStatus");
-    const btnLoad = document.getElementById("btnLoad");
     const btnSave = document.getElementById("btnSave");
     const btnLogin = document.getElementById("btnLogin");
     const btnLogout = document.getElementById("btnLogout");
 
     const listMine = document.getElementById("listMine");
     const listNpcs = document.getElementById("listNpcs");
-    const characterSelect = document.getElementById("characterSelect");
+    const toggleMine = document.getElementById("toggleMine");
+    const toggleNpcs = document.getElementById("toggleNpcs");
 
     const btnAdmin = document.getElementById("btnAdmin");
     const adminPanel = document.getElementById("adminPanel");
@@ -28,7 +31,7 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
 
     const btnDelete = document.getElementById("btnDelete");
     const btnCreatePC = document.getElementById("btnCreatePC");
-    const btnCreateNPC = document.getElementById("btnCreateNPC"); // optional, wenn schon vorhanden
+    const btnCreateNPC = document.getElementById("btnCreateNPC");
 
 
     // ===== State =====
@@ -39,6 +42,31 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     let currentUser = null;
 
     // ===== Helpers =====
+    function closeActionsMenu() {
+        if (actionsMenu) actionsMenu.hidden = true;
+    }
+
+    function toggleActionsMenu() {
+        if (actionsMenu) actionsMenu.hidden = !actionsMenu.hidden;
+    }
+
+    function setSectionOpen(toggleBtn, listEl, open) {
+        if (!toggleBtn || !listEl) return;
+        toggleBtn.setAttribute("aria-expanded", open ? "true" : "false");
+        listEl.hidden = !open;
+    }
+
+    function toggleSection(toggleBtn, listEl) {
+        if (!toggleBtn || !listEl) return;
+
+        // Quelle der Wahrheit: hidden-Status der Liste
+        const openNext = listEl.hidden; // wenn hidden=true → als nächstes öffnen
+        setSectionOpen(toggleBtn, listEl, openNext);
+
+        console.log("[drawer-toggle]", toggleBtn.id, "open=", openNext, "hidden=", listEl.hidden);
+    }
+
+
     function setStatus(msg) {
         if (statusEl) statusEl.textContent = msg;
     }
@@ -58,13 +86,21 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     function setLoggedInUI(isLoggedIn) {
         btnLogin.style.display = isLoggedIn ? "none" : "inline-block";
         btnLogout.style.display = isLoggedIn ? "inline-block" : "none";
-
-        // Buttons erst sinnvoll, wenn ein Character gewählt ist
-        btnLoad.disabled = !isLoggedIn || !currentCharacterId;
         btnSave.disabled = true; // erst aktiv wenn dirty
-        // Create-Buttons: PC immer ab Login möglich, NPC erst nach Role-Check
+
+        // Create/Delete nur wenn eingeloggt
         if (btnCreatePC) btnCreatePC.disabled = !isLoggedIn;
-        if (btnCreateNPC) btnCreateNPC.disabled = true; // Default: aus, bis wir role kennen
+        if (btnDelete) btnDelete.disabled = !isLoggedIn || !currentCharacterId;
+
+        // Drawer/Menu nur wenn eingeloggt (optional, aber wirkt aufgeräumt)
+        if (btnMenu) btnMenu.style.display = isLoggedIn ? "inline-block" : "none";
+
+        // Sheet anzeigen/verstecken
+        if (sheetRootEl) sheetRootEl.style.display = isLoggedIn ? "" : "none";
+
+        if (btnActions) btnActions.style.display = isLoggedIn ? "inline-block" : "none";
+        if (!isLoggedIn) closeActionsMenu();
+
 
     }
 
@@ -88,13 +124,9 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         } else {
             localStorage.removeItem("dnd_current_character_id");
         }
-
-        if (characterSelect) {
-            characterSelect.value = currentCharacterId ? String(currentCharacterId) : "";
-        }
-
-        btnLoad.disabled = !currentCharacterId;
         btnSave.disabled = true;
+        // Delete nur wenn Character ausgewählt
+        if (btnDelete) btnDelete.disabled = !currentCharacterId;
     }
 
     function markDirty() {
@@ -159,14 +191,6 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         listMine.innerHTML = "";
         listNpcs.innerHTML = "";
 
-        if (characterSelect) {
-            characterSelect.innerHTML = "";
-            const placeholder = document.createElement("option");
-            placeholder.value = "";
-            placeholder.textContent = "(Charakter wählen)";
-            characterSelect.appendChild(placeholder);
-        }
-
         const chars = await API.characters();
 
         for (const c of chars) {
@@ -175,7 +199,6 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
             b.className = "drawer__item";
             const owner = c.owner_username ? ` – ${c.owner_username}` : "";
             b.textContent = `${c.name} (${c.kind})${owner}`;
-
 
             b.addEventListener("click", async () => {
                 setCurrentCharacter(c.id);
@@ -186,37 +209,19 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
                     await loadCharacter(c.id);
                 } catch (e) {
                     // Wenn Character nicht sichtbar/weg: Auswahl zurücksetzen und Liste neu laden
-                    setCurrentCharacter(null); // oder "" je nach eurer Implementierung
-                    // optional: localStorage remove, falls setCurrentCharacter das nicht macht
-                    // localStorage.removeItem("selectedCharacterId");
-
+                    setCurrentCharacter(null);
                     await loadCharacters();
                     setStatus?.("Charakter nicht verfügbar oder kein Zugriff.");
                 }
             });
 
-
             if (c.kind === "npc") listNpcs.appendChild(b);
             else listMine.appendChild(b);
-
-            // Dropdown Option (Fallback)
-            if (characterSelect) {
-                const opt = document.createElement("option");
-                opt.value = String(c.id);
-                opt.textContent = `${c.name} (${c.kind})`;
-                characterSelect.appendChild(opt);
-            }
         }
 
-        // Auto-select first character if none selected
-        if (!currentCharacterId && chars.length > 0) {
-            setCurrentCharacter(chars[0].id);
-            setStatus(`Charaktere geladen: ${chars.length} (1 ausgewählt)`);
-            btnLoad.disabled = false;
-        } else {
-            setStatus(`Charaktere geladen: ${chars.length}`);
-        }
+        setStatus(`Charaktere geladen: ${chars.length}`);
     }
+
 
     async function loadSheetTemplateOnce() {
         if (!sheetRootEl) return;
@@ -228,6 +233,12 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
         }
 
         sheetRootEl.innerHTML = await res.text();
+
+        // 👉 Default-Titel setzen
+        const titleEl = document.getElementById("sheetTitle");
+        if (titleEl) {
+            titleEl.textContent = "Kein Charakter geladen";
+        }
 
         // Dirty tracking
         sheetRootEl.addEventListener("input", markDirty);
@@ -257,6 +268,10 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
 
             try {
                 jsonToSheet(c.data);
+
+                const titleEl = document.getElementById("sheetTitle");
+                if (titleEl) titleEl.textContent = c.name;
+
                 renderOverlay(c.data);
                 showOverlay();
             } catch (e) {
@@ -266,13 +281,14 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
             isDirty = false;
             btnSave.disabled = true;
 
-            setStatus(`Geladen: ${c.name} (${c.kind})`);
+            setStatus(`Geladen: ${c.name}`);
         } catch (e) {
             console.error(e);
             setStatus("Fehler beim Laden des Charakters ❌");
             alert("Fehler beim Laden des Charakters.");
         }
     }
+
 
     // ----- Admin UI -----
     function renderUserRow(u) {
@@ -320,9 +336,37 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
                 btnSaveRole.disabled = false;
             }
         });
+        const btnDeleteUser = document.createElement("button");
+        btnDeleteUser.className = "btn btn--danger";
+        btnDeleteUser.textContent = "Löschen";
 
-        row.append(meta, sel, btnSaveRole);
+        btnDeleteUser.addEventListener("click", async () => {
+            const confirmed = confirm(
+                `User "${u.username}" wirklich löschen?`
+            );
+            if (!confirmed) return;
+
+            btnDeleteUser.disabled = true;
+
+            try {
+                await API.deleteUser(u.id);
+                await loadUsersIntoAdmin(); // Liste neu laden
+            } catch (e) {
+                console.error(e);
+                alert(e?.message || "Löschen fehlgeschlagen.");
+                btnDeleteUser.disabled = false;
+            }
+        });
+
+        const actions = document.createElement("div");
+        actions.className = "userActions";
+
+// Reihenfolge bestimmt die vertikale Anordnung
+        actions.append(sel, btnSaveRole, btnDeleteUser);
+
+        row.append(meta, actions);
         return row;
+
     }
 
     async function loadUsersIntoAdmin() {
@@ -397,20 +441,9 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     btnLogout?.addEventListener("click", doLogout);
     btnCreatePC?.addEventListener("click", () => handleCreate("pc"));
     btnCreateNPC?.addEventListener("click", () => handleCreate("npc"));
+    toggleMine?.addEventListener("click", () => toggleSection(toggleMine, listMine));
+    toggleNpcs?.addEventListener("click", () => toggleSection(toggleNpcs, listNpcs));
 
-
-    characterSelect?.addEventListener("change", async () => {
-        const id = characterSelect.value;
-        setCurrentCharacter(id);
-        showAdminPanel(false);
-        if (currentCharacterId) await loadCharacter(currentCharacterId);
-    });
-
-    btnLoad?.addEventListener("click", async () => {
-        if (!currentCharacterId) return;
-        showAdminPanel(false);
-        await loadCharacter(currentCharacterId);
-    });
 
     btnDelete?.addEventListener("click", async () => {
         if (!currentCharacterId) return;
@@ -471,6 +504,13 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
             alert(String(e));
         }
     });
+    btnActions?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleActionsMenu();
+    });
+
+    document.addEventListener("click", () => closeActionsMenu());
+
 
     btnAdmin?.addEventListener("click", async () => {
         closeDrawer();

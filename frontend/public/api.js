@@ -129,4 +129,10 @@ export const API = {
             body: JSON.stringify({role}),
         });
     },
+    deleteUser(id) {
+    return this.request(`/users/${id}`, {
+        method: "DELETE",
+    });
+},
+
 };

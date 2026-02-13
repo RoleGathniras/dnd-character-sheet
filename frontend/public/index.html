@@ -11,21 +11,25 @@
 <div class="appbar">
     <button id="btnMenu" class="btn" aria-label="Menü">☰</button>
 
-    <select id="characterSelect" class="select" aria-label="Charakter auswählen">
-        <option value="">(nicht eingeloggt)</option>
-    </select>
+    <!-- Actions Dropdown -->
+    <div class="actions">
+        <button id="btnActions" class="btn" aria-label="Character" style="display:none">Character ▾</button>
 
-    <button id="btnLoad" class="btn" disabled>Laden</button>
-    <button id="btnSave" class="btn btn--primary" disabled>Speichern</button>
 
-    <button id="btnCreatePC" class="btn" disabled>Neuer Charakter</button>
-    <button id="btnCreateNPC" class="btn" disabled>Neuer NPC</button>
-    <button id="btnDelete" class="btn btn--danger">Charakter löschen</button>
+        <div id="actionsMenu" class="actionsMenu" hidden>
+            <button id="btnCreatePC" class="btn" disabled>Neuer Charakter</button>
+            <button id="btnCreateNPC" class="btn" disabled>Neuer NPC</button>
+            <button id="btnSave" class="btn btn--primary" disabled>Speichern</button>
+            <button id="btnDelete" class="btn btn--danger" disabled>Charakter löschen</button>
+        </div>
+    </div>
+
     <button id="btnLogin" class="btn">Login</button>
     <button id="btnLogout" class="btn" style="display:none">Logout</button>
 
     <span id="appStatus" class="status" aria-live="polite">Frontend läuft 🚀</span>
 </div>
+
 
 <!-- Drawer -->
 <div id="drawer" class="drawer" aria-hidden="true">
@@ -35,21 +39,35 @@
     </div>
 
     <div class="drawer__content">
+
         <div class="drawer__section">
-            <div class="drawer__title">Charactere</div>
+            <button type="button"
+                    class="drawer__title drawer__toggle"
+                    id="toggleMine"
+                    aria-expanded="true">
+                Charaktere
+            </button>
+
             <div id="listMine" class="drawer__list">
                 <button class="drawer__item" disabled>(noch keine Daten)</button>
             </div>
         </div>
 
         <div class="drawer__section">
-            <div class="drawer__title">NPCs</div>
-            <div id="listNpcs" class="drawer__list">
+            <button type="button"
+                    class="drawer__title drawer__toggle"
+                    id="toggleNpcs"
+                    aria-expanded="false">
+                NPCs
+            </button>
+
+            <div id="listNpcs" class="drawer__list" hidden>
                 <button class="drawer__item" disabled>(noch keine Daten)</button>
             </div>
         </div>
+
+        <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
     </div>
-    <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
 </div>
 
 <div id="backdrop" class="backdrop" hidden></div>
