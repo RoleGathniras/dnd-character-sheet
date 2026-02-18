@@ -1,6 +1,6 @@
 import {API} from "./api.js";
 import {jsonToSheet, sheetToJson} from "./mapper.js";
-import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
+import {renderOverlay, showOverlay} from "./overlay.js";
 
 (function () {
 
@@ -42,6 +42,24 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     let currentUser = null;
 
     // ===== Helpers =====
+    function renderDrawerTitle() {
+        const el = document.getElementById("drawerUserTitle");
+        console.log("[renderDrawerTitle] called. el=", el, "currentUser=", currentUser);
+
+        if (!el) return;
+
+        // TEST: damit wir sehen, dass es wirklich schreibt
+        if (!currentUser) {
+            el.textContent = "Charaktere";
+            return;
+        }
+
+        const username = currentUser.username ?? "???";
+        const role = currentUser.role ?? "";
+        el.textContent = role ? `${username} (${role})` : username;
+    }
+
+
     function closeActionsMenu() {
         if (actionsMenu) actionsMenu.hidden = true;
     }
@@ -197,8 +215,17 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
             // Drawer Button
             const b = document.createElement("button");
             b.className = "drawer__item";
-            const owner = c.owner_username ? ` – ${c.owner_username}` : "";
-            b.textContent = `${c.name} (${c.kind})${owner}`;
+            const name = escapeHtml(c.name ?? "");
+            const kind = escapeHtml((c.kind ?? "").toUpperCase()); // PC/NPC
+            const ownerName = c.owner_username ? escapeHtml(c.owner_username) : "";
+
+            b.innerHTML = `
+  <span class="drawerItem__main">
+    <span class="drawerItem__name">${name}</span>
+    <span class="drawerItem__kind">${kind}</span>
+  </span>
+  ${ownerName ? `<span class="drawerItem__sub">${ownerName}</span>` : ``}
+`;
 
             b.addEventListener("click", async () => {
                 setCurrentCharacter(c.id);
@@ -387,19 +414,21 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
     async function refreshCurrentUserAndUI() {
         try {
             currentUser = await API.me();
+            renderDrawerTitle();
+
             setAdminVisible(currentUser?.role === "admin");
             applyRoleUI();
-
         } catch (e) {
-            // Token vermutlich invalid
             console.error(e);
             currentUser = null;
-            applyRoleUI();
+            renderDrawerTitle();
 
+            applyRoleUI();
             setAdminVisible(false);
             throw e;
         }
     }
+
 
     async function doLogin() {
         const username = prompt("Username");
@@ -540,13 +569,15 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
                     } catch (e) {
                         if (e?.status === 404) {
                             console.warn("Last character not found/visible, clearing selection.");
-                            setCurrentCharacter(null); // oder "" je nach eurer Implementierung
+                            setCurrentCharacter(null);
                             setStatus("Letzter Charakter nicht verfügbar – bitte neu wählen.");
                         } else {
-                            // alles andere ist ein echter Fehler → nach außen werfen
-                            throw e;
+                            console.error("Auto-load last character failed", e);
+                            setStatus("Letzten Charakter konnte ich nicht laden – bitte im Drawer wählen.");
+                            setCurrentCharacter(null);
                         }
                     }
+
                 }
 
                 setStatus("Bereit ✅");
@@ -554,6 +585,7 @@ import {renderOverlay, toggleOverlay, showOverlay} from "./overlay.js";
                 setLoggedInUI(false);
                 applyRoleUI();
                 setAdminVisible(false);
+                renderDrawerTitle();
                 setStatus("UI bereit ✅");
             }
         } catch (e) {
