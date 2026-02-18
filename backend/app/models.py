@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Literal
 from enum import Enum
 from typing import Optional, Any, Dict
 from sqlmodel import SQLModel, Field
@@ -21,10 +20,12 @@ class User(SQLModel, table=True):
     username: str = Field(index=True, unique=True)
     password_hash: str
     role: Role = Field(default=Role.player)
+    is_active: bool = Field(default=False)
 
 
 def utcnow():
     return datetime.now(timezone.utc)
+
 
 class Character(SQLModel, table=True):
     __tablename__ = "characters"

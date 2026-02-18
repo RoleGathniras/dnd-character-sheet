@@ -30,6 +30,14 @@ export const API = {
         this.token = data.access_token;
         return data;
     },
+    async register(username, password) {
+        return this.request("/auth/register", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({username, password}),
+        });
+    },
+
 
     async request(path, opts = {}) {
         const headers = new Headers(opts.headers || {});
@@ -130,9 +138,15 @@ export const API = {
         });
     },
     deleteUser(id) {
-    return this.request(`/users/${id}`, {
-        method: "DELETE",
-    });
-},
+        return this.request(`/users/${id}`, {
+            method: "DELETE",
+        });
+    },
+    activateUser(id) {
+        return this.request(`/users/${id}/activate`, {
+            method: "PATCH",
+        });
+    },
+
 
 };

@@ -33,6 +33,13 @@ import {renderOverlay, showOverlay} from "./overlay.js";
     const btnCreatePC = document.getElementById("btnCreatePC");
     const btnCreateNPC = document.getElementById("btnCreateNPC");
 
+    const btnRegister = document.getElementById("btnRegister");
+    const authPanel = document.getElementById("authPanel");
+    const authUsername = document.getElementById("authUsername");
+    const authPassword = document.getElementById("authPassword");
+    const btnAuthDoRegister = document.getElementById("btnAuthDoRegister");
+    const btnAuthCancel = document.getElementById("btnAuthCancel");
+
 
     // ===== State =====
     let currentCharacterId = Number(localStorage.getItem("dnd_current_character_id")) || null;
@@ -59,6 +66,16 @@ import {renderOverlay, showOverlay} from "./overlay.js";
         el.textContent = role ? `${username} (${role})` : username;
     }
 
+    function showAuthPanel(show) {
+        if (!authPanel) return;
+        authPanel.hidden = !show;
+        if (show) {
+            authUsername?.focus();
+        } else {
+            authUsername.value = "";
+            authPassword.value = "";
+        }
+    }
 
     function closeActionsMenu() {
         if (actionsMenu) actionsMenu.hidden = true;
@@ -83,7 +100,6 @@ import {renderOverlay, showOverlay} from "./overlay.js";
 
         console.log("[drawer-toggle]", toggleBtn.id, "open=", openNext, "hidden=", listEl.hidden);
     }
-
 
     function setStatus(msg) {
         if (statusEl) statusEl.textContent = msg;
@@ -119,6 +135,9 @@ import {renderOverlay, showOverlay} from "./overlay.js";
         if (btnActions) btnActions.style.display = isLoggedIn ? "inline-block" : "none";
         if (!isLoggedIn) closeActionsMenu();
 
+        //Register-Button
+        if (btnRegister) btnRegister.style.display = isLoggedIn ? "none" : "inline-block";
+        if (!isLoggedIn) showAuthPanel(false);
 
     }
 
@@ -203,6 +222,30 @@ import {renderOverlay, showOverlay} from "./overlay.js";
         }
     }
 
+    async function doRegister() {
+        const username = authUsername?.value?.trim();
+        const password = authPassword?.value;
+
+        if (!username || !password) {
+            alert("Bitte Username und Passwort eingeben.");
+            return;
+        }
+
+        btnAuthDoRegister.disabled = true;
+        try {
+            await API.register(username, password);
+            showAuthPanel(false);
+            setStatus("Account erstellt – wartet auf Admin-Freischaltung 🕯️");
+            alert("Account erstellt. Ein Admin muss dich freischalten, bevor du dich einloggen kannst.");
+        } catch (e) {
+            console.error(e);
+            alert(e?.message || "Registrierung fehlgeschlagen.");
+        } finally {
+            btnAuthDoRegister.disabled = false;
+        }
+    }
+
+
     async function loadCharacters() {
         if (!listMine || !listNpcs) return;
 
@@ -247,6 +290,8 @@ import {renderOverlay, showOverlay} from "./overlay.js";
         }
 
         setStatus(`Charaktere geladen: ${chars.length}`);
+        return chars;
+
     }
 
 
@@ -322,12 +367,18 @@ import {renderOverlay, showOverlay} from "./overlay.js";
         const row = document.createElement("div");
         row.className = "userRow";
 
+        const pending = u.is_active === false;   // <-- MUSS HIER OBEN STEHEN
+
         const meta = document.createElement("div");
         meta.className = "userMeta";
         meta.innerHTML = `
-            <div class="userName">${escapeHtml(u.username)}</div>
-            <div class="userId">ID: ${u.id}</div>
-        `;
+    <div class="userName">
+      ${escapeHtml(u.username)}
+      ${pending ? `<span class="badge">pending</span>` : ``}
+    </div>
+    <div class="userId">ID: ${u.id}</div>
+  `;
+
 
         const sel = document.createElement("select");
         sel.className = "select";
@@ -384,12 +435,33 @@ import {renderOverlay, showOverlay} from "./overlay.js";
                 btnDeleteUser.disabled = false;
             }
         });
+        let btnApprove = null;
+        if (pending) {
+            btnApprove = document.createElement("button");
+            btnApprove.className = "btn btn--primary";
+            btnApprove.textContent = "Freischalten";
+
+            btnApprove.addEventListener("click", async () => {
+                btnApprove.disabled = true;
+                try {
+                    await API.activateUser(u.id);
+                    await loadUsersIntoAdmin();
+                } catch (e) {
+                    console.error(e);
+                    alert(e?.message || "Freischalten fehlgeschlagen.");
+                    btnApprove.disabled = false;
+                }
+            });
+        }
+
 
         const actions = document.createElement("div");
         actions.className = "userActions";
 
 // Reihenfolge bestimmt die vertikale Anordnung
+        if (btnApprove) actions.append(btnApprove);
         actions.append(sel, btnSaveRole, btnDeleteUser);
+
 
         row.append(meta, actions);
         return row;
@@ -429,7 +501,6 @@ import {renderOverlay, showOverlay} from "./overlay.js";
         }
     }
 
-
     async function doLogin() {
         const username = prompt("Username");
         const password = prompt("Passwort");
@@ -443,17 +514,25 @@ import {renderOverlay, showOverlay} from "./overlay.js";
             applyRoleUI();
 
             setStatus("Eingeloggt ✅");
-            await loadCharacters();
+            const chars = await loadCharacters();
 
-            // Optional: direkt den ausgewählten Charakter laden
             if (currentCharacterId) {
-                await loadCharacter(currentCharacterId);
+                const exists = Array.isArray(chars) &&
+                    chars.some(c => Number(c.id) === Number(currentCharacterId));
+
+                if (exists) {
+                    await loadCharacter(currentCharacterId);
+                } else {
+                    setCurrentCharacter(null);
+                    setStatus("Letzter Charakter nicht verfügbar – bitte neu wählen.");
+                }
             }
         } catch (e) {
             console.error(e);
-            alert("Login fehlgeschlagen");
-            setStatus("Login fehlgeschlagen ❌");
+            alert(e?.message || "Login fehlgeschlagen");
+            setStatus(e?.message || "Login fehlgeschlagen ❌");
         }
+
     }
 
     function doLogout() {
@@ -472,6 +551,10 @@ import {renderOverlay, showOverlay} from "./overlay.js";
     btnCreateNPC?.addEventListener("click", () => handleCreate("npc"));
     toggleMine?.addEventListener("click", () => toggleSection(toggleMine, listMine));
     toggleNpcs?.addEventListener("click", () => toggleSection(toggleNpcs, listNpcs));
+
+    btnRegister?.addEventListener("click", () => showAuthPanel(authPanel.hidden));
+    btnAuthCancel?.addEventListener("click", () => showAuthPanel(false));
+    btnAuthDoRegister?.addEventListener("click", doRegister);
 
 
     btnDelete?.addEventListener("click", async () => {

@@ -64,6 +64,16 @@ html, body {
     color: var(--muted);
     white-space: nowrap;
 }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  margin-left: 8px;
+  border: 1px solid #ffb347;
+  color: #ffb347;
+}
+
 
 /* Controls */
 .btn, .select {
@@ -95,6 +105,37 @@ html, body {
     background-position: right 10px center;
     background-size: 16px;
 }
+.authPanel {
+  position: absolute;
+  top: 56px;
+  right: 12px;
+  width: min(320px, calc(100vw - 24px));
+  padding: 12px;
+  z-index: 50;
+}
+
+.authRow { margin-bottom: 10px; }
+
+.input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.2);
+  color: inherit;
+}
+
+.authActions {
+  display: flex;
+  gap: 8px;
+}
+
+.authHint {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
 
 .select option {
     background: #1a1a1a;
@@ -210,14 +251,16 @@ html, body {
   padding: 0;
   cursor: pointer;
 }
-.drawer__toggle::after{
-  content: "▾";
+.drawer__toggle::after {
+  content: "\25BE";  /* ▾ */
   float: right;
   opacity: .8;
 }
-.drawer__toggle[aria-expanded="false"]::after{
-  content: "▸";
+
+.drawer__toggle[aria-expanded="false"]::after {
+  content: "\25B8";  /* ▸ */
 }
+
 .drawer__list[hidden] {
   display: none;
 }

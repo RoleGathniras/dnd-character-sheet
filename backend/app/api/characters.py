@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
-from app.models import Character, User
 from app.deps import get_current_user, get_session
 from app.models import Character, User, Role
 from app.schemas import CharacterCreate, CharacterUpdate, CharacterOut
