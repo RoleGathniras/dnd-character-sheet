@@ -1,34 +1,53 @@
 <!-- sheet.html (MVP) -->
 <section class="sheet">
-  <h2 id="sheetTitle">Kein Charakter geladen</h2>
+    <h2 id="sheetTitle">Kein Charakter geladen</h2>
 
-  <div class="grid">
-    <label>Charaktername <input id="character_name" /></label>
-    <label>Klasse <input id="class" /></label>
-    <label>Volk <input id="race" /></label>
-    <label>Stufe <input id="level" type="number" min="1" /></label>
-  </div>
+    <div class="grid">
+        <label>Charaktername <input id="character_name"/></label>
+        <label>Klasse <input id="class"/></label>
+        <label>Volk <input id="race"/></label>
+        <label>Stufe <input id="level" type="number" min="1"/></label>
+    </div>
 
-  <h3>Attribute</h3>
-  <div class="grid">
-    <label>Stärke <input id="str" type="number" /></label>
-    <label>Geschicklichkeit <input id="dex" type="number" /></label>
-    <label>Konstitution <input id="con" type="number" /></label>
-    <label>Intelligenz <input id="int" type="number" /></label>
-    <label>Weisheit <input id="wis" type="number" /></label>
-    <label>Charisma <input id="cha" type="number" /></label>
-  </div>
+    <h3>Attribute</h3>
+    <div class="grid">
+        <label>Stärke <input id="str" type="number"/></label>
+        <label>Geschicklichkeit <input id="dex" type="number"/></label>
+        <label>Konstitution <input id="con" type="number"/></label>
+        <label>Intelligenz <input id="int" type="number"/></label>
+        <label>Weisheit <input id="wis" type="number"/></label>
+        <label>Charisma <input id="cha" type="number"/></label>
+        <label>Übungsbonus <input id="proficiency_bonus" type="number"/></label>
+    </div>
+    <h3>Fertigkeiten</h3>
+    <div class="grid">
+        <label>
+            <input id="skill_athletics_prof" type="checkbox"/>
+            Athletik (Stärke)
+            <input id="skill_athletics" type="number" readonly/>
+        </label>
 
-  <h3>Kampf</h3>
-  <div class="grid">
-    <label>RK <input id="ac" type="number" /></label>
-    <label>TP aktuell <input id="hp_current" type="number" /></label>
-    <label>TP max <input id="hp_max" type="number" /></label>
-    <label>Bewegung <input id="speed" type="number" /></label>
-  </div>
+        <label>
+            <input id="skill_perception_prof" type="checkbox"/>
+            Wahrnehmung (Weisheit)
+            <input id="skill_perception" type="number" readonly/>
+        </label>
 
-  <h3>Notizen</h3>
-  <textarea id="notes" rows="6" style="width:100%"></textarea>
+        <label>
+            <input id="skill_persuasion_prof" type="checkbox"/>
+            Überreden (Charisma)
+            <input id="skill_persuasion" type="number" readonly/>
+        </label>
+    </div>
+
+
+    <h3>Kampf</h3>
+    <div class="grid">
+        <label>RK <input id="ac" type="number"/></label>
+        <label>TP aktuell <input id="hp_current" type="number"/></label>
+        <label>TP max <input id="hp_max" type="number"/></label>
+        <label>Bewegung <input id="speed" type="number"/></label>
+    </div>
 </section>
 
 
