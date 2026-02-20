@@ -9,47 +9,190 @@
         <label>Stufe <input id="level" type="number" min="1"/></label>
     </div>
 
-    <h3>Attribute</h3>
-    <div class="grid">
-        <label>Stärke <input id="str" type="number"/></label>
-        <label>Mod STR <input id="str_mod" type="number" readonly/></label>
-
-        <label>Geschicklichkeit <input id="dex" type="number"/></label>
-        <label>Mod DEX <input id="dex_mod" type="number" readonly/></label>
-
-        <label>Konstitution <input id="con" type="number"/></label>
-        <label>Mod CON <input id="con_mod" type="number" readonly/></label>
-
-        <label>Intelligenz <input id="int" type="number"/></label>
-        <label>Mod INT <input id="int_mod" type="number" readonly/></label>
-
-        <label>Weisheit <input id="wis" type="number"/></label>
-        <label>Mod WIS <input id="wis_mod" type="number" readonly/></label>
-
-        <label>Charisma <input id="cha" type="number"/></label>
-        <label>Mod CHA <input id="cha_mod" type="number" readonly/></label>
-
-        <label>Übungsbonus <input id="proficiency_bonus" type="number"/></label>
+    <h3>Sheet</h3>
+    <!-- Top bar -->
+    <div class="sheetTop">
+        <div class="pbBox">
+            <label>Übungsbonus</label>
+            <input id="proficiency_bonus" type="number"/>
+        </div>
     </div>
-    <h3>Fertigkeiten</h3>
-    <div class="grid">
-        <label>
-            <input id="skill_athletics_prof" type="checkbox"/>
-            Athletik (Stärke)
-            <input id="skill_athletics" type="number" readonly/>
-        </label>
 
-        <label>
-            <input id="skill_perception_prof" type="checkbox"/>
-            Wahrnehmung (Weisheit)
-            <input id="skill_perception" type="number" readonly/>
-        </label>
+    <div class="sheetTwoCol">
+        <!-- LEFT: Abilities -->
+        <section class="abilities">
+            <h3>Attribute</h3>
 
-        <label>
-            <input id="skill_persuasion_prof" type="checkbox"/>
-            Überreden (Charisma)
-            <input id="skill_persuasion" type="number" readonly/>
-        </label>
+            <div class="abilityCard">
+                <div class="abilityHead">Stärke</div>
+                <input id="str" type="number"/>
+                <div class="modBadge">
+                    <span class="modLabel">MOD</span>
+                    <input id="str_mod" type="number" readonly/>
+                </div>
+            </div>
+
+            <div class="abilityCard">
+                <div class="abilityHead">Geschicklichkeit</div>
+                <input id="dex" type="number"/>
+                <div class="modBadge">
+                    <span class="modLabel">MOD</span>
+                    <input id="dex_mod" type="number" readonly/>
+                </div>
+            </div>
+
+            <div class="abilityCard">
+                <div class="abilityHead">Konstitution</div>
+                <input id="con" type="number"/>
+                <div class="modBadge">
+                    <span class="modLabel">MOD</span>
+                    <input id="con_mod" type="number" readonly/>
+                </div>
+            </div>
+
+            <div class="abilityCard">
+                <div class="abilityHead">Intelligenz</div>
+                <input id="int" type="number"/>
+                <div class="modBadge">
+                    <span class="modLabel">MOD</span>
+                    <input id="int_mod" type="number" readonly/>
+                </div>
+            </div>
+
+            <div class="abilityCard">
+                <div class="abilityHead">Weisheit</div>
+                <input id="wis" type="number"/>
+                <div class="modBadge">
+                    <span class="modLabel">MOD</span>
+                    <input id="wis_mod" type="number" readonly/>
+                </div>
+            </div>
+
+            <div class="abilityCard">
+                <div class="abilityHead">Charisma</div>
+                <input id="cha" type="number"/>
+                <div class="modBadge">
+                    <span class="modLabel">MOD</span>
+                    <input id="cha_mod" type="number" readonly/>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT: Skills grouped by ability -->
+        <section class="skills">
+            <h3>Fertigkeiten</h3>
+
+            <div class="skillGroup">
+                <div class="skillGroupTitle">Stärke</div>
+                <div class="skillRow">
+                    <input id="skill_athletics_prof" type="checkbox"/>
+                    <div class="skillName">Athletik</div>
+                    <input id="skill_athletics" type="number" readonly/>
+                </div>
+            </div>
+
+            <div class="skillGroup">
+                <div class="skillGroupTitle">Geschicklichkeit</div>
+                <div class="skillRow">
+                    <input id="skill_acrobatics_prof" type="checkbox"/>
+                    <div class="skillName">Akrobatik</div>
+                    <input id="skill_acrobatics" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_sleight_of_hand_prof" type="checkbox"/>
+                    <div class="skillName">Fingerfertigkeit</div>
+                    <input id="skill_sleight_of_hand" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_stealth_prof" type="checkbox"/>
+                    <div class="skillName">Heimlichkeit</div>
+                    <input id="skill_stealth" type="number" readonly/>
+                </div>
+            </div>
+
+            <div class="skillGroup">
+                <div class="skillGroupTitle">Intelligenz</div>
+                <div class="skillRow">
+                    <input id="skill_arcana_prof" type="checkbox"/>
+                    <div class="skillName">Arkane Kunde</div>
+                    <input id="skill_arcana" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_history_prof" type="checkbox"/>
+                    <div class="skillName">Geschichte</div>
+                    <input id="skill_history" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_investigation_prof" type="checkbox"/>
+                    <div class="skillName">Nachforschungen</div>
+                    <input id="skill_investigation" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_nature_prof" type="checkbox"/>
+                    <div class="skillName">Natur</div>
+                    <input id="skill_nature" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_religion_prof" type="checkbox"/>
+                    <div class="skillName">Religion</div>
+                    <input id="skill_religion" type="number" readonly/>
+                </div>
+            </div>
+
+            <div class="skillGroup">
+                <div class="skillGroupTitle">Weisheit</div>
+                <div class="skillRow">
+                    <input id="skill_animal_handling_prof" type="checkbox"/>
+                    <div class="skillName">Tierhandlung</div>
+                    <input id="skill_animal_handling" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_insight_prof" type="checkbox"/>
+                    <div class="skillName">Motiv erkennen</div>
+                    <input id="skill_insight" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_medicine_prof" type="checkbox"/>
+                    <div class="skillName">Heilkunde</div>
+                    <input id="skill_medicine" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_perception_prof" type="checkbox"/>
+                    <div class="skillName">Wahrnehmung</div>
+                    <input id="skill_perception" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_survival_prof" type="checkbox"/>
+                    <div class="skillName">Überlebenskunst</div>
+                    <input id="skill_survival" type="number" readonly/>
+                </div>
+            </div>
+
+            <div class="skillGroup">
+                <div class="skillGroupTitle">Charisma</div>
+                <div class="skillRow">
+                    <input id="skill_deception_prof" type="checkbox"/>
+                    <div class="skillName">Täuschung</div>
+                    <input id="skill_deception" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_intimidation_prof" type="checkbox"/>
+                    <div class="skillName">Einschüchtern</div>
+                    <input id="skill_intimidation" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_performance_prof" type="checkbox"/>
+                    <div class="skillName">Auftreten</div>
+                    <input id="skill_performance" type="number" readonly/>
+                </div>
+                <div class="skillRow">
+                    <input id="skill_persuasion_prof" type="checkbox"/>
+                    <div class="skillName">Überreden</div>
+                    <input id="skill_persuasion" type="number" readonly/>
+                </div>
+            </div>
+
+        </section>
     </div>
 
 

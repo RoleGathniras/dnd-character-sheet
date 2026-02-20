@@ -81,9 +81,14 @@ export function jsonToSheet(data) {
     setInputValue(resolveField("cha"), d.cha);
 
     setInputValue(resolveField("proficiency_bonus"), d.proficiency_bonus ?? "");
-    setInputValue(resolveField("skill_athletics_prof"), !!d.skill_athletics_prof);
-    setInputValue(resolveField("skill_perception_prof"), !!d.skill_perception_prof);
-    setInputValue(resolveField("skill_persuasion_prof"), !!d.skill_persuasion_prof);
+
+    // Skill-Proficiencies (alle Checkboxen automatisch setzen)
+    document
+        .querySelectorAll('input[type="checkbox"][id^="skill_"][id$="_prof"]')
+        .forEach((el) => {
+            // JSON keys sind exakt die IDs (z.B. "skill_stealth_prof")
+            el.checked = Boolean(d?.[el.id]);
+        });
 }
 
 export function sheetToJson() {
@@ -112,10 +117,12 @@ export function sheetToJson() {
     console.log("PB el:", resolveField("proficiency_bonus"));
     console.log("PB raw:", resolveField("proficiency_bonus")?.value);
 
-    // Skill-Proficiencies (Checkboxen)
-    out.skill_athletics_prof = getInputValue(resolveField("skill_athletics_prof"));
-    out.skill_perception_prof = getInputValue(resolveField("skill_perception_prof"));
-    out.skill_persuasion_prof = getInputValue(resolveField("skill_persuasion_prof"));
+    // Skill-Proficiencies (alle Checkboxen automatisch persistieren)
+    document
+        .querySelectorAll('input[type="checkbox"][id^="skill_"][id$="_prof"]')
+        .forEach((el) => {
+            out[el.id] = el.checked;
+        });
 
     console.log("=== sheetToJson DEBUG ===");
     console.log("PB field:", resolveField("proficiency_bonus"));

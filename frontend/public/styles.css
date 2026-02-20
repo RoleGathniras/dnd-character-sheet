@@ -22,8 +22,7 @@
     --pad-y: 10px;
 }
 
-
-* {
+{
     box-sizing: border-box;
 }
 
@@ -64,14 +63,15 @@ html, body {
     color: var(--muted);
     white-space: nowrap;
 }
+
 .badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  margin-left: 8px;
-  border: 1px solid #ffb347;
-  color: #ffb347;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    margin-left: 8px;
+    border: 1px solid #ffb347;
+    color: #ffb347;
 }
 
 
@@ -105,35 +105,38 @@ html, body {
     background-position: right 10px center;
     background-size: 16px;
 }
+
 .authPanel {
-  position: absolute;
-  top: 56px;
-  right: 12px;
-  width: min(320px, calc(100vw - 24px));
-  padding: 12px;
-  z-index: 50;
+    position: absolute;
+    top: 56px;
+    right: 12px;
+    width: min(320px, calc(100vw - 24px));
+    padding: 12px;
+    z-index: 50;
 }
 
-.authRow { margin-bottom: 10px; }
+.authRow {
+    margin-bottom: 10px;
+}
 
 .input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(0,0,0,0.2);
-  color: inherit;
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+    color: inherit;
 }
 
 .authActions {
-  display: flex;
-  gap: 8px;
+    display: flex;
+    gap: 8px;
 }
 
 .authHint {
-  margin-top: 10px;
-  font-size: 12px;
-  opacity: 0.8;
+    margin-top: 10px;
+    font-size: 12px;
+    opacity: 0.8;
 }
 
 
@@ -243,35 +246,38 @@ html, body {
     width: 100%;
     text-align: left;
 }
-.drawer__toggle{
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
+
+.drawer__toggle {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
 }
+
 .drawer__toggle::after {
-  content: "\25BE";  /* ▾ */
-  float: right;
-  opacity: .8;
+    content: "\25BE"; /* ▾ */
+    float: right;
+    opacity: .8;
 }
 
 .drawer__toggle[aria-expanded="false"]::after {
-  content: "\25B8";  /* ▸ */
+    content: "\25B8"; /* ▸ */
 }
 
 .drawer__list[hidden] {
-  display: none;
-}
-.drawer__toggle[aria-expanded="false"] {
-  margin-bottom: 0;
-}
-/* Make hidden actually hidden (override any accidental styles) */
-[hidden] {
-  display: none !important;
+    display: none;
 }
 
+.drawer__toggle[aria-expanded="false"] {
+    margin-bottom: 0;
+}
+
+/* Make hidden actually hidden (override any accidental styles) */
+[hidden] {
+    display: none !important;
+}
 
 
 /* Mobile tweaks */
@@ -380,51 +386,234 @@ html, body {
     font-size: var(--fs-small);
     color: var(--muted);
 }
-.actionsMenu{
-  display: flex;           /* statt grid */
-  flex-direction: column;  /* untereinander */
-  gap: 6px;
+
+.actionsMenu {
+    display: flex; /* statt grid */
+    flex-direction: column; /* untereinander */
+    gap: 6px;
 }
 
 .actionsMenu .btn {
-  width: 100%;
-  text-align: left;
+    width: 100%;
+    text-align: left;
 }
 
 
-
-.actionsDivider{
-  margin: 6px 0;
+.actionsDivider {
+    margin: 6px 0;
 }
+
 .actions {
-  position: relative;
+    position: relative;
 }
 
 .actionsMenu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;              /* oder right: 0; wenn du es rechts ausrichten willst */
-  z-index: 1100;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0; /* oder right: 0; wenn du es rechts ausrichten willst */
+    z-index: 1100;
 
-  /* Layout als Liste */
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+    /* Layout als Liste */
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 
-  min-width: 220px;
-  padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--panelSolid);
-  box-shadow: var(--shadow);
+    min-width: 220px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panelSolid);
+    box-shadow: var(--shadow);
 }
 
 
+/* =========================
+   SHEET (clean)
+   ========================= */
+
+.sheet {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 18px;
+}
+
+/* Existing form grids (name/class/race/level + combat) */
+.sheet .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(190px, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.sheet label {
+    display: grid;
+    gap: 8px;
+    font-size: var(--fs-small);
+    color: var(--muted);
+}
+
+.sheet input,
+.sheet textarea,
+.sheet select {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: var(--control-h);
+    padding: var(--pad-y) var(--pad-x);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, .05);
+    color: var(--text);
+}
+
+.sheet input:focus,
+.sheet textarea:focus,
+.sheet select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(122, 162, 255, .18);
+    border-color: rgba(122, 162, 255, .55);
+}
+
+/* Top PB bar */
+.sheetTop {
+    display: flex;
+    justify-content: flex-end;
+    margin: 12px 0 18px;
+}
+
+.pbBox {
+    width: 240px;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.pbBox label {
+    display: block;
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 6px;
+}
+
+/* 2-column layout */
+.sheetTwoCol {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* LEFT: abilities */
+.abilities h3,
+.skills h3 {
+    margin: 0 0 10px;
+}
+
+.abilityCard {
+    position: relative;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.abilityHead {
+    font-size: 13px;
+    opacity: 0.85;
+    margin-bottom: 6px;
+}
 
 
-@media (max-width: 900px) {
+/* Ability score input bekommt Platz für Badge */
+.abilityCard > input[type="number"] {
+    width: 100%;
+    padding-right: 120px; /* Platz für MOD-Kasten */
+}
+
+/* MOD Badge Input soll kompakter aussehen als normale Inputs */
+.modBadge input {
+    min-height: 36px;
+    padding: 6px 8px;
+    font-weight: 800;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* MOD badge overlay */
+.modBadge {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-10%); /* leicht nach oben wie überlappend */
+    width: 96px;
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid var(--borderStrong);
+    background: rgba(0, 0, 0, 0.50);
+    backdrop-filter: blur(6px);
+}
+
+.modLabel {
+    display: block;
+    font-size: 10px;
+    opacity: 0.7;
+    margin-bottom: 4px;
+}
+
+.modBadge input {
+    width: 100%;
+}
+
+/* RIGHT: skills */
+.skillGroup {
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.skillGroupTitle {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-bottom: 8px;
+}
+
+.skillRow {
+    display: grid;
+    grid-template-columns: 26px 1fr 84px;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.skillRow:first-of-type {
+    border-top: none;
+}
+
+.skillName {
+    font-size: 13px;
+    opacity: 0.92;
+}
+
+.skillRow input[type="number"] {
+    width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 980px) {
     .sheet .grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Only stack abilities+skills when REALLY narrow */
+@media (max-width: 520px) {
+    .sheetTwoCol {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -445,4 +634,3 @@ html, body {
         max-width: 52vw;
     }
 }
-
