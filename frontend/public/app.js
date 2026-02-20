@@ -80,6 +80,8 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
     let currentCharacterUpdatedAt = null; // wichtig für Optimistic Locking
     let isDirty = false;                  // ob Sheet ungespeicherte Änderungen hat
     let currentUser = null;               // Ergebnis von API.me()
+    let autosaveTimer = null;
+    let isSaving = false;
 
     // ============================================================
     // 2) UI/HELPER (KLEINE BAUSTEINE)
@@ -167,6 +169,20 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         isDirty = true;
         btnSave.disabled = false;
         setStatus("Ungespeicherte Änderungen ⚠");
+        scheduleAutoSave();
+        console.log("[dirty] scheduled autosave", { currentCharacterId, isDirty });
+    }
+
+    function scheduleAutoSave() {
+        if (!currentCharacterId) return;
+        if (!isDirty) return;
+
+        if (autosaveTimer) clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(() => {
+            autosaveTimer = null;
+            doAutoSave();
+            scheduleAutoSave();
+        }, 800);
     }
 
     function setCurrentCharacter(id) {
@@ -240,7 +256,24 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
     function setVal(id, value) {
         const el = document.getElementById(id);
         if (!el) return;
-        el.value = String(value);
+
+        const next = String(value);
+        if (el.value === next) return; // kein Spam
+
+        el.value = next;
+
+        // Wichtig: programmatic changes sollen genauso reagieren wie User-Input
+        el.dispatchEvent(new Event("input", {bubbles: true}));
+        el.dispatchEvent(new Event("change", {bubbles: true}));
+    }
+
+    function setDerivedVal(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        const next = String(value);
+        if (el.value === next) return;
+        el.value = next; // keine Events!
     }
 
     function isChecked(id) {
@@ -257,43 +290,72 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         return Math.floor((score - 10) / 2);
     }
 
+    const SKILLS = [
+        {key: "athletics", ability: "str", profId: "skill_athletics_prof", outId: "skill_athletics"},
+        {key: "perception", ability: "wis", profId: "skill_perception_prof", outId: "skill_perception"},
+        {key: "persuasion", ability: "cha", profId: "skill_persuasion_prof", outId: "skill_persuasion"},
+    ];
+
     function recalcSkills() {
         const pb = getNum("proficiency_bonus", 0);
-        // Ability mods from scores
-        const strMod = abilityMod(getNum("str", 10));
-        const wisMod = abilityMod(getNum("wis", 10));
-        const chaMod = abilityMod(getNum("cha", 10));
 
-        // Skills: mod + (proficient ? pb : 0)
-        const athletics = strMod + (isChecked("skill_athletics_prof") ? pb : 0);
-        const perception = wisMod + (isChecked("skill_perception_prof") ? pb : 0);
-        const persuasion = chaMod + (isChecked("skill_persuasion_prof") ? pb : 0);
+        // Ability mods aus den Scores
+        const abilityMods = {
+            str: abilityMod(getNum("str", 10)),
+            dex: abilityMod(getNum("dex", 10)),
+            con: abilityMod(getNum("con", 10)),
+            int: abilityMod(getNum("int", 10)),
+            wis: abilityMod(getNum("wis", 10)),
+            cha: abilityMod(getNum("cha", 10)),
+        };
 
-        setVal("skill_athletics", athletics);
-        setVal("skill_perception", perception);
-        setVal("skill_persuasion", persuasion);
+        for (const s of SKILLS) {
+            const base = abilityMods[s.ability] ?? 0;
+            const val = base + (isChecked(s.profId) ? pb : 0);
+            setDerivedVal(s.outId, val);
+        }
+    }
 
+    function recalcAbilities() {
+        const scores = {
+            str: getNum("str", 10),
+            dex: getNum("dex", 10),
+            con: getNum("con", 10),
+            int: getNum("int", 10),
+            wis: getNum("wis", 10),
+            cha: getNum("cha", 10),
+        };
+
+        for (const [ability, score] of Object.entries(scores)) {
+            setDerivedVal(`${ability}_mod`, abilityMod(score));
+        }
+    }
+
+    function recalcDerived() {
+        recalcAbilities();
+        recalcSkills();
     }
 
     function bindSkillAutoCalc() {
         const ids = [
-            "str", "wis", "cha", "proficiency_bonus",
-            "skill_athletics_prof", "skill_perception_prof", "skill_persuasion_prof",
+            "proficiency_bonus",
+            "str", "dex", "con", "int", "wis", "cha",
+            ...SKILLS.flatMap(s => [s.profId]),
         ];
 
         for (const id of ids) {
             const el = document.getElementById(id);
             if (!el) continue;
 
-            const evt = (el.type === "checkbox") ? "change" : "input";
-            el.addEventListener(evt, () => {
-                recalcSkills();
-                // Optional: markDirty();  <-- NUR wenn du willst, dass PB/Attr-Änderung automatisch "dirty" setzt
-            });
+            if (el.type === "checkbox") {
+                el.addEventListener("change", recalcDerived);
+            } else {
+                el.addEventListener("input", recalcDerived);
+                el.addEventListener("change", recalcDerived);
+            }
         }
 
-        // Initial einmal rechnen
-        recalcSkills();
+        recalcDerived();
     }
 
 
@@ -395,7 +457,7 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
 
         // Dirty tracking: JEDER Input im Sheet setzt dirty
         sheetRootEl.addEventListener("input", markDirty);
-
+        sheetRootEl.addEventListener("change", markDirty);
         setStatus("Sheet geladen ✅");
     }
 
@@ -420,7 +482,7 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
 
             try {
                 jsonToSheet(c.data);
-                recalcSkills();
+                recalcDerived();
 
                 const titleEl = document.getElementById("sheetTitle");
                 if (titleEl) titleEl.textContent = c.name;
@@ -437,6 +499,52 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
             setStatus("Fehler beim Laden des Charakters ❌");
             alert("Fehler beim Laden des Charakters.");
         }
+    }
+
+    async function saveCurrentCharacter({silent = false} = {}) {
+        if (!currentCharacterId) return;
+
+        if (isSaving) return; // kein Parallel-Save
+        isSaving = true;
+
+        try {
+            if (!silent) setStatus("Speichere…");
+
+            const data = sheetToJson();
+
+            const res = await API.patchCharacter(currentCharacterId, {
+                data,
+                updated_at: currentCharacterUpdatedAt,
+            });
+
+            currentCharacterUpdatedAt = res.updated_at;
+            isDirty = false;
+            btnSave.disabled = true;
+            setStatus(silent ? "Auto-gespeichert ✅" : "Gespeichert ✅");
+            setTimeout(() => {
+                if (!isDirty) setStatus("Bereit ✅");
+            }, 1200);
+
+            if (!silent) setStatus("Gespeichert ✅");
+            else setStatus("Auto-Save ✅");
+        } catch (e) {
+            console.error("SAVE ERROR", e);
+
+            if (String(e).includes("409")) {
+                alert("Konflikt: Der Charakter wurde zwischenzeitlich geändert. Ich lade neu.");
+                await loadCharacter(currentCharacterId);
+                return;
+            }
+
+            setStatus("Speichern fehlgeschlagen ❌ (siehe Console)");
+        } finally {
+            isSaving = false;
+        }
+    }
+
+    function doAutoSave() {
+        // silent, damit es nicht ständig “Speichere…” flackert
+        saveCurrentCharacter({silent: true});
     }
 
     // ============================================================
@@ -686,44 +794,8 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
 
     // Save (inkl. Optimistic Locking)
     btnSave?.addEventListener("click", async () => {
-        console.log("SENDING updated_at:", currentCharacterUpdatedAt);
-
-        if (!currentCharacterId) {
-            setStatus("Kein Charakter geladen.");
-            return;
-        }
-
-        try {
-            setStatus("Speichere…");
-
-            const data = sheetToJson();
-            console.log("PAYLOAD", data);
-
-            const res = await API.patchCharacter(currentCharacterId, {
-                data,
-                updated_at: currentCharacterUpdatedAt,
-            });
-
-            // neuen Stand übernehmen
-            currentCharacterUpdatedAt = res.updated_at;
-
-            isDirty = false;
-            btnSave.disabled = true;
-            setStatus("Gespeichert ✅");
-        } catch (e) {
-            console.error("SAVE ERROR", e);
-
-            if (String(e).includes("409")) {
-                alert("Konflikt: Der Charakter wurde zwischenzeitlich geändert. Ich lade neu.");
-                await loadCharacter(currentCharacterId); // updated_at neu setzen
-                return;
-            }
-
-            setStatus("Speichern fehlgeschlagen ❌ (siehe Console)");
-            alert(String(e));
-        }
+        await saveCurrentCharacter({silent: false});
     });
-
     // Actions Menu
     btnActions?.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -747,6 +819,7 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
     (async function startup() {
         try {
             await loadSheetTemplateOnce();
+            bindSkillAutoCalc();
 
             if (API.token) {
                 setLoggedInUI(true);

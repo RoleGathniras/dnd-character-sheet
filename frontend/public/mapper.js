@@ -58,6 +58,11 @@ function setCheckboxValue(id, value) {
 
 export function jsonToSheet(data) {
     const d = data || {};
+
+    console.log("=== jsonToSheet DEBUG ===");
+    console.log("PB from JSON:", d.proficiency_bonus);
+    console.log("PB field resolve:", resolveField("proficiency_bonus"));
+
     setInputValue(resolveField("character_name"), d.character_name);
     setInputValue(resolveField("class"), d.class);
     setInputValue(resolveField("race"), d.race);
@@ -76,9 +81,9 @@ export function jsonToSheet(data) {
     setInputValue(resolveField("cha"), d.cha);
 
     setInputValue(resolveField("proficiency_bonus"), d.proficiency_bonus ?? "");
-    setCheckboxValue(resolveField("skill_athletics_prof"), !!d.skill_athletics_prof);
-    setCheckboxValue(resolveField("skill_perception_prof"), !!d.skill_perception_prof);
-    setCheckboxValue(resolveField("skill_persuasion_prof"), !!d.skill_persuasion_prof);
+    setInputValue(resolveField("skill_athletics_prof"), !!d.skill_athletics_prof);
+    setInputValue(resolveField("skill_perception_prof"), !!d.skill_perception_prof);
+    setInputValue(resolveField("skill_persuasion_prof"), !!d.skill_persuasion_prof);
 }
 
 export function sheetToJson() {
@@ -101,19 +106,20 @@ export function sheetToJson() {
     out.wis = getInputValue(resolveField("wis"));
     out.cha = getInputValue(resolveField("cha"));
 
+    out.proficiency_bonus = Number(getInputValue(resolveField("proficiency_bonus")) || 0);
+
     // Übungsbonus
-    out.proficiency_bonus = getInputValue(resolveField("proficiency_bonus"));
+    console.log("PB el:", resolveField("proficiency_bonus"));
+    console.log("PB raw:", resolveField("proficiency_bonus")?.value);
 
     // Skill-Proficiencies (Checkboxen)
-    out.skill_athletics_prof =
-        document.getElementById(resolveField("skill_athletics_prof"))?.checked ?? false;
+    out.skill_athletics_prof = getInputValue(resolveField("skill_athletics_prof"));
+    out.skill_perception_prof = getInputValue(resolveField("skill_perception_prof"));
+    out.skill_persuasion_prof = getInputValue(resolveField("skill_persuasion_prof"));
 
-    out.skill_perception_prof =
-        document.getElementById(resolveField("skill_perception_prof"))?.checked ?? false;
-
-    out.skill_persuasion_prof =
-        document.getElementById(resolveField("skill_persuasion_prof"))?.checked ?? false;
-    console.log("PB id:", resolveField("proficiency_bonus"));
-    console.log("PB raw:", document.getElementById(resolveField("proficiency_bonus"))?.value);
+    console.log("=== sheetToJson DEBUG ===");
+    console.log("PB field:", resolveField("proficiency_bonus"));
+    console.log("PB raw value:", resolveField("proficiency_bonus")?.value);
+    console.log("PB in out:", out.proficiency_bonus);
     return out;
 }

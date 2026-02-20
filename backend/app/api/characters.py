@@ -23,6 +23,7 @@ def can_read_character(user: User, character: Character) -> bool:
 def can_write_character(user: User, character: Character) -> bool:
     if user.role == Role.admin:
         return True
+    return character.owner_id == user.id
     if user.role == Role.dm:
         # DM darf nur eigene NPCs ändern/löschen
         return character.kind != "pc" and character.owner_id == user.id
@@ -72,9 +73,9 @@ def create_character(
         session: Session = Depends(get_session),
         current_user: User = Depends(get_current_user),
 ):
-    # Player darf nur PC für sich selbst anlegen
-    if current_user.role != Role.dm and payload.kind != "pc":
-        raise HTTPException(status_code=403, detail="Only DM can create NPCs")
+    is_dm_or_admin = current_user.role in (Role.dm, Role.admin)
+    if (not is_dm_or_admin) and payload.kind != "pc":
+        raise HTTPException(status_code=403, detail="Only DM/Admin can create NPCs")
 
     owner_id = current_user.id
 
@@ -118,7 +119,7 @@ def update_character(
     character = session.get(Character, character_id)
     if not character:
         raise HTTPException(status_code=404, detail="Character not found")
-    if current_user.role == Role.dm and character.kind != "pc" and character.owner_id is None:
+    #if current_user.role == Role.dm and character.kind != "pc" and character.owner_id is None:
         character.owner_id = current_user.id
 
     if not can_write_character(current_user, character):
