@@ -22,11 +22,12 @@
     --pad-y: 10px;
 }
 
-{
+    {
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     background: var(--bg);
@@ -76,7 +77,8 @@ html, body {
 
 
 /* Controls */
-.btn, .select {
+.btn,
+.select {
     font-size: 1rem;
     padding: var(--pad-y) var(--pad-x);
     border-radius: var(--radius);
@@ -150,7 +152,8 @@ html, body {
     cursor: pointer;
 }
 
-.btn:hover, .select:hover {
+.btn:hover,
+.select:hover {
     border-color: var(--borderStrong);
 }
 
@@ -171,7 +174,8 @@ html, body {
 }
 
 /* Tastatur-Fokus: sichtbar, aber nicht neon */
-.btn:focus-visible, .select:focus-visible {
+.btn:focus-visible,
+.select:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px rgba(122, 162, 255, .22);
     border-color: rgba(122, 162, 255, .55);
@@ -257,13 +261,15 @@ html, body {
 }
 
 .drawer__toggle::after {
-    content: "\25BE"; /* ▾ */
+    content: "\25BE";
+    /* ▾ */
     float: right;
     opacity: .8;
 }
 
 .drawer__toggle[aria-expanded="false"]::after {
-    content: "\25B8"; /* ▸ */
+    content: "\25B8";
+    /* ▸ */
 }
 
 .drawer__list[hidden] {
@@ -388,8 +394,10 @@ html, body {
 }
 
 .actionsMenu {
-    display: flex; /* statt grid */
-    flex-direction: column; /* untereinander */
+    display: flex;
+    /* statt grid */
+    flex-direction: column;
+    /* untereinander */
     gap: 6px;
 }
 
@@ -410,7 +418,8 @@ html, body {
 .actionsMenu {
     position: absolute;
     top: calc(100% + 8px);
-    left: 0; /* oder right: 0; wenn du es rechts ausrichten willst */
+    left: 0;
+    /* oder right: 0; wenn du es rechts ausrichten willst */
     z-index: 1100;
 
     /* Layout als Liste */
@@ -473,26 +482,56 @@ html, body {
     border-color: rgba(122, 162, 255, .55);
 }
 
-/* Top PB bar */
+/* Top bar aligned with 2-column layout */
 .sheetTop {
-    display: flex;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    /* exakt wie .sheetTwoCol */
+    gap: 24px;
+    align-items: end;
     margin: 12px 0 18px;
 }
 
-.pbBox {
-    width: 240px;
-    padding: 12px;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.03);
+/* Links (PB) */
+.sheetTopLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.pbBox label {
-    display: block;
-    font-size: 12px;
-    opacity: 0.8;
-    margin-bottom: 6px;
+/* Rechts (TP) */
+.sheetTopRight {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.sheetTopRight label,
+.sheetTopLeft label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+@media (max-width: 980px) {
+    .sheetTop {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sheetTopLeft {
+        flex: 1;
+    }
+
+    .sheetTopRight {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .sheetTopRight {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* 2-column layout */
@@ -526,9 +565,10 @@ html, body {
 
 
 /* Ability score input bekommt Platz für Badge */
-.abilityCard > input[type="number"] {
+.abilityCard>input[type="number"] {
     width: 100%;
-    padding-right: 120px; /* Platz für MOD-Kasten */
+    padding-right: 120px;
+    /* Platz für MOD-Kasten */
 }
 
 /* MOD Badge Input soll kompakter aussehen als normale Inputs */
@@ -546,7 +586,8 @@ html, body {
     position: absolute;
     right: 12px;
     top: 50%;
-    transform: translateY(-10%); /* leicht nach oben wie überlappend */
+    transform: translateY(-10%);
+    /* leicht nach oben wie überlappend */
     width: 96px;
     padding: 8px;
     border-radius: 12px;
@@ -633,4 +674,32 @@ html, body {
     .select {
         max-width: 52vw;
     }
+}
+
+/* ===== Combat (MVP) ===== */
+.combatSection {
+    margin-top: 10px;
+}
+
+.combatGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.hpBox {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.hpTitle {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.hpGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
 }
