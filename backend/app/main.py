@@ -6,6 +6,7 @@ from app.api.users import router as users_router
 from app.api.characters import router as characters_router
 import os
 from fastapi.middleware.cors import CORSMiddleware
+from app.seed_dev import seed_dev_users
 
 app = FastAPI(title="DnD Character Sheet API")
 
@@ -24,6 +25,9 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     init_db()
+    created = seed_dev_users()
+    print(f"[seed] SEED_ENABLED={os.getenv('SEED_ENABLED')} created={created}")
+
 
 
 @app.get("/health")
