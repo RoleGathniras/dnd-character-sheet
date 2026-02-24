@@ -186,7 +186,8 @@ html, body {
 }
 
 .drawer.is-open {
-    transform: translateX(0%); !important;
+    transform: translateX(0%);
+!important;
 }
 
 .backdrop {
@@ -326,6 +327,7 @@ html, body {
     font-size: 1.05rem;
     letter-spacing: 0.2px;
 }
+
 .drawerItem__main {
     display: flex;
     align-items: baseline;
@@ -349,11 +351,13 @@ html, body {
     font-size: 0.85rem;
     color: var(--muted);
 }
+
 .drawer__item.is-active {
     border-color: rgba(122, 162, 255, .55);
     background: rgba(122, 162, 255, .15);
     box-shadow: 0 0 0 2px rgba(122, 162, 255, .15) inset;
 }
+
 /* =========================================================
    5) AUTH PANEL
    ========================================================= */
@@ -652,10 +656,11 @@ html, body {
 .modBadge {
     position: absolute;
     right: 12px;
-    top: 50%;
-    transform: translateY(-10%);
+    bottom: 12px; /* Abstand zum unteren Rand der abilityCard */
+
     width: 96px;
     padding: 8px;
+
     border-radius: 12px;
     border: 1px solid var(--borderStrong);
     background: rgba(0, 0, 0, 0.50);
@@ -758,16 +763,273 @@ html, body {
    13) COMBAT (MVP)
    ========================================================= */
 
+/* ===== Combat Panel MVP ===== */
+
 .combatSection {
-    margin-top: 10px;
+    margin-top: 18px;
 }
 
 .combatGrid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+
+.combatCard {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px;
+}
+
+.combatCard h4 {
+    margin: 0 0 10px 0;
+    font-size: var(--fs-base);
+    letter-spacing: 0.2px;
+}
+
+/* --- Death Saves (Fix Alignment + nebeneinander) --- */
+.deathSaves {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.deathCol {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px;
+    background: var(--panelSolid);
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.deathLabel {
+    font-size: var(--fs-small);
+    color: var(--muted);
+    margin: 0;
+}
+
+/* Container: die 3 Punkte nebeneinander */
+.deathCol .deathDot {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    user-select: none;
+}
+
+/* Wir machen aus den 3 Labels eine “Reihe” */
+.deathCol {
+    /* nichts weiter */
+}
+
+.deathCol .deathDot {
+    /* bleibt inline-flex */
+}
+
+/* Trick: die Labels als Reihe anordnen */
+.deathCol {
+    /* Label oben, dann Reihe unten */
+}
+
+.deathCol .deathRow {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Checkbox */
+.deathDot input[type="checkbox"] {
+    width: 26px;
+    height: 44px;
+    margin: 0;
+}
+
+/* Zahl daneben (optional, aber hübsch) */
+.deathDot span {
+    font-size: var(--fs-small);
+    color: var(--muted);
+}
+
+/* ===== Angriffe Layout: echte Zeilen, kein Chaos ===== */
+
+.attacksTable {
+    display: grid;
     gap: 10px;
 }
 
+.attacksHead.attacksRowGrid {
+    font-size: var(--fs-small);
+    color: var(--muted);
+    padding: 0 2px;
+}
+
+/* pro Angriffs-Zeile eine Zeile */
+.attacksRowGrid {
+    display: grid;
+    grid-template-columns:
+    2.2fr   /* Angriffsart */
+    0.9fr   /* Attr Select */
+    0.9fr   /* geübt */
+    0.8fr   /* Bonus misc */
+    0.8fr   /* ATK derived */
+    1.2fr   /* Reichweite */
+    2.2fr; /* Schaden/Typ */
+    gap: 10px;
+    align-items: center;
+}
+
+/* Inputs in Zeilen NICHT stretchen lassen */
+.attacksRowGrid > * {
+    min-width: 0;
+}
+
+/* ===== geübt Toggle ===== */
+.atkProf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    height: var(--control-h);
+    padding: 0 12px;
+
+    border: 1px solid var(--borderStrong);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.04);
+    user-select: none;
+}
+
+/* Native Checkbox verstecken */
+.atkProf input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Custom Switch */
+.atkProf::before {
+    content: "";
+    width: 44px;
+    height: 24px;
+    border-radius: 999px;
+    border: 1px solid var(--borderStrong);
+    background: rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.atkProf::after {
+    content: "";
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: rgba(241, 241, 241, 0.85);
+    position: relative;
+    left: -40px; /* sitzt auf dem Switch */
+    transition: transform .15s ease, background .15s ease;
+}
+
+/* Checked State */
+.atkProf:has(input:checked)::before {
+    background: rgba(122, 162, 255, 0.22);
+    border-color: rgba(122, 162, 255, 0.55);
+}
+
+.atkProf:has(input:checked)::after {
+    transform: translateX(20px);
+    background: rgba(241, 241, 241, 0.95);
+}
+
+.atkProf span {
+    font-size: var(--fs-small);
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+/* Fokus sichtbar */
+.atkProf:has(input:focus-visible) {
+    outline: 2px solid rgba(122, 162, 255, 0.35);
+    outline-offset: 2px;
+}
+
+.attacksRow select {
+    height: var(--control-h);
+    padding: 0 var(--pad-x);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.18);
+    color: var(--text);
+    outline: none;
+}
+
+.attacksRow select:focus {
+    border-color: var(--borderStrong);
+    box-shadow: 0 0 0 2px rgba(122, 162, 255, 0.18);
+}
+
+.attacksRow select,
+.attacksRowGrid select {
+    height: var(--control-h);
+    padding: 0 var(--pad-x);
+    border-radius: var(--radius);
+    border: 1px solid var(--borderStrong);
+
+    /* mehr Kontrast als dein normales Input */
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+
+    outline: none;
+    appearance: none; /* gleiche Optik */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* Pfeil sichtbar machen (weil appearance:none) */
+.attacksRow select,
+.attacksRowGrid select {
+    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 34px;
+}
+
+.attacksRow select:focus,
+.attacksRowGrid select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(122, 162, 255, 0.22);
+}
+
+/* Placeholder-Option (Attr) stärker hervorheben */
+.attacksRow select option[value=""],
+.attacksRowGrid select option[value=""] {
+    color: rgba(241, 241, 241, 0.85);
+}
+
+@media (max-width: 980px) {
+    .attacksHead {
+        display: none;
+    }
+
+    .attacksRowGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* Reihenfolge: erst Basics, dann Rest */
+    #attack_1_type, #attack_2_type, #attack_3_type, #attack_4_type, #attack_5_type,
+    #attack_1_damage, #attack_2_damage, #attack_3_damage, #attack_4_damage, #attack_5_damage {
+        grid-column: 1 / -1;
+    }
+}
 
 /* =========================================================
    14) RESPONSIVE

@@ -296,6 +296,147 @@
 
         <section id="combatPanel" class="combatSection" data-nav-label="Kampf" tabindex="-1">
             <div class="combatGrid">
+
+                <!-- Death Saves -->
+                <div class="combatCard">
+                    <h4>Death Saves</h4>
+
+                    <div class="deathSaves">
+                        <div class="deathCol">
+                            <div class="deathLabel">Erfolge</div>
+                            <div class="deathRow">
+                                <label class="deathDot"><input id="death_success_1" type="checkbox"/>
+                                    <span>1</span></label>
+                                <label class="deathDot"><input id="death_success_2" type="checkbox"/>
+                                    <span>2</span></label>
+                                <label class="deathDot"><input id="death_success_3" type="checkbox"/>
+                                    <span>3</span></label>
+                            </div>
+                        </div>
+
+                        <div class="deathCol">
+                            <div class="deathLabel">Fehlschläge</div>
+                            <div class="deathRow">
+                                <label class="deathDot"><input id="death_fail_1" type="checkbox"/>
+                                    <span>1</span></label>
+                                <label class="deathDot"><input id="death_fail_2" type="checkbox"/>
+                                    <span>2</span></label>
+                                <label class="deathDot"><input id="death_fail_3" type="checkbox"/>
+                                    <span>3</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Angriffe / Zauber (10 Zeilen) -->
+                <div class="combatCard">
+                    <h4>Angriffe /</h4>
+
+                    <div class="attacksRow attacksRowGrid">
+                        <input id="attack_1_type" placeholder="Angriffsart (z.B. Langschwert)"/>
+                        <select id="attack_1_abil">
+                            <option value="">Attr</option>
+                            <option value="str">STR</option>
+                            <option value="dex">DEX</option>
+                            <option value="con">CON</option>
+                            <option value="int">INT</option>
+                            <option value="wis">WIS</option>
+                            <option value="cha">CHA</option>
+                        </select>
+                        <label class="atkProf">
+                            <input id="attack_1_prof" type="checkbox"/>
+                            <span>geübt</span>
+                        </label>
+                        <input id="attack_1_misc" type="number" placeholder="Bonus"/>
+                        <input id="attack_1_bonus" type="number" readonly placeholder="ATK"/>
+                        <input id="attack_1_range" placeholder="Reichweite"/>
+                        <input id="attack_1_damage" placeholder="Schaden / Typ"/>
+                    </div>
+
+                    <div class="attacksRow attacksRowGrid">
+                        <input id="attack_2_type" placeholder="Angriffsart (z.B. Langschwert)"/>
+                        <select id="attack_2_abil">
+                            <option value="">Attr</option>
+                            <option value="str">STR</option>
+                            <option value="dex">DEX</option>
+                            <option value="con">CON</option>
+                            <option value="int">INT</option>
+                            <option value="wis">WIS</option>
+                            <option value="cha">CHA</option>
+                        </select>
+                        <label class="atkProf">
+                            <input id="attack_2_prof" type="checkbox"/>
+                            <span>geübt</span>
+                        </label>
+                        <input id="attack_2_misc" type="number" placeholder="Bonus"/>
+                        <input id="attack_2_bonus" type="number" readonly placeholder="ATK"/>
+                        <input id="attack_2_range" placeholder="Reichweite"/>
+                        <input id="attack_2_damage" placeholder="Schaden / Typ"/>
+                    </div>
+
+                    <div class="attacksRow attacksRowGrid">
+                        <input id="attack_3_type" placeholder="Angriffsart (z.B. Langschwert)"/>
+                        <select id="attack_3_abil">
+                            <option value="">Attr</option>
+                            <option value="str">STR</option>
+                            <option value="dex">DEX</option>
+                            <option value="con">CON</option>
+                            <option value="int">INT</option>
+                            <option value="wis">WIS</option>
+                            <option value="cha">CHA</option>
+                        </select>
+                        <label class="atkProf">
+                            <input id="attack_3_prof" type="checkbox"/>
+                            <span>geübt</span>
+                        </label>
+                        <input id="attack_3_misc" type="number" placeholder="Bonus"/>
+                        <input id="attack_3_bonus" type="number" readonly placeholder="ATK"/>
+                        <input id="attack_3_range" placeholder="Reichweite"/>
+                        <input id="attack_3_damage" placeholder="Schaden / Typ"/>
+                    </div>
+
+                    <div class="attacksRow attacksRowGrid">
+                        <input id="attack_4_type" placeholder="Angriffsart (z.B. Langschwert)"/>
+                        <select id="attack_4_abil">
+                            <option value="">Attr</option>
+                            <option value="str">STR</option>
+                            <option value="dex">DEX</option>
+                            <option value="con">CON</option>
+                            <option value="int">INT</option>
+                            <option value="wis">WIS</option>
+                            <option value="cha">CHA</option>
+                        </select>
+                        <label class="atkProf">
+                            <input id="attack_4_prof" type="checkbox"/>
+                            <span>geübt</span>
+                        </label>
+                        <input id="attack_4_misc" type="number" placeholder="Bonus"/>
+                        <input id="attack_4_bonus" type="number" readonly placeholder="ATK"/>
+                        <input id="attack_4_range" placeholder="Reichweite"/>
+                        <input id="attack_4_damage" placeholder="Schaden / Typ"/>
+                    </div>
+
+                    <div class="attacksRow attacksRowGrid">
+                        <input id="attack_5_type" placeholder="Angriffsart (z.B. Langschwert)"/>
+                        <select id="attack_5_abil">
+                            <option value="">Attr</option>
+                            <option value="str">STR</option>
+                            <option value="dex">DEX</option>
+                            <option value="con">CON</option>
+                            <option value="int">INT</option>
+                            <option value="wis">WIS</option>
+                            <option value="cha">CHA</option>
+                        </select>
+                        <label class="atkProf">
+                            <input id="attack_5_prof" type="checkbox"/>
+                            <span>geübt</span>
+                        </label>
+                        <input id="attack_5_misc" type="number" placeholder="Bonus"/>
+                        <input id="attack_5_bonus" type="number" readonly placeholder="ATK"/>
+                        <input id="attack_5_range" placeholder="Reichweite"/>
+                        <input id="attack_5_damage" placeholder="Schaden / Typ"/>
+                    </div>
+                </div>
             </div>
         </section>
     </section>

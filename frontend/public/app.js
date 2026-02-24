@@ -482,6 +482,48 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         recalcDerived();
     }
 
+    function toNum(v) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    function getVal(id) {
+        return document.getElementById(id)?.value ?? "";
+    }
+
+    let recalcAttacks = null;
+
+    function bindAttackAutoCalc() {
+        const attackCount = 5;
+
+        function recalcAttack(i) {
+            const abil = getVal(`attack_${i}_abil`);
+            const pb = toNum(getVal("proficiency_bonus"));
+            const misc = toNum(getVal(`attack_${i}_misc`));
+            const prof = !!document.getElementById(`attack_${i}_prof`)?.checked;
+            const mod = abil ? toNum(getVal(`${abil}_mod`)) : 0;
+
+            setDerivedVal(`attack_${i}_bonus`, mod + (prof ? pb : 0) + misc);
+        }
+
+        recalcAttacks = function () {
+            for (let i = 1; i <= attackCount; i++) recalcAttack(i);
+        };
+
+        document.getElementById("proficiency_bonus")?.addEventListener("input", recalcAttacks);
+        ["str", "dex", "con", "int", "wis", "cha"].forEach(a => {
+            document.getElementById(a)?.addEventListener("input", recalcAttacks);
+        });
+
+        for (let i = 1; i <= attackCount; i++) {
+            document.getElementById(`attack_${i}_abil`)?.addEventListener("change", recalcAttacks);
+            document.getElementById(`attack_${i}_prof`)?.addEventListener("change", recalcAttacks);
+            document.getElementById(`attack_${i}_misc`)?.addEventListener("input", recalcAttacks);
+        }
+
+        recalcAttacks();
+    }
+
 
     // ============================================================
     // 3) DATA-FLOW: CHARAKTERE (API + RENDER)
@@ -610,6 +652,7 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
             try {
                 jsonToSheet(c.data);
                 recalcDerived();
+                recalcAttacks?.();
 
                 const titleEl = document.getElementById("sheetTitle");
                 if (titleEl) titleEl.textContent = c.name;
@@ -952,6 +995,7 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         try {
             await loadSheetTemplateOnce();
             bindSkillAutoCalc();
+            bindAttackAutoCalc();
 
             if (API.token) {
                 setLoggedInUI(true);

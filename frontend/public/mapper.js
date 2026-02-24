@@ -110,6 +110,29 @@ export function jsonToSheet(data) {
             // JSON keys sind exakt die IDs (z.B. "skill_stealth_prof")
             el.checked = Boolean(d?.[el.id]);
         });
+    // ===== Combat: Death Saves =====
+    for (let i = 1; i <= 3; i++) {
+        const sId = `death_success_${i}`;
+        const fId = `death_fail_${i}`;
+
+        const sEl = document.getElementById(sId);
+        if (sEl) sEl.checked = Boolean(d?.[sId]);
+
+        const fEl = document.getElementById(fId);
+        if (fEl) fEl.checked = Boolean(d?.[fId]);
+    }
+
+// ===== Combat: Angriffe=====
+    for (let i = 1; i <= 5; i++) {
+        setInputValue(resolveField(`attack_${i}_type`), d?.[`attack_${i}_type`] ?? "");
+        setInputValue(resolveField(`attack_${i}_abil`), d?.[`attack_${i}_abil`] ?? "");
+        setInputValue(resolveField(`attack_${i}_range`), d?.[`attack_${i}_range`] ?? "");
+        setInputValue(resolveField(`attack_${i}_bonus`), d?.[`attack_${i}_bonus`] ?? "");
+        setInputValue(resolveField(`attack_${i}_damage`), d?.[`attack_${i}_damage`] ?? "");
+
+        const pEl = document.getElementById(`attack_${i}_prof`);
+        if (pEl) pEl.checked = Boolean(d?.[`attack_${i}_prof`]);
+    }
 }
 
 export function sheetToJson() {
@@ -175,5 +198,23 @@ export function sheetToJson() {
     ["str", "dex", "con", "int", "wis", "cha"].forEach(a => {
         out[`save_${a}_prof`] = !!resolveField(`save_${a}_prof`)?.checked;
     });
+    // ===== Combat: Death Saves =====
+    for (let i = 1; i <= 3; i++) {
+        out[`death_success_${i}`] = !!document.getElementById(`death_success_${i}`)?.checked;
+        out[`death_fail_${i}`] = !!document.getElementById(`death_fail_${i}`)?.checked;
+    }
+
+// ===== Combat: Angriffe=====
+    for (let i = 1; i <= 5; i++) {
+        out[`attack_${i}_type`] = getInputValue(resolveField(`attack_${i}_type`)) ?? "";
+        out[`attack_${i}_abil`] = getInputValue(resolveField(`attack_${i}_abil`)) ?? "";
+        out[`attack_${i}_range`] = getInputValue(resolveField(`attack_${i}_range`)) ?? "";
+        out[`attack_${i}_damage`] = getInputValue(resolveField(`attack_${i}_damage`)) ?? "";
+
+        out[`attack_${i}_misc`] = Number(getInputValue(resolveField(`attack_${i}_misc`)) || 0);
+        out[`attack_${i}_prof`] = !!document.getElementById(`attack_${i}_prof`)?.checked;
+
+        // attack_${i}_bonus NICHT persistieren (derived)
+    }
     return out;
 }
