@@ -1,3 +1,7 @@
+/* =========================================================
+   0) CSS BASICS / TOKENS
+   ========================================================= */
+
 :root {
     --bg: #0f0f10;
     --panel: rgba(20, 20, 20, .92);
@@ -22,12 +26,11 @@
     --pad-y: 10px;
 }
 
-    {
+* {
     box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
     margin: 0;
     padding: 0;
     background: var(--bg);
@@ -37,6 +40,14 @@ body {
     line-height: 1.45;
 }
 
+[hidden] {
+    display: none !important;
+}
+
+
+/* =========================================================
+   1) PAGE WRAPPER
+   ========================================================= */
 
 .page {
     padding: 1rem;
@@ -44,145 +55,11 @@ body {
     margin: 0 auto;
 }
 
-/* Appbar */
-.appbar {
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    display: flex;
-    gap: .5rem;
-    align-items: center;
-    padding: .5rem;
-    background: var(--panel);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
-}
 
-.status {
-    margin-left: auto;
-    font-size: .85rem;
-    color: var(--muted);
-    white-space: nowrap;
-}
+/* =========================================================
+   2) APPBAR / STATUS
+   ========================================================= */
 
-.badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: 12px;
-    margin-left: 8px;
-    border: 1px solid #ffb347;
-    color: #ffb347;
-}
-
-
-/* Controls */
-.btn,
-.select {
-    font-size: 1rem;
-    padding: var(--pad-y) var(--pad-x);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, .06);
-    color: var(--text);
-    min-height: var(--control-h);
-}
-
-.select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-
-    background-color: rgba(255, 255, 255, .06);
-    color: var(--text);
-
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-
-    min-height: var(--control-h);
-    padding: var(--pad-y) calc(var(--pad-x) + 26px) var(--pad-y) var(--pad-x);
-
-    background-image: url("data:image/svg+xml;utf8,<svg fill='%23f1f1f1' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7.5l4.5 4 4.5-4'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 16px;
-}
-
-.authPanel {
-    position: absolute;
-    top: 56px;
-    right: 12px;
-    width: min(320px, calc(100vw - 24px));
-    padding: 12px;
-    z-index: 50;
-}
-
-.authRow {
-    margin-bottom: 10px;
-}
-
-.input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(0, 0, 0, 0.2);
-    color: inherit;
-}
-
-.authActions {
-    display: flex;
-    gap: 8px;
-}
-
-.authHint {
-    margin-top: 10px;
-    font-size: 12px;
-    opacity: 0.8;
-}
-
-
-.select option {
-    background: #1a1a1a;
-    color: #f1f1f1;
-}
-
-
-.btn {
-    cursor: pointer;
-}
-
-.btn:hover,
-.select:hover {
-    border-color: var(--borderStrong);
-}
-
-.btn:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-}
-
-.btn--primary {
-    font-weight: 800;
-    background: rgba(122, 162, 255, .18);
-    border-color: rgba(122, 162, 255, .35);
-}
-
-.btn--primary:hover {
-    background: rgba(122, 162, 255, .24);
-    border-color: rgba(122, 162, 255, .45);
-}
-
-/* Tastatur-Fokus: sichtbar, aber nicht neon */
-.btn:focus-visible,
-.select:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(122, 162, 255, .22);
-    border-color: rgba(122, 162, 255, .55);
-}
-
-
-/* Drawer + Backdrop */
 .appbar {
     position: sticky;
     top: 0;
@@ -202,6 +79,87 @@ body {
     color: var(--muted);
     white-space: nowrap;
 }
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    margin-left: 8px;
+    border: 1px solid #ffb347;
+    color: #ffb347;
+}
+
+
+/* =========================================================
+   3) GLOBAL CONTROLS (BUTTONS / SELECT / INPUT)
+   ========================================================= */
+
+.btn,
+.select {
+    font-size: 1rem;
+    padding: var(--pad-y) var(--pad-x);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, .06);
+    color: var(--text);
+    min-height: var(--control-h);
+}
+
+.btn {
+    cursor: pointer;
+}
+
+.btn:hover, .select:hover {
+    border-color: var(--borderStrong);
+}
+
+.btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.btn--primary {
+    font-weight: 800;
+    background: rgba(122, 162, 255, .18);
+    border-color: rgba(122, 162, 255, .35);
+}
+
+.btn--primary:hover {
+    background: rgba(122, 162, 255, .24);
+    border-color: rgba(122, 162, 255, .45);
+}
+
+.btn:focus-visible,
+.select:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(122, 162, 255, .22);
+    border-color: rgba(122, 162, 255, .55);
+}
+
+.select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    padding: var(--pad-y) calc(var(--pad-x) + 26px) var(--pad-y) var(--pad-x);
+    background-color: rgba(255, 255, 255, .06);
+
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23f1f1f1' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7.5l4.5 4 4.5-4'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+}
+
+.select option {
+    background: #1a1a1a;
+    color: #f1f1f1;
+}
+
+
+/* =========================================================
+   4) DRAWER + BACKDROP
+   ========================================================= */
 
 .drawer {
     position: fixed;
@@ -261,77 +219,61 @@ body {
 }
 
 .drawer__toggle::after {
-    content: "\25BE";
-    /* ▾ */
+    content: "\25BE"; /* ▾ */
     float: right;
     opacity: .8;
 }
 
 .drawer__toggle[aria-expanded="false"]::after {
-    content: "\25B8";
-    /* ▸ */
+    content: "\25B8"; /* ▸ */
 }
 
 .drawer__list[hidden] {
     display: none;
 }
 
-.drawer__toggle[aria-expanded="false"] {
-    margin-bottom: 0;
+
+/* =========================================================
+   5) AUTH PANEL
+   ========================================================= */
+
+.authPanel {
+    position: absolute;
+    top: 56px;
+    right: 12px;
+    width: min(320px, calc(100vw - 24px));
+    padding: 12px;
+    z-index: 50;
 }
 
-/* Make hidden actually hidden (override any accidental styles) */
-[hidden] {
-    display: none !important;
+.authRow {
+    margin-bottom: 10px;
 }
 
-
-/* Mobile tweaks */
-.sheet {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 18px;
-}
-
-.sheet .grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(190px, 1fr));
-    gap: 14px;
-    margin-bottom: 18px;
-}
-
-.sheet label {
-    display: grid;
-    gap: 8px;
-    font-size: var(--fs-small);
-    color: var(--muted);
-}
-
-.sheet input,
-.sheet textarea,
-.sheet select {
+.input {
     width: 100%;
-    box-sizing: border-box;
-    min-height: var(--control-h);
-    padding: var(--pad-y) var(--pad-x);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, .05);
-    color: var(--text);
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+    color: inherit;
 }
 
-.sheet textarea {
-    min-height: calc(var(--control-h) * 2);
-    resize: vertical;
+.authActions {
+    display: flex;
+    gap: 8px;
 }
 
-.sheet input:focus,
-.sheet textarea:focus,
-.sheet select:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(122, 162, 255, .18);
-    border-color: rgba(122, 162, 255, .55);
+.authHint {
+    margin-top: 10px;
+    font-size: 12px;
+    opacity: 0.8;
 }
+
+
+/* =========================================================
+   6) GENERIC PANELS (ADMIN etc.)
+   ========================================================= */
 
 .panel {
     background: var(--panel);
@@ -370,7 +312,6 @@ body {
     background: rgba(255, 255, 255, .04);
 }
 
-
 .userMeta {
     display: grid;
     gap: 2px;
@@ -383,7 +324,6 @@ body {
     align-items: flex-end;
 }
 
-
 .userName {
     font-weight: 700;
 }
@@ -391,24 +331,6 @@ body {
 .userId {
     font-size: var(--fs-small);
     color: var(--muted);
-}
-
-.actionsMenu {
-    display: flex;
-    /* statt grid */
-    flex-direction: column;
-    /* untereinander */
-    gap: 6px;
-}
-
-.actionsMenu .btn {
-    width: 100%;
-    text-align: left;
-}
-
-
-.actionsDivider {
-    margin: 6px 0;
 }
 
 .actions {
@@ -419,10 +341,8 @@ body {
     position: absolute;
     top: calc(100% + 8px);
     left: 0;
-    /* oder right: 0; wenn du es rechts ausrichten willst */
     z-index: 1100;
 
-    /* Layout als Liste */
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -435,10 +355,19 @@ body {
     box-shadow: var(--shadow);
 }
 
+.actionsMenu .btn {
+    width: 100%;
+    text-align: left;
+}
 
-/* =========================
-   SHEET (clean)
-   ========================= */
+.actionsDivider {
+    margin: 6px 0;
+}
+
+
+/* =========================================================
+   7) SHEET BASE (INPUTS / LABELS / GRIDS)
+   ========================================================= */
 
 .sheet {
     max-width: 1100px;
@@ -446,7 +375,7 @@ body {
     padding: 18px;
 }
 
-/* Existing form grids (name/class/race/level + combat) */
+/* Name/Class/Race/Level Grid */
 .sheet .grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(190px, 1fr));
@@ -454,6 +383,7 @@ body {
     margin-bottom: 18px;
 }
 
+/* Default field layout: label above input */
 .sheet label {
     display: grid;
     gap: 8px;
@@ -465,13 +395,17 @@ body {
 .sheet textarea,
 .sheet select {
     width: 100%;
-    box-sizing: border-box;
     min-height: var(--control-h);
     padding: var(--pad-y) var(--pad-x);
     border-radius: var(--radius);
     border: 1px solid var(--border);
     background: rgba(255, 255, 255, .05);
     color: var(--text);
+}
+
+.sheet textarea {
+    min-height: calc(var(--control-h) * 2);
+    resize: vertical;
 }
 
 .sheet input:focus,
@@ -482,59 +416,80 @@ body {
     border-color: rgba(122, 162, 255, .55);
 }
 
-/* Top bar aligned with 2-column layout */
+
+/* =========================================================
+   8) SHEET TOP BAR (LEFT = PB/INSP, RIGHT = COMBAT/HP)
+   ========================================================= */
+
+/* aligned with sheetTwoCol columns */
 .sheetTop {
     display: grid;
     grid-template-columns: 320px 1fr;
-    /* exakt wie .sheetTwoCol */
     gap: 24px;
     align-items: end;
     margin: 12px 0 18px;
 }
 
-/* Links (PB) */
 .sheetTopLeft {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
 }
 
-/* Rechts (TP) */
 .sheetTopRight {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
 }
 
+/* Override: inside topbar labels should behave like normal stacked fields */
 .sheetTopRight label,
 .sheetTopLeft label {
+    display: grid;
+    gap: 8px;
+}
+
+
+/* ===== Inspiration (Label oben, Box mit Checkbox+Text) ===== */
+.inspirationField {
+    /* nutzt das gleiche Label-Layout wie alle Sheet-Felder */
+}
+
+.inspirationInner {
+    width: 100%;
+    min-height: var(--control-h);
+    padding: var(--pad-y) var(--pad-x);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, .05);
+
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    gap: 10px;
 }
 
-@media (max-width: 980px) {
-    .sheetTop {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .sheetTopLeft {
-        flex: 1;
-    }
-
-    .sheetTopRight {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+/* Checkbox nicht auf 100% Breite ziehen */
+.inspirationInner input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    min-height: auto;
+    padding: 0;
+    margin: 0;
+    flex: 0 0 auto;
 }
 
-@media (max-width: 520px) {
-    .sheetTopRight {
-        grid-template-columns: 1fr;
-    }
+/* Text etwas ruhiger wie bei Inputs */
+.inspirationInner span {
+    color: var(--text);
+    opacity: 0.92;
+    line-height: 1.25;
 }
 
-/* 2-column layout */
+
+/* =========================================================
+   9) SHEET MAIN 2-COLUMN LAYOUT
+   ========================================================= */
+
 .sheetTwoCol {
     display: grid;
     grid-template-columns: 320px 1fr;
@@ -542,7 +497,11 @@ body {
     align-items: start;
 }
 
-/* LEFT: abilities */
+
+/* =========================================================
+   10) ABILITIES (LEFT)
+   ========================================================= */
+
 .abilities h3,
 .skills h3 {
     margin: 0 0 10px;
@@ -563,22 +522,9 @@ body {
     margin-bottom: 6px;
 }
 
-
-/* Ability score input bekommt Platz für Badge */
-.abilityCard>input[type="number"] {
-    width: 100%;
+/* Ability score input: space for MOD badge */
+.abilityCard > input[type="number"] {
     padding-right: 120px;
-    /* Platz für MOD-Kasten */
-}
-
-/* MOD Badge Input soll kompakter aussehen als normale Inputs */
-.modBadge input {
-    min-height: 36px;
-    padding: 6px 8px;
-    font-weight: 800;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 /* MOD badge overlay */
@@ -587,7 +533,6 @@ body {
     right: 12px;
     top: 50%;
     transform: translateY(-10%);
-    /* leicht nach oben wie überlappend */
     width: 96px;
     padding: 8px;
     border-radius: 12px;
@@ -604,10 +549,19 @@ body {
 }
 
 .modBadge input {
-    width: 100%;
+    min-height: 36px;
+    padding: 6px 8px;
+    font-weight: 800;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
-/* RIGHT: skills */
+
+/* =========================================================
+   11) SKILLS (RIGHT)
+   ========================================================= */
+
 .skillGroup {
     margin-bottom: 14px;
     padding: 10px 12px;
@@ -640,21 +594,67 @@ body {
     opacity: 0.92;
 }
 
-.skillRow input[type="number"] {
-    width: 100%;
+
+/* =========================================================
+   12) SAVES + PASSIVES (LEFT)
+   ========================================================= */
+
+.saveList {
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+    margin-bottom: 14px;
 }
 
-/* Responsive */
+.saveRow {
+    display: grid;
+    grid-template-columns: 26px 1fr 84px;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.saveRow:first-of-type {
+    border-top: none;
+}
+
+.saveName {
+    font-size: 13px;
+    opacity: 0.92;
+}
+
+.passiveList {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+
+/* =========================================================
+   13) COMBAT (MVP)
+   ========================================================= */
+
+.combatSection {
+    margin-top: 10px;
+}
+
+.combatGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+
+/* =========================================================
+   14) RESPONSIVE
+   ========================================================= */
+
 @media (max-width: 980px) {
     .sheet .grid {
         grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Only stack abilities+skills when REALLY narrow */
-@media (max-width: 520px) {
-    .sheetTwoCol {
-        grid-template-columns: 1fr;
     }
 }
 
@@ -667,6 +667,18 @@ body {
         grid-template-columns: 1fr;
     }
 
+    .sheetTwoCol {
+        grid-template-columns: 1fr;
+    }
+
+    .sheetTop {
+        grid-template-columns: 1fr;
+    }
+
+    .sheetTopRight {
+        grid-template-columns: 1fr;
+    }
+
     .status {
         display: none;
     }
@@ -674,32 +686,4 @@ body {
     .select {
         max-width: 52vw;
     }
-}
-
-/* ===== Combat (MVP) ===== */
-.combatSection {
-    margin-top: 10px;
-}
-
-.combatGrid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.hpBox {
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-.hpTitle {
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.hpGrid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
 }

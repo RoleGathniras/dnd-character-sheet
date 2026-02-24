@@ -319,6 +319,33 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         {key: "performance", ability: "cha", profId: "skill_performance_prof", outId: "skill_performance"},
         {key: "persuasion", ability: "cha", profId: "skill_persuasion_prof", outId: "skill_persuasion"},
     ];
+    const SAVES = [
+        {ability: "str", profId: "save_str_prof", outId: "save_str"},
+        {ability: "dex", profId: "save_dex_prof", outId: "save_dex"},
+        {ability: "con", profId: "save_con_prof", outId: "save_con"},
+        {ability: "int", profId: "save_int_prof", outId: "save_int"},
+        {ability: "wis", profId: "save_wis_prof", outId: "save_wis"},
+        {ability: "cha", profId: "save_cha_prof", outId: "save_cha"},
+    ];
+
+    function recalcSaves() {
+        const pb = getNum("proficiency_bonus", 0);
+
+        const abilityMods = {
+            str: abilityMod(getNum("str", 10)),
+            dex: abilityMod(getNum("dex", 10)),
+            con: abilityMod(getNum("con", 10)),
+            int: abilityMod(getNum("int", 10)),
+            wis: abilityMod(getNum("wis", 10)),
+            cha: abilityMod(getNum("cha", 10)),
+        };
+
+        for (const s of SAVES) {
+            const base = abilityMods[s.ability] ?? 0;
+            const val = base + (isChecked(s.profId) ? pb : 0);
+            setDerivedVal(s.outId, val);
+        }
+    }
 
     function recalcSkills() {
         const pb = getNum("proficiency_bonus", 0);
@@ -340,6 +367,16 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         }
     }
 
+    function recalcPassives() {
+        const perception = getNum("skill_perception", 0);
+        const investigation = getNum("skill_investigation", 0);
+        const insight = getNum("skill_insight", 0);
+
+        setDerivedVal("passive_perception", 10 + perception);
+        setDerivedVal("passive_investigation", 10 + investigation);
+        setDerivedVal("passive_insight", 10 + insight);
+    }
+
     function recalcAbilities() {
         const scores = {
             str: getNum("str", 10),
@@ -358,6 +395,8 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
     function recalcDerived() {
         recalcAbilities();
         recalcSkills();
+        recalcSaves();
+        recalcPassives();
     }
 
     function bindSkillAutoCalc() {
@@ -365,6 +404,7 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
             "proficiency_bonus",
             "str", "dex", "con", "int", "wis", "cha",
             ...SKILLS.flatMap(s => [s.profId]),
+            ...SAVES.flatMap(s => [s.profId]),
         ];
 
         for (const id of ids) {
