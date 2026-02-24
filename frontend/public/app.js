@@ -70,6 +70,12 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
     const btnAuthDoRegister = document.getElementById("btnAuthDoRegister");
     const btnAuthCancel = document.getElementById("btnAuthCancel");
 
+    // Right Nav Drawer (Section Navigation)
+    const navDrawer = document.getElementById("navDrawer");
+    const navBackdrop = document.getElementById("navBackdrop");
+    const btnNavOpen = document.getElementById("btnNavOpen");
+    const btnNavClose = document.getElementById("btnNavClose");
+    const navList = document.getElementById("navList");
     // ============================================================
     // 1) APP-STATE (ZUSTAND)
     //    -> Diese Variablen sind die “Wahrheit” der App.
@@ -117,6 +123,45 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         el.textContent = role ? `${username} (${role})` : username;
     }
 
+    function buildSheetNav() {
+        if (!navList) return;
+
+        // Sheet ist in #sheetRoot, also dort suchen:
+        const anchors = sheetRootEl?.querySelectorAll("[data-nav-label][id]") ?? [];
+
+        navList.innerHTML = "";
+
+        for (const sec of anchors) {
+            const id = sec.id;
+            const label = sec.getAttribute("data-nav-label") || id;
+
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "drawer__item"; // reuse deine Styles
+            btn.textContent = label;
+
+            btn.addEventListener("click", () => {
+                closeNavDrawer();
+
+                // Ziel im DOM suchen und hinscrollen
+                const target = document.getElementById(id);
+                if (!target) return;
+
+                target.scrollIntoView({behavior: "smooth", block: "start"});
+
+                // Fokus für Accessibility + sichtbarer "Jump"
+                target.focus?.({preventScroll: true});
+            });
+
+            navList.appendChild(btn);
+        }
+
+        // Button in der Appbar nur zeigen, wenn wir überhaupt Sections haben
+        if (btnNavOpen) {
+            btnNavOpen.style.display = anchors.length ? "inline-block" : "none";
+        }
+    }
+
     function showAuthPanel(show) {
         if (!authPanel) return;
         authPanel.hidden = !show;
@@ -149,6 +194,21 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         drawer?.classList.add("is-open");
         drawer?.setAttribute("aria-hidden", "false");
         if (backdrop) backdrop.hidden = false;
+    }
+
+    function openNavDrawer() {
+        // optional: linken Drawer schließen, damit nicht zwei Schränke gleichzeitig umfallen
+        closeDrawer();
+
+        navDrawer?.classList.add("is-open");
+        navDrawer?.setAttribute("aria-hidden", "false");
+        if (navBackdrop) navBackdrop.hidden = false;
+    }
+
+    function closeNavDrawer() {
+        navDrawer?.classList.remove("is-open");
+        navDrawer?.setAttribute("aria-hidden", "true");
+        if (navBackdrop) navBackdrop.hidden = true;
     }
 
     function closeDrawer() {
@@ -468,7 +528,9 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         for (const c of chars) {
             const b = document.createElement("button");
             b.className = "drawer__item";
-
+            if (Number(c.id) === Number(currentCharacterId)) {
+                b.classList.add("is-active");
+            }
             const name = escapeHtml(c.name ?? "");
             const kind = escapeHtml((c.kind ?? "").toUpperCase()); // PC/NPC
             const ownerName = c.owner_username ? escapeHtml(c.owner_username) : "";
@@ -514,6 +576,7 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         }
 
         sheetRootEl.innerHTML = await res.text();
+        buildSheetNav();
 
         // Default-Titel
         const titleEl = document.getElementById("sheetTitle");
@@ -824,6 +887,11 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
     btnMenu?.addEventListener("click", openDrawer);
     btnClose?.addEventListener("click", closeDrawer);
     backdrop?.addEventListener("click", closeDrawer);
+
+    // Right nav drawer
+    btnNavOpen?.addEventListener("click", openNavDrawer);
+    btnNavClose?.addEventListener("click", closeNavDrawer);
+    navBackdrop?.addEventListener("click", closeNavDrawer);
 
     // Auth Buttons
     btnLogin?.addEventListener("click", doLogin);

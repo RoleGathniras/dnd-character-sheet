@@ -24,6 +24,7 @@
         </div>
     </div>
 
+    <button id="btnNavOpen" class="btn" aria-label="Sheet Navigation" style="display:none">Sections ☰</button>
     <button id="btnLogin" class="btn">Login</button>
     <button id="btnLogout" class="btn" style="display:none">Logout</button>
     <button id="btnRegister" class="btn">Registrieren</button>
@@ -85,6 +86,19 @@
 </div>
 
 <div id="backdrop" class="backdrop" hidden></div>
+
+<!-- Right nav drawer -->
+<div id="navBackdrop" class="backdrop" hidden></div>
+
+<aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+    <div class="drawer__header">
+        <strong>Navigation</strong>
+        <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
+    </div>
+    <div id="navList" class="drawer__content">
+        <!-- Items kommen per JS -->
+    </div>
+</aside>
 
 <!-- Content Placeholder -->
 <main>

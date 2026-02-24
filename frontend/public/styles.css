@@ -174,8 +174,19 @@ html, body {
     box-shadow: var(--shadow);
 }
 
+.drawer--right {
+    right: 0;
+    left: auto;
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 0;
+}
+
+.drawer.drawer--right {
+    transform: translateX(105%);
+}
+
 .drawer.is-open {
-    transform: translateX(0);
+    transform: translateX(0%); !important;
 }
 
 .backdrop {
@@ -232,7 +243,117 @@ html, body {
     display: none;
 }
 
+/* =========================================================
+   4b) DRAWER BUTTONS (größer + passender Look)
+   ========================================================= */
 
+.drawer__content {
+    display: grid;
+    gap: 10px;
+}
+
+/* Listen-Buttons (Charakter / NPC Einträge, Admin Button, Nav-Items) */
+.drawer__item {
+    width: 100%;
+    text-align: left;
+
+    min-height: 52px;
+    padding: 12px 14px;
+
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.06);
+
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.2;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    cursor: pointer;
+    transition: border-color .12s ease, background .12s ease, transform .06s ease;
+}
+
+.drawer__item:hover {
+    border-color: var(--borderStrong);
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.drawer__item:active {
+    transform: translateY(1px);
+}
+
+.drawer__item:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(122, 162, 255, .22);
+    border-color: rgba(122, 162, 255, .55);
+}
+
+.drawer__item:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+/* Section-Toggles (Charaktere / NPCs Überschrift) */
+.drawer__toggle {
+    width: 100%;
+    text-align: left;
+
+    padding: 10px 6px;
+    margin: 8px 0 6px;
+
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 700;
+
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.drawer__toggle:hover {
+    color: var(--text);
+}
+
+.drawer__toggle::after {
+    opacity: .85;
+}
+
+/* Optional: Header etwas "kräftiger" */
+.drawer__header strong {
+    font-size: 1.05rem;
+    letter-spacing: 0.2px;
+}
+.drawerItem__main {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex: 1;
+}
+
+.drawerItem__name {
+    font-weight: 800;
+}
+
+.drawerItem__kind {
+    font-size: 0.85rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.drawerItem__sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+.drawer__item.is-active {
+    border-color: rgba(122, 162, 255, .55);
+    background: rgba(122, 162, 255, .15);
+    box-shadow: 0 0 0 2px rgba(122, 162, 255, .15) inset;
+}
 /* =========================================================
    5) AUTH PANEL
    ========================================================= */
