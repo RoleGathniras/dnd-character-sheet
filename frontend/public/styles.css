@@ -24,6 +24,12 @@
     --control-h: 44px;
     --pad-x: 12px;
     --pad-y: 10px;
+
+    --appbar-height: 72px;
+}
+
+[data-nav-label][id] {
+    scroll-margin-top: calc(var(--appbar-height) + 8px);
 }
 
 * {
@@ -253,7 +259,6 @@ html, body {
     gap: 10px;
 }
 
-/* Listen-Buttons (Charakter / NPC Einträge, Admin Button, Nav-Items) */
 .drawer__item {
     width: 100%;
     text-align: left;
@@ -297,7 +302,6 @@ html, body {
     cursor: not-allowed;
 }
 
-/* Section-Toggles (Charaktere / NPCs Überschrift) */
 .drawer__toggle {
     width: 100%;
     text-align: left;
@@ -322,7 +326,6 @@ html, body {
     opacity: .85;
 }
 
-/* Optional: Header etwas "kräftiger" */
 .drawer__header strong {
     font-size: 1.05rem;
     letter-spacing: 0.2px;
@@ -356,6 +359,22 @@ html, body {
     border-color: rgba(122, 162, 255, .55);
     background: rgba(122, 162, 255, .15);
     box-shadow: 0 0 0 2px rgba(122, 162, 255, .15) inset;
+}
+
+.drawer__group {
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navSubList {
+    display: flex;
+    flex-direction: column;
+    margin-left: 12px;
+}
+
+.drawer__sub {
+    opacity: 0.9;
+    font-size: 0.95rem;
 }
 
 /* =========================================================
@@ -608,6 +627,60 @@ html, body {
     color: var(--text);
     opacity: 0.92;
     line-height: 1.25;
+}
+
+/*NEU ===== Werte: 2 Zeilen × 4 (Desktop) ===== */
+.sheetTopGrid {
+    display: grid;
+    gap: 14px;
+    align-items: end;
+
+    /* 4 Spalten */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    /* 2 Zeilen, sauber zugewiesen */
+    grid-template-areas:
+    "insp pb init speed"
+    "ac   hpmax hpcur hptemp";
+}
+
+/* Blöcke und Felder in die Areas mappen */
+.topBlock--inspiration {
+    grid-area: insp;
+}
+
+.topField--pb {
+    grid-area: pb;
+}
+
+.topField--init {
+    grid-area: init;
+}
+
+.topField--speed {
+    grid-area: speed;
+}
+
+.topBlock--ac {
+    grid-area: ac;
+}
+
+.topField--hpmax {
+    grid-area: hpmax;
+}
+
+.topField--hpcur {
+    grid-area: hpcur;
+}
+
+.topField--hptemp {
+    grid-area: hptemp;
+}
+
+/* Labels im Grid sollen wie gewohnt gestapelt sein */
+.sheetTopGrid label {
+    display: grid;
+    gap: 8px;
 }
 
 
@@ -876,22 +949,36 @@ html, body {
     display: grid;
     grid-template-columns:
     2.2fr   /* Angriffsart */
-    0.9fr   /* Attr Select */
-    0.9fr   /* geübt */
-    0.8fr   /* Bonus misc */
-    0.8fr   /* ATK derived */
+    0.9fr   /* Attr */
+    1.1fr   /* geübt Toggle */
+    0.8fr   /* Bonus */
+    0.8fr   /* ATK */
     1.2fr   /* Reichweite */
-    2.2fr; /* Schaden/Typ */
+    2.2fr; /* Schaden */
     gap: 10px;
     align-items: center;
 }
 
-/* Inputs in Zeilen NICHT stretchen lassen */
+/* Angriffsart */
+.attacksRowGrid > :nth-child(1) {
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(122, 162, 255, 0.35);
+}
+
+/* Schaden */
+.attacksRowGrid > :nth-child(7) {
+    font-weight: 600;
+    background: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 80, 80, 0.35);
+}
+
 .attacksRowGrid > * {
     min-width: 0;
 }
 
 /* ===== geübt Toggle ===== */
+/* ===== geübt Toggle (stabil, ohne Versatz) ===== */
 .atkProf {
     display: flex;
     align-items: center;
@@ -904,46 +991,59 @@ html, body {
     border: 1px solid var(--borderStrong);
     border-radius: var(--radius);
     background: rgba(255, 255, 255, 0.04);
+
+    position: relative;
     user-select: none;
 }
 
-/* Native Checkbox verstecken */
-.atkProf input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
+.atkProf span:last-child {
+    position: relative;
+    top: -10px; /* 3–6px testen */
 }
 
-/* Custom Switch */
-.atkProf::before {
-    content: "";
+/* Native Checkbox unsichtbar, aber fokussierbar */
+.atkProf input[type="checkbox"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+}
+
+/* Switch Track */
+.atkProf .switch {
     width: 44px;
     height: 24px;
     border-radius: 999px;
     border: 1px solid var(--borderStrong);
     background: rgba(0, 0, 0, 0.25);
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+    position: relative;
+    flex: 0 0 auto;
 }
 
-.atkProf::after {
+/* Switch Knob */
+.atkProf .switch::after {
     content: "";
     width: 18px;
     height: 18px;
     border-radius: 999px;
     background: rgba(241, 241, 241, 0.85);
-    position: relative;
-    left: -40px; /* sitzt auf dem Switch */
+
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    transform: translateY(-50%);
     transition: transform .15s ease, background .15s ease;
 }
 
-/* Checked State */
-.atkProf:has(input:checked)::before {
+/* Checked */
+.atkProf:has(input:checked) .switch {
     background: rgba(122, 162, 255, 0.22);
     border-color: rgba(122, 162, 255, 0.55);
 }
 
-.atkProf:has(input:checked)::after {
-    transform: translateX(20px);
+.atkProf:has(input:checked) .switch::after {
+    transform: translate(20px, -50%);
     background: rgba(241, 241, 241, 0.95);
 }
 
@@ -1015,19 +1115,74 @@ html, body {
     color: rgba(241, 241, 241, 0.85);
 }
 
+
 @media (max-width: 980px) {
     .attacksHead {
         display: none;
     }
 
+    /* Jede Angriffs-Zeile wird zur eigenen Box */
     .attacksRowGrid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        align-items: stretch;
+        justify-items: stretch;
+
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--panelSolid);
+        box-shadow: var(--shadow);
     }
 
-    /* Reihenfolge: erst Basics, dann Rest */
-    #attack_1_type, #attack_2_type, #attack_3_type, #attack_4_type, #attack_5_type,
-    #attack_1_damage, #attack_2_damage, #attack_3_damage, #attack_4_damage, #attack_5_damage {
+    /* Mehr “Luft” zwischen den Angriffen */
+    .attacksTable {
+        gap: 14px;
+    }
+
+    .attacksRowGrid input,
+    .attacksRowGrid select,
+    .attacksRowGrid .atkProf {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        box-sizing: border-box;
+    }
+
+    /* 1) Angriffsart volle Breite */
+    .attacksRowGrid > :where([id$="_type"]) {
         grid-column: 1 / -1;
+    }
+
+    /* 2) abil | prof | misc | range */
+    .attacksRowGrid > :where([id$="_abil"]) {
+        grid-column: 1 / 2;
+    }
+
+    .attacksRowGrid > :where([id$="_prof"]) {
+        grid-column: 2 / 3;
+    }
+
+    .attacksRowGrid > :where([id$="_misc"]) {
+        grid-column: 3 / 4;
+    }
+
+    .attacksRowGrid > :where([id$="_range"]) {
+        grid-column: 4 / 5;
+    }
+
+    /* 3) ATK + Schaden */
+    .attacksRowGrid > :where([id$="_bonus"]) {
+        grid-column: 1 / 2;
+    }
+
+    .attacksRowGrid > :where([id$="_damage"]) {
+        grid-column: 1 / -1;
+    }
+
+    /* vorher hattest du margin-bottom am damage – das killt dir die Box-Optik */
+    .attacksRowGrid > :where([id$="_damage"]) {
+        margin-bottom: 0;
     }
 }
 
@@ -1067,6 +1222,209 @@ html, body {
     }
 
     .select {
-        max-width: 52vw;
+        max-width: none;
+        width: 100%;
     }
+}
+
+@media (max-width: 520px) {
+
+    .sheetTopGrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        align-items: start;
+
+        grid-template-areas:
+      "insp  ac"
+      "pb    hpmax"
+      "init  hpcur"
+      "speed hptemp";
+    }
+
+    /* ALLE HP-Sonderstyles deaktivieren */
+    .topField--hpmax,
+    .topField--hpcur,
+    .topField--hptemp {
+        background: var(--panelSolid);
+        padding: 0;
+        border: none;
+        box-shadow: none;
+        margin-top: 0;
+    }
+}
+
+
+/* ===== Spells Page (UI Mock) ===== */
+.page--spells {
+    padding: 12px;
+    display: grid;
+    gap: 12px;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 900px) {
+    .grid2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tab {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    color: inherit;
+    padding: 8px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.tab.is-active {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.slotsBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.slot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.slot input {
+    transform: translateY(1px);
+}
+
+.tableWrap {
+    overflow: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+}
+
+.table th, .table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    vertical-align: top;
+}
+
+.table thead th {
+    position: sticky;
+    top: 0;
+    background: rgba(20, 20, 20, 0.9);
+    backdrop-filter: blur(6px);
+}
+
+.spellDesc {
+    margin-top: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.spellDesc.is-hidden {
+    display: none;
+}
+
+.spellDesc__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.spellDesc__body {
+    padding: 12px;
+}
+
+.spellbook {
+    display: grid;
+    gap: 8px;
+}
+
+.spellbook__empty {
+    padding: 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.field--full {
+    grid-column: 1 / -1;
+}
+
+/* Optional, falls du diese Klassen noch nicht hast */
+.h1 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.h2 {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.h3 {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.small {
+    font-size: 12px;
+}
+
+.strong {
+    font-weight: 700;
+}
+
+.muted {
+    opacity: 0.75;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+}
+
+.gap {
+    gap: 8px;
 }

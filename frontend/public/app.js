@@ -126,10 +126,29 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
     function buildSheetNav() {
         if (!navList) return;
 
-        // Sheet ist in #sheetRoot, also dort suchen:
+        navList.innerHTML = "";
+
+        // ===== Gruppe: Charakterbogen (Sections aus dem geladenen Sheet) =====
         const anchors = sheetRootEl?.querySelectorAll("[data-nav-label][id]") ?? [];
 
-        navList.innerHTML = "";
+        const sheetGroup = document.createElement("div");
+        sheetGroup.className = "navGroup";
+
+        const sheetTitle = document.createElement("button");
+        sheetTitle.type = "button";
+        sheetTitle.className = "drawer__item drawer__group";
+        sheetTitle.textContent = "Charakterbogen";
+
+        sheetTitle.addEventListener("click", () => {
+            closeNavDrawer();
+            // Zur Hauptseite (ohne Hash)
+            window.location.href = "/index.html";
+        });
+
+        sheetGroup.appendChild(sheetTitle);
+
+        const sheetSubList = document.createElement("div");
+        sheetSubList.className = "navSubList";
 
         for (const sec of anchors) {
             const id = sec.id;
@@ -137,28 +156,56 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
 
             const btn = document.createElement("button");
             btn.type = "button";
-            btn.className = "drawer__item"; // reuse deine Styles
+            btn.className = "drawer__item drawer__sub";
             btn.textContent = label;
 
             btn.addEventListener("click", () => {
                 closeNavDrawer();
 
-                // Ziel im DOM suchen und hinscrollen
+                // Hash setzen, ohne reload
+                history.replaceState(null, "", `#${encodeURIComponent(id)}`);
+
                 const target = document.getElementById(id);
                 if (!target) return;
 
                 target.scrollIntoView({behavior: "smooth", block: "start"});
-
-                // Fokus für Accessibility + sichtbarer "Jump"
                 target.focus?.({preventScroll: true});
             });
 
-            navList.appendChild(btn);
+            sheetSubList.appendChild(btn);
         }
 
-        // Button in der Appbar nur zeigen, wenn wir überhaupt Sections haben
+        sheetGroup.appendChild(sheetSubList);
+        navList.appendChild(sheetGroup);
+
+        // ===== Gruppe: Zauber (Link auf eigene Seite) =====
+        const spellsGroup = document.createElement("div");
+        spellsGroup.className = "navGroup";
+
+        const spellsTitle = document.createElement("button");
+        spellsTitle.type = "button";
+        spellsTitle.className = "drawer__item drawer__group";
+        spellsTitle.textContent = "Zauber";
+
+        spellsTitle.addEventListener("click", () => {
+            closeNavDrawer();
+            window.location.href = "/spell.html";
+        });
+
+        spellsGroup.appendChild(spellsTitle);
+
+        // (Unterpunkte kommen später, wenn spell.html Sections hat)
+        const spellsHint = document.createElement("div");
+        spellsHint.className = "drawer__item drawer__sub muted";
+        spellsHint.textContent = "— (Unterpunkte kommen später)";
+        spellsHint.style.cursor = "default";
+
+        spellsGroup.appendChild(spellsHint);
+        navList.appendChild(spellsGroup);
+
+        // Button in der Appbar nur zeigen, wenn wir Navigation haben
         if (btnNavOpen) {
-            btnNavOpen.style.display = anchors.length ? "inline-block" : "none";
+            btnNavOpen.style.display = "inline-block";
         }
     }
 
@@ -339,6 +386,41 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
     function isChecked(id) {
         const el = document.getElementById(id);
         return !!el && el.checked;
+    }
+
+    function scrollToHashIfPresent() {
+        const hash = window.location.hash;
+        if (!hash || hash.length < 2) return;
+
+        const id = decodeURIComponent(hash.slice(1));
+        const target = document.getElementById(id);
+        if (!target) return;
+
+        // Fokus + Scroll (CSS scroll-margin-top greift hier perfekt)
+        target.scrollIntoView({behavior: "smooth", block: "start"});
+        target.focus?.({preventScroll: true});
+    }
+
+    /**
+     * Falls das Sheet async geladen wird (Template in #sheetRoot),
+     * kann der Anchor beim ersten Versuch noch nicht existieren.
+     * Dann versuchen wir es kurz erneut.
+     */
+    function scrollToHashWithRetry(tries = 20) {
+        const hash = window.location.hash;
+        if (!hash || hash.length < 2) return;
+
+        const id = decodeURIComponent(hash.slice(1));
+        const target = document.getElementById(id);
+
+        if (target) {
+            scrollToHashIfPresent();
+            return;
+        }
+
+        if (tries <= 0) return;
+
+        requestAnimationFrame(() => scrollToHashWithRetry(tries - 1));
     }
 
     // ============================================================
@@ -994,6 +1076,9 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
     (async function startup() {
         try {
             await loadSheetTemplateOnce();
+            buildSheetNav();
+            scrollToHashWithRetry();
+
             bindSkillAutoCalc();
             bindAttackAutoCalc();
 
@@ -1045,4 +1130,7 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
             setAdminVisible(false);
         }
     })();
+    window.addEventListener("hashchange", () => {
+        scrollToHashWithRetry();
+    });
 })();
