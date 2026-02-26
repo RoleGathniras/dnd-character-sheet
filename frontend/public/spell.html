@@ -19,6 +19,7 @@
     </div>
 
     <div class="appbar__right">
+        <button id="btnNavOpen" class="btn" aria-label="Sheet Navigation">Navigation ☰</button>
         <div class="pill">
             <span class="muted small">Char</span>
             <span id="spellCharName" class="strong">—</span>
@@ -27,251 +28,221 @@
 </header>
 
 <main class="page page--spells">
-    <!-- Spell Attacks Panel (oben) -->
-    <section class="card">
-        <div class="card__header">
-            <div>
-                <div class="h2">Zauberangriffe</div>
-                <div class="muted small">Wie dein Angriffspanel – nur mit mehr Magie und weniger Ausreden.</div>
+    <!-- Zauberangriffe -->
+    <section id="sec-spell-attacks" data-nav-label="Zauberangriffe">
+        <!-- Spell Attacks Panel (oben) -->
+        <section class="card">
+            <div class="card__header">
+                <div>
+                    <div class="h2">Zauberangriffe</div>
+                    <div class="muted small">Wie dein Angriffspanel – nur mit mehr Magie und weniger Ausreden.</div>
+                </div>
+
+                <div class="row gap">
+                    <label class="field field--mini">
+                        <span class="label">Zauber-DC</span>
+                        <input id="spellSaveDc" type="number" inputmode="numeric"/>
+                    </label>
+
+                    <label class="field field--mini">
+                        <span class="label">Angriffsbonus</span>
+                        <input id="spellAtkBonus" type="number" inputmode="numeric"/>
+                    </label>
+
+                    <label class="field field--mini">
+                        <span class="label">Zauberattribut</span>
+                        <select id="spellAbility">
+                            <option value="">—</option>
+                            <option value="int">INT</option>
+                            <option value="wis">WIS</option>
+                            <option value="cha">CHA</option>
+                        </select>
+                    </label>
+                </div>
             </div>
-
-            <div class="row gap">
-                <label class="field field--mini">
-                    <span class="label">Zauber-DC</span>
-                    <input id="spellSaveDc" type="number" inputmode="numeric"/>
-                </label>
-
-                <label class="field field--mini">
-                    <span class="label">Angriffsbonus</span>
-                    <input id="spellAtkBonus" type="number" inputmode="numeric"/>
-                </label>
-
-                <label class="field field--mini">
-                    <span class="label">Zauberattribut</span>
-                    <select id="spellAbility">
-                        <option value="">—</option>
-                        <option value="int">INT</option>
-                        <option value="wis">WIS</option>
-                        <option value="cha">CHA</option>
-                    </select>
-                </label>
-            </div>
-        </div>
+        </section>
     </section>
 
     <!-- Tabs für Zaubergrade + Cantrips -->
-    <section class="card">
-        <div class="card__header card__header--tight">
-            <div class="tabs" role="tablist" aria-label="Zaubergrade">
-                <button class="tab is-active" role="tab" aria-selected="true" data-spell-level="cantrip">Zaubertricks
-                </button>
-                <button class="tab" role="tab" aria-selected="false" data-spell-level="1">Grad 1</button>
-                <button class="tab" role="tab" aria-selected="false" data-spell-level="2">Grad 2</button>
-                <button class="tab" role="tab" aria-selected="false" data-spell-level="3">Grad 3</button>
-                <button class="tab" role="tab" aria-selected="false" data-spell-level="4">Grad 4</button>
-                <button class="tab" role="tab" aria-selected="false" data-spell-level="5">Grad 5</button>
-                <button class="tab" role="tab" aria-selected="false" data-spell-level="6">Grad 6</button>
-                <button class="tab" role="tab" aria-selected="false" data-spell-level="7">Grad 7</button>
-                <button class="tab" role="tab" aria-selected="false" data-spell-level="8">Grad 8</button>
-                <button class="tab" role="tab" aria-selected="false" data-spell-level="9">Grad 9</button>
+    <!-- Slots + Panel (Tabs-Card enthält beides) -->
+    <section id="sec-spell-slots" data-nav-label="Zauberslots">
+        <section class="card">
+            <div class="card__header card__header--tight">
+                <div class="tabs" role="tablist" aria-label="Zaubergrade">
+                    <button class="tab is-active" role="tab" aria-selected="true" data-spell-level="cantrip">
+                        Zaubertricks
+                    </button>
+                    <button class="tab" role="tab" aria-selected="false" data-spell-level="1">Grad 1</button>
+                    <button class="tab" role="tab" aria-selected="false" data-spell-level="2">Grad 2</button>
+                    <button class="tab" role="tab" aria-selected="false" data-spell-level="3">Grad 3</button>
+                    <button class="tab" role="tab" aria-selected="false" data-spell-level="4">Grad 4</button>
+                    <button class="tab" role="tab" aria-selected="false" data-spell-level="5">Grad 5</button>
+                    <button class="tab" role="tab" aria-selected="false" data-spell-level="6">Grad 6</button>
+                    <button class="tab" role="tab" aria-selected="false" data-spell-level="7">Grad 7</button>
+                    <button class="tab" role="tab" aria-selected="false" data-spell-level="8">Grad 8</button>
+                    <button class="tab" role="tab" aria-selected="false" data-spell-level="9">Grad 9</button>
+                </div>
             </div>
-        </div>
 
-        <div class="card__body">
-            <!-- Slot-Checkboxen -->
-            <div class="slotsBar">
-                <div class="slotsBar__left">
-                    <div class="h3">Zauberslots</div>
-                    <div class="muted small">
-                        Anzahl kommt später aus dem Zauberbuch (Slots pro Grad). Hier erstmal UI.
+            <div class="card__body">
+                <!-- Slot-Checkboxen -->
+                <div class="slotsBar">
+                    <div class="slotsBar__left">
+                        <div class="h3">Zauberslots</div>
+                        <div class="muted small">
+                            Anzahl kommt später aus dem Zauberbuch (Slots pro Grad). Hier erstmal UI.
+                        </div>
+                    </div>
+
+                    <div class="slotsBar__right">
+                        <!-- wird später dynamisch gerendert -->
+                        <div id="spellSlots" class="slots"></div>
                     </div>
                 </div>
 
-                <div class="slotsBar__right">
-                    <!-- wird später dynamisch gerendert -->
-                    <div id="spellSlots" class="slots"></div>
+                <!-- Spell Panel Table -->
+                <div id="sec-spell-panel" data-nav-label="Zauberpanel">
+                    <div class="tableWrap">
+                        <table class="table table--spells" aria-label="Zauberpanel">
+                            <thead>
+                            <tr>
+                                <th style="width: 30%;">Zauber (Name)</th>
+                                <th style="width: 12%;">Zeit</th>
+                                <th style="width: 14%;">Reichweite</th>
+                                <th style="width: 12%;">Trefferwert</th>
+                                <th>Effekt</th>
+                            </tr>
+                            </thead>
+                            <tbody id="spellPanelRows">
+                            <!-- UI-Placeholder -->
+                            <tr class="rowHint">
+                                <td colspan="5" class="muted small">
+                                    Noch leer. Später: Zauber aus Zauberbuch auswählen und hier anzeigen.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Spell Panel Table -->
-            <div class="tableWrap">
-                <table class="table table--spells" aria-label="Zauberpanel">
-                    <thead>
-                    <tr>
-                        <th style="width: 30%;">Zauber (Name)</th>
-                        <th style="width: 12%;">Zeit</th>
-                        <th style="width: 14%;">Reichweite</th>
-                        <th style="width: 12%;">Trefferwert</th>
-                        <th>Effekt</th>
-                    </tr>
-                    </thead>
-                    <tbody id="spellPanelRows">
-                    <!-- UI-Placeholder -->
-                    <tr class="rowHint">
-                        <td colspan="5" class="muted small">
-                            Noch leer. Später: Zauber aus Zauberbuch auswählen und hier anzeigen.
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Beschreibung, erscheint wenn Name geklickt -->
-            <div id="spellDescriptionBox" class="spellDesc is-hidden" aria-live="polite">
-                <div class="spellDesc__header">
-                    <div class="h3" id="spellDescTitle">Zaubername</div>
-                    <button class="btn btn--ghost" id="btnCloseSpellDesc" type="button">Schließen</button>
-                </div>
-                <div class="spellDesc__body">
+                <!-- Beschreibung, erscheint wenn Name geklickt -->
+                <div id="spellDescriptionBox" class="spellDesc is-hidden" aria-live="polite">
+                    <div class="spellDesc__header">
+                        <div class="h3" id="spellDescTitle">Zaubername</div>
+                        <button class="btn btn--ghost" id="btnCloseSpellDesc" type="button">Schließen</button>
+                    </div>
+                    <div class="spellDesc__body">
                     <textarea id="spellDescText" rows="8"
                               placeholder="Beschreibung kommt später aus dem Zauberbuch… (UI-Mock)"></textarea>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
     </section>
 
     <!-- Zauberbuch + Detail (unten, 2 Spalten) -->
     <section class="grid2">
         <!-- Zauberbuch Liste -->
-        <section class="card">
-            <div class="card__header">
-                <div>
-                    <div class="h2">Zauberbuch</div>
-                    <div class="muted small">Liste nach Grad. Klick → Details bearbeiten. (UI-Mock)</div>
-                </div>
+        <section id="sec-spellbook" data-nav-label="Zauberbuch">
+            <section class="card">
+                <div class="card__header">
+                    <div>
+                        <div class="h2">Zauberbuch</div>
+                        <div class="muted small">Liste nach Grad. Klick → Details bearbeiten. (UI-Mock)</div>
+                    </div>
 
-                <div class="row gap">
-                    <label class="field field--mini">
-                        <span class="label">Slots (aktueller Tab)</span>
-                        <input id="spellSlotsCountInput" type="number" min="0" inputmode="numeric" value="0"/>
-                    </label>
+                    <div class="row gap">
+                        <label class="field field--mini">
+                            <span class="label">Slots (aktueller Tab)</span>
+                            <input id="spellSlotsCountInput" type="number" min="0" inputmode="numeric" value="0"/>
+                        </label>
 
-                    <button class="btn" id="btnAddSpell" type="button">+ Zauber hinzufügen</button>
-                </div>
-            </div>
-
-            <div class="card__body">
-                <div id="spellbookList" class="spellbook">
-                    <!-- UI-Placeholder -->
-                    <div class="spellbook__empty muted small">
-                        Keine Zauber im aktuellen Grad. (Ja, trag welche ein. 😉)
+                        <button class="btn" id="btnAddSpell" type="button">+ Zauber hinzufügen</button>
                     </div>
                 </div>
-            </div>
+
+                <div class="card__body">
+                    <div id="spellbookList" class="spellbook">
+                        <!-- UI-Placeholder -->
+                        <div class="spellbook__empty muted small">
+                            Keine Zauber im aktuellen Grad. (Ja, trag welche ein. 😉)
+                        </div>
+                    </div>
+                </div>
+            </section>
         </section>
 
         <!-- Detail Editor -->
-        <section class="card">
-            <div class="card__header">
-                <div>
-                    <div class="h2">Zauber-Details</div>
-                    <div class="muted small">Hier wird der Zauber im Zauberbuch gepflegt.</div>
+        <section id="sec-spell-details" data-nav-label="Zauber-Details">
+            <section class="card">
+                <div class="card__header">
+                    <div>
+                        <div class="h2">Zauber-Details</div>
+                        <div class="muted small">Hier wird der Zauber im Zauberbuch gepflegt.</div>
+                    </div>
+
+                    <div class="row gap">
+                        <button class="btn btn--ghost" id="btnUseInPanel" type="button">Im Panel verwenden</button>
+                        <button class="btn btn--danger" id="btnDeleteSpell" type="button">Löschen</button>
+                    </div>
                 </div>
 
-                <div class="row gap">
-                    <button class="btn btn--ghost" id="btnUseInPanel" type="button">Im Panel verwenden</button>
-                    <button class="btn btn--danger" id="btnDeleteSpell" type="button">Löschen</button>
+                <div class="card__body">
+                    <div class="formGrid">
+                        <label class="field">
+                            <span class="label">Name</span>
+                            <input id="sb_name" type="text" placeholder="z.B. Magic Missile"/>
+                        </label>
+
+                        <label class="field">
+                            <span class="label">Zeit</span>
+                            <input id="sb_time" type="text" placeholder="z.B. 1 Aktion"/>
+                        </label>
+
+                        <label class="field">
+                            <span class="label">Reichweite</span>
+                            <input id="sb_range" type="text" placeholder="z.B. 36m"/>
+                        </label>
+
+                        <label class="field">
+                            <span class="label">Trefferwert</span>
+                            <input id="sb_hit" type="text" placeholder="z.B. +7 / Rettungswurf"/>
+                        </label>
+
+                        <label class="field field--full">
+                            <span class="label">Effekt (kurz)</span>
+                            <input id="sb_effect" type="text"
+                                   placeholder="Kurzbeschreibung für Panel-Spalte Effekt"/>
+                        </label>
+
+                        <label class="field field--full">
+                            <span class="label">Beschreibung (lang)</span>
+                            <textarea id="sb_desc" rows="10" placeholder="Voller Text des Zaubers…"></textarea>
+                        </label>
+                    </div>
+
+                    <div class="muted small">
+                        Hinweis: In der echten Version wird “Beschreibung” beim Klick auf den Zaubernamen im Panel
+                        angezeigt.
+                    </div>
                 </div>
-            </div>
-
-            <div class="card__body">
-                <div class="formGrid">
-                    <label class="field">
-                        <span class="label">Name</span>
-                        <input id="sb_name" type="text" placeholder="z.B. Magic Missile"/>
-                    </label>
-
-                    <label class="field">
-                        <span class="label">Zeit</span>
-                        <input id="sb_time" type="text" placeholder="z.B. 1 Aktion"/>
-                    </label>
-
-                    <label class="field">
-                        <span class="label">Reichweite</span>
-                        <input id="sb_range" type="text" placeholder="z.B. 36m"/>
-                    </label>
-
-                    <label class="field">
-                        <span class="label">Trefferwert</span>
-                        <input id="sb_hit" type="text" placeholder="z.B. +7 / Rettungswurf"/>
-                    </label>
-
-                    <label class="field field--full">
-                        <span class="label">Effekt (kurz)</span>
-                        <input id="sb_effect" type="text" placeholder="Kurzbeschreibung für Panel-Spalte Effekt"/>
-                    </label>
-
-                    <label class="field field--full">
-                        <span class="label">Beschreibung (lang)</span>
-                        <textarea id="sb_desc" rows="10" placeholder="Voller Text des Zaubers…"></textarea>
-                    </label>
-                </div>
-
-                <div class="muted small">
-                    Hinweis: In der echten Version wird “Beschreibung” beim Klick auf den Zaubernamen im Panel
-                    angezeigt.
-                </div>
-            </div>
+            </section>
         </section>
     </section>
 </main>
 
-<script type="module">
-    // UI-only Mock: Tabs + Slot-Renderer + Description Toggle
-    const tabs = [...document.querySelectorAll('.tab[data-spell-level]')];
-    const slotsEl = document.getElementById('spellSlots');
-    const slotsCountInput = document.getElementById('spellSlotsCountInput');
+<div id="navBackdrop" class="backdrop" hidden></div>
 
-    const descBox = document.getElementById('spellDescriptionBox');
-    const btnCloseDesc = document.getElementById('btnCloseSpellDesc');
-
-    let currentLevel = 'cantrip';
-
-    function setActiveTab(level) {
-        currentLevel = level;
-        tabs.forEach(t => {
-            const isActive = t.dataset.spellLevel === level;
-            t.classList.toggle('is-active', isActive);
-            t.setAttribute('aria-selected', isActive ? 'true' : 'false');
-        });
-
-        // Cantrips haben keine Slots
-        const isCantrip = level === 'cantrip';
-        slotsCountInput.disabled = isCantrip;
-        slotsCountInput.value = isCantrip ? 0 : slotsCountInput.value;
-
-        renderSlots(isCantrip ? 0 : Number(slotsCountInput.value || 0));
-        hideDesc();
-        // später: spellbookList + panelRows nach level filtern
-    }
-
-    function renderSlots(n) {
-        slotsEl.innerHTML = '';
-        for (let i = 1; i <= n; i++) {
-            const id = `slot_${currentLevel}_${i}`;
-            const label = document.createElement('label');
-            label.className = 'slot';
-            label.innerHTML = `
-          <input type="checkbox" id="${id}" />
-          <span>${i}</span>
-        `;
-            slotsEl.appendChild(label);
-        }
-        if (n === 0) {
-            slotsEl.innerHTML = '<span class="muted small">Keine Slots (z.B. Zaubertricks) oder noch nicht definiert.</span>';
-        }
-    }
-
-    function hideDesc() {
-        descBox.classList.add('is-hidden');
-    }
-
-    tabs.forEach(t => t.addEventListener('click', () => setActiveTab(t.dataset.spellLevel)));
-    slotsCountInput.addEventListener('input', () => renderSlots(Number(slotsCountInput.value || 0)));
-    btnCloseDesc.addEventListener('click', hideDesc);
-
-    // Start
-    setActiveTab('cantrip');
-</script>
+<aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+    <div class="drawer__header">
+        <strong>Navigation</strong>
+        <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
+    </div>
+    <div id="navList" class="drawer__content">
+        <!-- Items kommen per JS -->
+    </div>
+</aside>
+<script type="module" src="/app.js"></script>
+<script type="module" src="/spells.js"></script>
 </body>
 </html>

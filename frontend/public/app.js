@@ -18,6 +18,7 @@
 
 import {API} from "./api.js";
 import {jsonToSheet, sheetToJson} from "./mapper.js";
+import {buildSheetNav} from "/nav.js";
 
 (function () {
     // ============================================================
@@ -123,91 +124,6 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         el.textContent = role ? `${username} (${role})` : username;
     }
 
-    function buildSheetNav() {
-        if (!navList) return;
-
-        navList.innerHTML = "";
-
-        // ===== Gruppe: Charakterbogen (Sections aus dem geladenen Sheet) =====
-        const anchors = sheetRootEl?.querySelectorAll("[data-nav-label][id]") ?? [];
-
-        const sheetGroup = document.createElement("div");
-        sheetGroup.className = "navGroup";
-
-        const sheetTitle = document.createElement("button");
-        sheetTitle.type = "button";
-        sheetTitle.className = "drawer__item drawer__group";
-        sheetTitle.textContent = "Charakterbogen";
-
-        sheetTitle.addEventListener("click", () => {
-            closeNavDrawer();
-            // Zur Hauptseite (ohne Hash)
-            window.location.href = "/index.html";
-        });
-
-        sheetGroup.appendChild(sheetTitle);
-
-        const sheetSubList = document.createElement("div");
-        sheetSubList.className = "navSubList";
-
-        for (const sec of anchors) {
-            const id = sec.id;
-            const label = sec.getAttribute("data-nav-label") || id;
-
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "drawer__item drawer__sub";
-            btn.textContent = label;
-
-            btn.addEventListener("click", () => {
-                closeNavDrawer();
-
-                // Hash setzen, ohne reload
-                history.replaceState(null, "", `#${encodeURIComponent(id)}`);
-
-                const target = document.getElementById(id);
-                if (!target) return;
-
-                target.scrollIntoView({behavior: "smooth", block: "start"});
-                target.focus?.({preventScroll: true});
-            });
-
-            sheetSubList.appendChild(btn);
-        }
-
-        sheetGroup.appendChild(sheetSubList);
-        navList.appendChild(sheetGroup);
-
-        // ===== Gruppe: Zauber (Link auf eigene Seite) =====
-        const spellsGroup = document.createElement("div");
-        spellsGroup.className = "navGroup";
-
-        const spellsTitle = document.createElement("button");
-        spellsTitle.type = "button";
-        spellsTitle.className = "drawer__item drawer__group";
-        spellsTitle.textContent = "Zauber";
-
-        spellsTitle.addEventListener("click", () => {
-            closeNavDrawer();
-            window.location.href = "/spell.html";
-        });
-
-        spellsGroup.appendChild(spellsTitle);
-
-        // (Unterpunkte kommen später, wenn spell.html Sections hat)
-        const spellsHint = document.createElement("div");
-        spellsHint.className = "drawer__item drawer__sub muted";
-        spellsHint.textContent = "— (Unterpunkte kommen später)";
-        spellsHint.style.cursor = "default";
-
-        spellsGroup.appendChild(spellsHint);
-        navList.appendChild(spellsGroup);
-
-        // Button in der Appbar nur zeigen, wenn wir Navigation haben
-        if (btnNavOpen) {
-            btnNavOpen.style.display = "inline-block";
-        }
-    }
 
     function showAuthPanel(show) {
         if (!authPanel) return;
@@ -307,27 +223,33 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         if (btnDelete) btnDelete.disabled = !currentCharacterId;
     }
 
+    function setDisplay(el, value) {
+        if (!el) return;
+        el.style.display = value;
+    }
+
     function setLoggedInUI(isLoggedIn) {
-        btnLogin.style.display = isLoggedIn ? "none" : "inline-block";
-        btnLogout.style.display = isLoggedIn ? "inline-block" : "none";
-        btnSave.disabled = true; // erst aktiv wenn dirty
+        setDisplay(btnLogin, isLoggedIn ? "none" : "inline-block");
+        setDisplay(btnLogout, isLoggedIn ? "inline-block" : "none");
+
+        if (btnSave) btnSave.disabled = true; // erst aktiv wenn dirty
 
         // Create/Delete nur wenn eingeloggt
         if (btnCreatePC) btnCreatePC.disabled = !isLoggedIn;
         if (btnDelete) btnDelete.disabled = !isLoggedIn || !currentCharacterId;
 
         // Drawer/Menu nur wenn eingeloggt
-        if (btnMenu) btnMenu.style.display = isLoggedIn ? "inline-block" : "none";
+        setDisplay(btnMenu, isLoggedIn ? "inline-block" : "none");
 
         // Sheet anzeigen/verstecken
         if (sheetRootEl) sheetRootEl.style.display = isLoggedIn ? "" : "none";
 
         // Actions Menu Button
-        if (btnActions) btnActions.style.display = isLoggedIn ? "inline-block" : "none";
+        setDisplay(btnActions, isLoggedIn ? "inline-block" : "none");
         if (!isLoggedIn) closeActionsMenu();
 
         // Register Button
-        if (btnRegister) btnRegister.style.display = isLoggedIn ? "none" : "inline-block";
+        setDisplay(btnRegister, isLoggedIn ? "none" : "inline-block");
         if (!isLoggedIn) showAuthPanel(false);
     }
 
@@ -360,19 +282,19 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         return Number.isFinite(v) ? v : fallback;
     }
 
-    function setVal(id, value) {
-        const el = document.getElementById(id);
-        if (!el) return;
+    /**function setVal(id, value) {
+     const el = document.getElementById(id);
+     if (!el) return;
 
-        const next = String(value);
-        if (el.value === next) return; // kein Spam
+     const next = String(value);
+     if (el.value === next) return; // kein Spam
 
-        el.value = next;
+     el.value = next;
 
-        // Wichtig: programmatic changes sollen genauso reagieren wie User-Input
-        el.dispatchEvent(new Event("input", {bubbles: true}));
-        el.dispatchEvent(new Event("change", {bubbles: true}));
-    }
+     // Wichtig: programmatic changes sollen genauso reagieren wie User-Input
+     el.dispatchEvent(new Event("input", {bubbles: true}));
+     el.dispatchEvent(new Event("change", {bubbles: true}));
+     }*/
 
     function setDerivedVal(id, value) {
         const el = document.getElementById(id);
@@ -700,7 +622,6 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         }
 
         sheetRootEl.innerHTML = await res.text();
-        buildSheetNav();
 
         // Default-Titel
         const titleEl = document.getElementById("sheetTitle");
@@ -709,6 +630,7 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         // Dirty tracking: JEDER Input im Sheet setzt dirty
         sheetRootEl.addEventListener("input", markDirty);
         sheetRootEl.addEventListener("change", markDirty);
+
         setStatus("Sheet geladen ✅");
     }
 
@@ -1075,17 +997,41 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
 
     (async function startup() {
         try {
+            const isSpellPage = location.pathname.endsWith("/spell.html");
+
+            if (isSpellPage) {
+                buildSheetNav({
+                    navList,
+                    btnNavOpen,
+                    closeNavDrawer,
+                    sheetRootEl,
+                });
+
+                scrollToHashWithRetry();
+                setLoggedInUI(!!API.token);
+                return;
+            }
+
+            // Index/Sheet-Seite:
             await loadSheetTemplateOnce();
-            buildSheetNav();
+
+            buildSheetNav({
+                navList,
+                btnNavOpen,
+                closeNavDrawer,
+                sheetRootEl,
+            });
+
             scrollToHashWithRetry();
 
             bindSkillAutoCalc();
             bindAttackAutoCalc();
 
+            // ...rest wie gehabt
+
             if (API.token) {
                 setLoggedInUI(true);
 
-                // currentUser laden (für Admin-Button etc.)
                 await refreshCurrentUserAndUI();
                 applyRoleUI();
 
@@ -1118,7 +1064,6 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
         } catch (e) {
             console.error(e);
 
-            // Token nur killen, wenn es wirklich Auth ist
             if (e?.status === 401) {
                 API.token = null;
                 setStatus("Token ungültig – bitte neu einloggen");
@@ -1129,8 +1074,10 @@ import {jsonToSheet, sheetToJson} from "./mapper.js";
             setLoggedInUI(false);
             setAdminVisible(false);
         }
+
     })();
     window.addEventListener("hashchange", () => {
         scrollToHashWithRetry();
     });
-})();
+})
+();
