@@ -240,6 +240,11 @@ import {buildSheetNav} from "/nav.js";
 
         // Drawer/Menu nur wenn eingeloggt
         setDisplay(btnMenu, isLoggedIn ? "inline-block" : "none");
+        setDisplay(btnActions, isLoggedIn ? "inline-block" : "none");
+
+        // ✅ Right-Nav-Button nur wenn eingeloggt
+        setDisplay(btnNavOpen, isLoggedIn ? "inline-block" : "none");
+        if (!isLoggedIn) closeNavDrawer?.();
 
         // Sheet anzeigen/verstecken
         if (sheetRootEl) sheetRootEl.style.display = isLoggedIn ? "" : "none";
@@ -589,49 +594,29 @@ import {buildSheetNav} from "/nav.js";
         ${ownerName ? `<span class="drawerItem__sub">${ownerName}</span>` : ``}
       `;
 
-            b.addEventListener("click", async () => {
+            b.addEventListener("click", () => {
                 setCurrentCharacter(c.id);
                 closeDrawer();
                 showAdminPanel(false);
 
-                try {
-                    await loadCharacter(c.id);
-                } catch (e) {
-                    // Character nicht sichtbar/weg: Auswahl zurücksetzen + Liste neu laden
-                    setCurrentCharacter(null);
-                    await loadCharacters();
-                    setStatus("Charakter nicht verfügbar oder kein Zugriff.");
+                const onSheet = location.pathname.endsWith("/sheet.html");
+                if (onSheet) {
+                    loadCharacter(c.id).catch(async () => {
+                        setCurrentCharacter(null);
+                        await loadCharacters();
+                        setStatus("Charakter nicht verfügbar oder kein Zugriff.");
+                    });
+                    return;
                 }
-            });
 
+                window.location.href = "/sheet.html";
+            });
             if (c.kind === "npc") listNpcs.appendChild(b);
             else listMine.appendChild(b);
         }
 
         setStatus(`Charaktere geladen: ${chars.length}`);
         return chars;
-    }
-
-    async function loadSheetTemplateOnce() {
-        if (!sheetRootEl) return;
-
-        const res = await fetch("/sheet.html");
-        if (!res.ok) {
-            sheetRootEl.innerHTML = "<p>Sheet konnte nicht geladen werden ❌</p>";
-            return;
-        }
-
-        sheetRootEl.innerHTML = await res.text();
-
-        // Default-Titel
-        const titleEl = document.getElementById("sheetTitle");
-        if (titleEl) titleEl.textContent = "Kein Charakter geladen";
-
-        // Dirty tracking: JEDER Input im Sheet setzt dirty
-        sheetRootEl.addEventListener("input", markDirty);
-        sheetRootEl.addEventListener("change", markDirty);
-
-        setStatus("Sheet geladen ✅");
     }
 
     async function loadCharacter(id) {
@@ -871,6 +856,18 @@ import {buildSheetNav} from "/nav.js";
         try {
             await API.login(username, password);
 
+// Wenn wir auf der Landing-/Index-Seite sind → direkt ins Sheet wechseln
+            const isIndexPage =
+                location.pathname === "/" ||
+                location.pathname.endsWith("/index") ||
+                location.pathname.endsWith("/index.html");
+
+            if (isIndexPage) {
+                window.location.href = "/sheet.html";
+                return;
+            }
+
+// Ab hier nur noch für sheet.html relevant
             setLoggedInUI(true);
             await refreshCurrentUserAndUI();
             applyRoleUI();
@@ -997,38 +994,52 @@ import {buildSheetNav} from "/nav.js";
 
     (async function startup() {
         try {
+            const isIndexPage =
+                location.pathname === "/" ||
+                location.pathname.endsWith("/index") ||
+                location.pathname.endsWith("/index.html");
+
+            const isSheetPage = location.pathname.endsWith("/sheet.html");
             const isSpellPage = location.pathname.endsWith("/spell.html");
 
-            if (isSpellPage) {
-                buildSheetNav({
-                    navList,
-                    btnNavOpen,
-                    closeNavDrawer,
-                    sheetRootEl,
-                });
+            // ===== Index / Landing =====
+            if (isIndexPage) {
+                setLoggedInUI(!!API.token);
 
+                // Nav wird durch nav.js Guard sowieso verborgen, aber schadet nicht:
+                buildSheetNav({navList, btnNavOpen, closeNavDrawer, sheetRootEl});
+
+                renderDrawerTitle();
+                setStatus("Willkommen 👋 Bitte einloggen.");
+                return;
+            }
+
+            // ===== Spells =====
+            if (isSpellPage) {
+                buildSheetNav({navList, btnNavOpen, closeNavDrawer, sheetRootEl});
                 scrollToHashWithRetry();
                 setLoggedInUI(!!API.token);
                 return;
             }
 
-            // Index/Sheet-Seite:
-            await loadSheetTemplateOnce();
+            // ===== Sheet =====
+            if (isSheetPage) {
+                buildSheetNav({navList, btnNavOpen, closeNavDrawer, sheetRootEl});
+                scrollToHashWithRetry();
 
-            buildSheetNav({
-                navList,
-                btnNavOpen,
-                closeNavDrawer,
-                sheetRootEl,
-            });
+                bindSkillAutoCalc();
+                bindAttackAutoCalc();
+                sheetRootEl?.addEventListener("input", markDirty);
+                sheetRootEl?.addEventListener("change", markDirty);
+                // kein return -> danach gemeinsamer Auth-Flow
+            } else {
+                // unbekannte Seite: defensiv
+                setLoggedInUI(!!API.token);
+                setStatus("Unbekannte Seite – keine Initialisierung.");
+                return;
+            }
 
-            scrollToHashWithRetry();
-
-            bindSkillAutoCalc();
-            bindAttackAutoCalc();
-
-            // ...rest wie gehabt
-
+            // ===== Gemeinsamer Auth/Character Flow (nur Sheet) =====
             if (API.token) {
                 setLoggedInUI(true);
 

@@ -1,4 +1,5 @@
-// frontend/public/nav.js
+import {NAV} from "./nav_config.js";
+
 
 function setDisplay(el, value) {
     if (!el) return;
@@ -22,122 +23,100 @@ function collectSections(scopeEl) {
     }));
 }
 
+function isCurrentPage(href) {
+    const path = window.location.pathname;
+
+    // index.html ist Landing/Login (oder Dashboard)
+    if (href === "/index.html") {
+        return path === "/" || path.endsWith("/index") || path.endsWith("/index.html");
+    }
+
+    // sheet/spell/inventory etc.
+    return path.endsWith(href);
+}
+
+function scrollToSection(id, closeNavDrawer) {
+    closeNavDrawer?.();
+    history.replaceState(null, "", `#${encodeURIComponent(id)}`);
+    const target = document.getElementById(id);
+    if (!target) return;
+    target.scrollIntoView({behavior: "smooth", block: "start"});
+    target.focus?.({preventScroll: true});
+}
+
 /**
- * Baut die rechte Navigation.
- * Übergib alles, was sie braucht, damit nav.js unabhängig bleibt.
+ * Konfig-basierte rechte Navigation.
+ * DOM-Scan ist optional: wenn aktiv, überschreibt er Labels aus NAV.
  */
 export function buildSheetNav({
                                   navList,
                                   btnNavOpen,
                                   closeNavDrawer,
                                   sheetRootEl,
+                                  enableDomScan = true, // <- optionaler Schalter
                               }) {
     if (!navList) return;
-
     navList.innerHTML = "";
 
-    // ===== Gruppe: Charakterbogen =====
-    const sheetGroup = document.createElement("div");
-    sheetGroup.className = "navGroup";
+    for (const groupCfg of NAV) {
+        const group = document.createElement("div");
+        group.className = "navGroup";
 
-    const sheetTitle = document.createElement("button");
-    sheetTitle.type = "button";
-    sheetTitle.className = "drawer__item drawer__group";
-    sheetTitle.textContent = "Charakterbogen";
-    sheetTitle.addEventListener("click", () => {
-        closeNavDrawer?.();
-        window.location.href = "/index.html";
-    });
+        const titleBtn = document.createElement("button");
+        titleBtn.type = "button";
+        titleBtn.className = "drawer__item drawer__group";
+        titleBtn.textContent = groupCfg.title;
+        titleBtn.addEventListener("click", () => {
+            closeNavDrawer?.();
+            window.location.href = groupCfg.href;
+        });
 
-    sheetGroup.appendChild(sheetTitle);
+        group.appendChild(titleBtn);
 
-    const sheetSubList = document.createElement("div");
-    sheetSubList.className = "navSubList";
+        const subList = document.createElement("div");
+        subList.className = "navSubList";
 
-    // Nur dann DOM-Sections sammeln, wenn wir sie wirklich haben
-    const onIndexPage =
-        window.location.pathname === "/" ||
-        window.location.pathname.endsWith("/index.html");
+        const onThisPage = isCurrentPage(groupCfg.href);
 
-    const sheetSections = onIndexPage ? collectSections(sheetRootEl) : [];
+        // Default: aus Config
+        let sections = groupCfg.sections.map(([id, label]) => ({id, label}));
 
-    for (const sec of sheetSections) {
-        sheetSubList.appendChild(
-            makeSubButton({
-                label: sec.label,
-                onClick: () => {
-                    closeNavDrawer?.();
-                    history.replaceState(null, "", `#${encodeURIComponent(sec.id)}`);
-                    const target = document.getElementById(sec.id);
-                    if (!target) return;
-                    target.scrollIntoView({behavior: "smooth", block: "start"});
-                    target.focus?.({preventScroll: true});
-                },
-            })
-        );
+        // Optional: DOM-Scan nur wenn wir auf der Seite sind (und Root sinnvoll)
+        if (enableDomScan && onThisPage) {
+            const scope =
+                groupCfg.key === "sheet"
+                    ? (sheetRootEl ?? document)
+                    : (document.querySelector("main.page--spells") ?? document);
+
+            const domSections = collectSections(scope);
+
+            // Wenn DOM was liefert: Labels aus DOM nehmen, Reihenfolge wie NAV behalten (Fallback: NAV)
+            if (domSections.length) {
+                const byId = new Map(domSections.map((s) => [s.id, s]));
+                sections = sections.map((s) => byId.get(s.id) ?? s);
+            }
+        }
+
+        for (const sec of sections) {
+            subList.appendChild(
+                makeSubButton({
+                    label: sec.label,
+                    onClick: () => {
+                        if (!onThisPage) {
+                            // Wenn wir NICHT auf der Seite sind: Seite + Hash laden
+                            closeNavDrawer?.();
+                            window.location.href = `${groupCfg.href}#${encodeURIComponent(sec.id)}`;
+                            return;
+                        }
+                        scrollToSection(sec.id, closeNavDrawer);
+                    },
+                })
+            );
+        }
+
+        group.appendChild(subList);
+        navList.appendChild(group);
     }
 
-    // Wenn keine Unterpunkte (z.B. auf spell.html), optionaler Hint
-    if (sheetSections.length === 0) {
-        const hint = document.createElement("div");
-        hint.className = "drawer__item drawer__sub muted";
-        hint.textContent = "—";
-        hint.style.cursor = "default";
-        sheetSubList.appendChild(hint);
-    }
-
-    sheetGroup.appendChild(sheetSubList);
-    navList.appendChild(sheetGroup);
-
-    // ===== Gruppe: Zauber =====
-    const spellsGroup = document.createElement("div");
-    spellsGroup.className = "navGroup";
-
-    const spellsTitle = document.createElement("button");
-    spellsTitle.type = "button";
-    spellsTitle.className = "drawer__item drawer__group";
-    spellsTitle.textContent = "Zauber";
-    spellsTitle.addEventListener("click", () => {
-        closeNavDrawer?.();
-        window.location.href = "/spell.html";
-    });
-
-    spellsGroup.appendChild(spellsTitle);
-
-    const spellsSubList = document.createElement("div");
-    spellsSubList.className = "navSubList";
-
-    const isSpellPage = window.location.pathname.endsWith("/spell.html");
-    const spellScope = document.querySelector("main.page--spells") || document;
-    const spellSections = isSpellPage ? collectSections(spellScope) : [];
-
-    for (const sec of spellSections) {
-        spellsSubList.appendChild(
-            makeSubButton({
-                label: sec.label,
-                onClick: () => {
-                    closeNavDrawer?.();
-                    history.replaceState(null, "", `#${encodeURIComponent(sec.id)}`);
-                    const target = document.getElementById(sec.id);
-                    if (!target) return;
-                    target.scrollIntoView({behavior: "smooth", block: "start"});
-                    target.focus?.({preventScroll: true});
-                },
-            })
-        );
-    }
-
-    if (spellSections.length === 0) {
-        const hint = document.createElement("div");
-        hint.className = "drawer__item drawer__sub muted";
-        hint.textContent = "— (Unterpunkte kommen später)";
-        hint.style.cursor = "default";
-        spellsSubList.appendChild(hint);
-    }
-
-    spellsGroup.appendChild(spellsSubList);
-    navList.appendChild(spellsGroup);
-
-    // Nav-Button sichtbar, sobald Nav existiert
     setDisplay(btnNavOpen, "inline-block");
 }

@@ -2,7 +2,7 @@ export const NAV = [
   {
     key: "sheet",
     title: "Charakterbogen",
-    href: "/index.html",
+    href: "/sheet.html",
     // “Default”-Sections, falls DOM nicht geladen / nicht vorhanden
     sections: [
       ["sec-values", "Werte"],
