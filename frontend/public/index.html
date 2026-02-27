@@ -13,12 +13,6 @@
 
     <div class="actions">
         <button id="btnActions" class="btn" aria-label="Character" style="display:none">Erstellen</button>
-        <div id="actionsMenu" class="actionsMenu" hidden>
-            <button id="btnCreatePC" class="btn" disabled>Neuer Charakter</button>
-            <button id="btnCreateNPC" class="btn" disabled>Neuer NPC</button>
-            <button id="btnSave" class="btn btn--primary" disabled>Speichern</button>
-            <button id="btnDelete" class="btn btn--danger" disabled>Charakter löschen</button>
-        </div>
     </div>
 
     <button id="btnNavOpen" class="btn" aria-label="Sheet Navigation">Nav</button>
@@ -64,6 +58,18 @@
             </button>
             <div id="listNpcs" class="drawer__list" hidden>
                 <button class="drawer__item" disabled>(noch keine Daten)</button>
+            </div>
+        </div>
+        <div class="drawer__section" id="drawerActionsSection">
+            <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
+                Aktionen
+            </button>
+
+            <div id="actionsMenu" class="actionsMenu drawer__list">
+                <button id="btnCreatePC" class="btn" disabled>Neuer Charakter</button>
+                <button id="btnCreateNPC" class="btn" disabled>Neuer NPC</button>
+                <button id="btnSave" class="btn btn--primary" disabled>Speichern</button>
+                <button id="btnDelete" class="btn btn--danger" disabled>Charakter löschen</button>
             </div>
         </div>
 

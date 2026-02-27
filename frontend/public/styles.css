@@ -193,7 +193,6 @@ html, body {
 
 .drawer.is-open {
     transform: translateX(0%);
-!important;
 }
 
 .backdrop {
@@ -481,7 +480,7 @@ html, body {
     position: relative;
 }
 
-.actionsMenu {
+.appbar .actionsMenu {
     position: absolute;
     top: calc(100% + 8px);
     left: 0;

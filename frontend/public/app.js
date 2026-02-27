@@ -48,6 +48,8 @@ import {buildSheetNav} from "/nav.js";
     const listNpcs = document.getElementById("listNpcs");
     const toggleMine = document.getElementById("toggleMine");
     const toggleNpcs = document.getElementById("toggleNpcs");
+    const toggleActions = document.getElementById("toggleActions");
+
 
     // Admin-Bereich
     const btnAdmin = document.getElementById("btnAdmin");
@@ -143,20 +145,31 @@ import {buildSheetNav} from "/nav.js";
         listEl.hidden = !open;
     }
 
-    function toggleSection(toggleBtn, listEl) {
+    function bindSectionToggle(toggleBtn, listEl, defaultOpen) {
         if (!toggleBtn || !listEl) return;
 
-        // Quelle der Wahrheit: hidden-Status der Liste
-        const openNext = listEl.hidden; // hidden=true -> als nächstes öffnen
-        setSectionOpen(toggleBtn, listEl, openNext);
+        // verhindert doppelte Bindings (passiert schnell bei Re-Init / Multi-Page / Hot Reload)
+        if (toggleBtn.dataset.bound === "1") return;
+        toggleBtn.dataset.bound = "1";
 
-        console.log("[drawer-toggle]", toggleBtn.id, "open=", openNext, "hidden=", listEl.hidden);
+        // Initialzustand
+        setSectionOpen(toggleBtn, listEl, defaultOpen);
+
+        toggleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const isOpen = toggleBtn.getAttribute("aria-expanded") === "true";
+            setSectionOpen(toggleBtn, listEl, !isOpen);
+
+            console.log("[drawer-toggle]", toggleBtn.id, "open=", !isOpen, "hidden=", listEl.hidden);
+        });
     }
 
     function openDrawer() {
         drawer?.classList.add("is-open");
         drawer?.setAttribute("aria-hidden", "false");
         if (backdrop) backdrop.hidden = false;
+
+        document.getElementById("btnCloseDrawer")?.focus();
     }
 
     function openNavDrawer() {
@@ -175,17 +188,15 @@ import {buildSheetNav} from "/nav.js";
     }
 
     function closeDrawer() {
+        // Fokus raus aus dem Drawer, BEVOR aria-hidden=true gesetzt wird
+        document.getElementById("btnMenu")?.focus();
+
         drawer?.classList.remove("is-open");
         drawer?.setAttribute("aria-hidden", "true");
         if (backdrop) backdrop.hidden = true;
     }
 
     function closeActionsMenu() {
-        if (actionsMenu) actionsMenu.hidden = true;
-    }
-
-    function toggleActionsMenu() {
-        if (actionsMenu) actionsMenu.hidden = !actionsMenu.hidden;
     }
 
     function markDirty() {
@@ -972,12 +983,11 @@ import {buildSheetNav} from "/nav.js";
     btnSave?.addEventListener("click", async () => {
         await saveCurrentCharacter({silent: false});
     });
-    // Actions Menu
-    btnActions?.addEventListener("click", (e) => {
-        e.stopPropagation();
-        toggleActionsMenu();
-    });
-    document.addEventListener("click", () => closeActionsMenu());
+
+    // Initial Drawer Sections
+    bindSectionToggle(toggleMine, listMine, true);
+    bindSectionToggle(toggleNpcs, listNpcs, false);
+    bindSectionToggle(toggleActions, actionsMenu, true);
 
     // Admin
     btnAdmin?.addEventListener("click", async () => {
