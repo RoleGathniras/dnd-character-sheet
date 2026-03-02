@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnCloseDesc = document.getElementById("btnCloseSpellDesc");
     const spellbookList = document.getElementById("spellbookList");
     const btnAddSpell = document.getElementById("btnAddSpell");
+    const spellPanelRows = document.getElementById("spellPanelRows");
+    const btnUseInPanel = document.getElementById("btnUseInPanel");
     // Details-Inputs
     const sb_name = document.getElementById("sb_name");
     const sb_time = document.getElementById("sb_time");
@@ -16,12 +18,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const sb_hit = document.getElementById("sb_hit");
     const sb_effect = document.getElementById("sb_effect");
     const sb_desc = document.getElementById("sb_desc");
+    const btnDeleteSpell = document.getElementById("btnDeleteSpell");
+    const spellDescTitle = document.getElementById("spellDescTitle");
+    const spellDescText = document.getElementById("spellDescText");
     // Defensive: wenn irgendwas fehlt, lieber ruhig bleiben.
     if (
         !tabs.length || !slotsEl || !slotsCountInput ||
         !descBox || !btnCloseDesc ||
-        !spellbookList || !btnAddSpell ||
-        !sb_name || !sb_time || !sb_range || !sb_hit || !sb_effect || !sb_desc
+        !spellbookList || !btnAddSpell || !spellPanelRows || !btnUseInPanel ||
+        !sb_name || !sb_time || !sb_range || !sb_hit || !btnDeleteSpell || !sb_effect || !spellDescTitle || !spellDescText || !sb_desc
     ) {
         console.warn("[spells.js] Missing required DOM elements. Script skipped.");
         return;
@@ -45,6 +50,11 @@ document.addEventListener("DOMContentLoaded", () => {
         "1": [], "2": [], "3": [], "4": [], "5": [],
         "6": [], "7": [], "8": [], "9": [],
     };
+    const panelSpellsByLevel = {
+        cantrip: [],
+        "1": [], "2": [], "3": [], "4": [], "5": [],
+        "6": [], "7": [], "8": [], "9": [],
+    };
 
     let selectedSpellId = null;
 
@@ -59,6 +69,19 @@ document.addEventListener("DOMContentLoaded", () => {
             desc: "",
         };
     }
+    btnDeleteSpell.addEventListener("click", () => {
+        if (!selectedSpellId) return;
+
+        const list = getSpellsFor(currentLevel);
+        const idx = list.findIndex(s => s.id === selectedSpellId);
+        if (idx === -1) return;
+
+        list.splice(idx, 1);
+        selectedSpellId = null;
+
+        renderSpellbook(currentLevel);
+        clearSpellDetails();
+    });
 
     btnAddSpell.addEventListener("click", () => {
         if (!currentLevel) return; // Safety
@@ -69,6 +92,14 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedSpellId = spell.id;
         renderSpellbook(currentLevel);
         fillSpellDetails(spell);
+    });
+    btnUseInPanel.addEventListener("click", () => {
+        const spell = getSelectedSpell(currentLevel);
+        if (!spell) return;
+
+        // id mitnehmen, damit Panel-Eintrag eindeutig bleibt
+        panelSpellsByLevel[currentLevel].push({ ...spell, id: spell.id });
+        renderPanel(currentLevel);
     });
 
     function getSpellsFor(level) {
@@ -158,12 +189,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function fillSpellDetails(spell) {
-        document.getElementById("sb_name").value = spell.name;
-        document.getElementById("sb_time").value = spell.time;
-        document.getElementById("sb_range").value = spell.range;
-        document.getElementById("sb_hit").value = spell.hit;
-        document.getElementById("sb_effect").value = spell.effect;
-        document.getElementById("sb_desc").value = spell.desc;
+        if (!spell) {
+            clearSpellDetails();
+            return;
+        }
+        sb_name.value = spell.name || "";
+        sb_time.value = spell.time || "";
+        sb_range.value = spell.range || "";
+        sb_hit.value = spell.hit || "";
+        sb_effect.value = spell.effect || "";
+        sb_desc.value = spell.desc || "";
     }
 
     function setActiveTab(level) {
@@ -176,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
             t.setAttribute("aria-selected", isActive ? "true" : "false");
             t.tabIndex = isActive ? 0 : -1; // roving tabindex
         });
-// Wenn der selektierte Spell nicht im neuen Level existiert: reset
+        // Wenn der selektierte Spell nicht im neuen Level existiert: reset
         const existsInLevel = getSpellsFor(level).some(s => s.id === selectedSpellId);
         if (!existsInLevel) selectedSpellId = null;
         // Cantrips haben keine Slots
@@ -194,11 +229,98 @@ document.addEventListener("DOMContentLoaded", () => {
 
         hideDesc();
         renderSpellbook(level);
+        renderPanel(level);
+        fillSpellDetails(getSelectedSpell(level));
 
         // später: spellbookList + panelRows nach level filtern
     }
+    function getSelectedSpell(level) {
+        if (!selectedSpellId) return null;
+        const list = getSpellsFor(level);
+        return list.find(s => s.id === selectedSpellId) || null;
+    }
+    function clearSpellDetails() {
+        sb_name.value = "";
+        sb_time.value = "";
+        sb_range.value = "";
+        sb_hit.value = "";
+        sb_effect.value = "";
+        sb_desc.value = "";
+    }
+    function renderPanel(level) {
+        const list = panelSpellsByLevel[level] ?? [];
+        spellPanelRows.innerHTML = "";
+
+        if (!list.length) {
+            spellPanelRows.innerHTML = `
+            <tr class="rowHint">
+                <td colspan="6" class="muted small">
+                    Noch leer. Zauber aus dem Zauberbuch hinzufügen.
+                </td>
+            </tr>
+        `;
+            return;
+        }
+
+        list.forEach((spell, idx) => {
+            const tr = document.createElement("tr");
+            tr.dataset.panelOpen = "1";
+            tr.dataset.panelSpellId = spell.id;
+            tr.innerHTML = `
+    <td>${spell.name || "-"}</td>
+    <td>${spell.time || "-"}</td>
+    <td>${spell.range || "-"}</td>
+    <td>${spell.hit || "-"}</td>
+    <td>${spell.effect || "-"}</td>
+    <td class="cell-actions">
+        <button type="button"
+                class="btn btn--ghost btn--mini"
+                data-panel-remove="${idx}"
+                aria-label="Zauber aus Panel entfernen">✕</button>
+    </td>
+`;
+            spellPanelRows.appendChild(tr);
+        });
+
+    }
+    function showDescFromPanelSpell(spell) {
+        spellDescTitle.textContent = spell?.name?.trim() || "Zauber";
+        spellDescText.value = spell?.desc || "";
+        descBox.classList.remove("is-hidden");
+    }
+
 
     // Events
+    function bindSpellDetailsInputs() {
+        function applyPatch(patchFn) {
+            const spell = getSelectedSpell(currentLevel);
+            if (!spell) return;
+
+            patchFn(spell);
+
+            // Liste aktualisieren (Name/active state sichtbar)
+            renderSpellbook(currentLevel);
+        }
+
+        sb_name.addEventListener("input", () => {
+            applyPatch(s => s.name = sb_name.value);
+        });
+        sb_time.addEventListener("input", () => {
+            applyPatch(s => s.time = sb_time.value);
+        });
+        sb_range.addEventListener("input", () => {
+            applyPatch(s => s.range = sb_range.value);
+        });
+        sb_hit.addEventListener("input", () => {
+            applyPatch(s => s.hit = sb_hit.value);
+        });
+        sb_effect.addEventListener("input", () => {
+            applyPatch(s => s.effect = sb_effect.value);
+        });
+        sb_desc.addEventListener("input", () => {
+            applyPatch(s => s.desc = sb_desc.value);
+        });
+    }
     tabs.forEach((t) => {
         t.addEventListener("click", () => setActiveTab(t.dataset.spellLevel));
 
@@ -218,6 +340,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnCloseDesc.addEventListener("click", hideDesc);
 
-
+    bindSpellDetailsInputs();
     setActiveTab("cantrip");
+
+    spellPanelRows.addEventListener("click", (e) => {
+        // 1) Remove-Button hat Vorrang
+        const removeBtn = e.target.closest("[data-panel-remove]");
+        if (removeBtn) {
+            const idx = Number(removeBtn.dataset.panelRemove);
+            const list = panelSpellsByLevel[currentLevel] ?? [];
+            if (!Number.isInteger(idx) || idx < 0 || idx >= list.length) return;
+
+            list.splice(idx, 1);
+            renderPanel(currentLevel);
+            hideDesc(); // optional: Beschreibung schließen, falls offen
+            return;
+        }
+
+        // 2) Klick auf Zeile öffnet Beschreibung
+        const row = e.target.closest("tr[data-panel-open='1']");
+        if (!row) return;
+
+        const id = row.dataset.panelSpellId;
+        const list = panelSpellsByLevel[currentLevel] ?? [];
+        const spell = list.find(s => s.id === id);
+        if (!spell) return;
+
+        showDescFromPanelSpell(spell);
+    });
+
 });
