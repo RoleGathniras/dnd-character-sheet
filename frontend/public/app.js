@@ -224,13 +224,15 @@ import { buildSheetNav } from "/nav.js";
 
         if (currentCharacterId) {
             localStorage.setItem("dnd_current_character_id", String(currentCharacterId));
+
+            // Alias für andere Seiten/Module (z.B. spells.js)
+            localStorage.setItem("selectedCharacterId", String(currentCharacterId));
         } else {
             localStorage.removeItem("dnd_current_character_id");
+            localStorage.removeItem("selectedCharacterId");
         }
 
         btnSave.disabled = true;
-
-        // Delete nur wenn Character ausgewählt
         if (btnDelete) btnDelete.disabled = !currentCharacterId;
     }
 
@@ -1013,14 +1015,20 @@ import { buildSheetNav } from "/nav.js";
             const isSpellPage = location.pathname.endsWith("/spell.html");
 
             // ===== Index / Landing =====
-            if (isIndexPage) {
+            if (isSpellPage) {
+                buildSheetNav({ navList, btnNavOpen, closeNavDrawer, sheetRootEl });
+                scrollToHashWithRetry();
                 setLoggedInUI(!!API.token);
 
-                // Nav wird durch nav.js Guard sowieso verborgen, aber schadet nicht:
-                buildSheetNav({ navList, btnNavOpen, closeNavDrawer, sheetRootEl });
+                const cid =
+                    localStorage.getItem("dnd_current_character_id") ||
+                    localStorage.getItem("selectedCharacterId");
 
-                renderDrawerTitle();
-                setStatus("Willkommen 👋 Bitte einloggen.");
+                console.log("[spell] current character id =", cid);
+
+                if (!cid) {
+                    setStatus?.("Kein Charakter gewählt – bitte erst im Sheet auswählen.");
+                }
                 return;
             }
 
