@@ -1,6 +1,7 @@
 // frontend/public/spells.js
 // UI-only: Spell Tabs + Slots + Spellbook + Panel + Description (In-Memory)
-import { API } from "./api.js";
+import {API} from "./api.js";
+
 document.addEventListener("DOMContentLoaded", () => {
     // 0 DOM: Welche HTML-Elemente benutzt werden
     const tabs = [...document.querySelectorAll(".tab[data-spell-level]")];
@@ -29,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const sb_effect = document.getElementById("sb_effect");
     const sb_desc = document.getElementById("sb_desc");
 
-    // Defensive: wenn irgendwas fehlt, lieber ruhig bleiben.
+    // Defensive
     if (
         !tabs.length ||
         !slotsEl ||
@@ -70,186 +71,13 @@ document.addEventListener("DOMContentLoaded", () => {
             spells[lvl] = [];
             panel[lvl] = [];
         }
-        return { v: 1, slotCountsByLevel: slotCounts, slotUsedByLevel: slotUsed, spellsByLevel: spells, panelSpellsByLevel: panel };
-    }
-
-    function toPersist() {
-        const slotUsedObj = {};
-        for (const lvl of LEVELS) {
-            slotUsedObj[lvl] = [...(slotUsedByLevel[lvl] ?? new Set())].sort((a, b) => a - b);
-        }
         return {
             v: 1,
-            slotCountsByLevel: { ...slotCountsByLevel },
-            slotUsedByLevel: slotUsedObj,
-            spellsByLevel: structuredClone(spellsByLevel),
-            panelSpellsByLevel: structuredClone(panelSpellsByLevel),
+            slotCountsByLevel: slotCounts,
+            slotUsedByLevel: slotUsed,
+            spellsByLevel: spells,
+            panelSpellsByLevel: panel
         };
-    }
-
-    function applyPersist(persist) {
-        const p = persist && typeof persist === "object" ? persist : emptyPersistSpells();
-
-        for (const lvl of LEVELS) {
-            slotCountsByLevel[lvl] = Math.max(0, Number(p.slotCountsByLevel?.[lvl] ?? 0));
-
-            const usedArr = Array.isArray(p.slotUsedByLevel?.[lvl]) ? p.slotUsedByLevel[lvl] : [];
-            slotUsedByLevel[lvl] = new Set(usedArr.map(Number).filter(Number.isFinite));
-
-            spellsByLevel[lvl] = Array.isArray(p.spellsByLevel?.[lvl]) ? p.spellsByLevel[lvl] : [];
-            panelSpellsByLevel[lvl] = Array.isArray(p.panelSpellsByLevel?.[lvl]) ? p.panelSpellsByLevel[lvl] : [];
-        }
-    }
-
-    // Minimal API helper (self-contained)
-    const API_BASE = "/api";
-    function getToken() {
-        return localStorage.getItem("token") || localStorage.getItem("access_token") || "";
-    }
-    function getSelectedCharacterId() {
-        return (
-            localStorage.getItem("selectedCharacterId") ||
-            localStorage.getItem("lastCharacterId") ||
-            localStorage.getItem("last_selected_character_id") ||
-            ""
-        );
-    }
-
-    async function apiFetch(path, { method = "GET", body = null } = {}) {
-        const token = getToken();
-        const headers = { "Content-Type": "application/json" };
-        if (token) headers["Authorization"] = `Bearer ${token}`;
-
-        const res = await fetch(`${API_BASE}${path}`, {
-            method,
-            headers,
-            body: body ? JSON.stringify(body) : null,
-        });
-
-        let data = null;
-        const ct = res.headers.get("content-type") || "";
-        if (ct.includes("application/json")) data = await res.json().catch(() => null);
-
-        if (!res.ok) {
-            const err = new Error(data?.detail || `HTTP ${res.status}`);
-            err.status = res.status;
-            err.data = data;
-            throw err;
-        }
-        return data;
-    }
-
-    // Character cache for optimistic locking
-    let currentCharacter = null; // { id, data, updated_at, ... }
-    let saveTimer = null;
-    let isSaving = false;
-    let pendingSave = false;
-
-    function writeStateIntoCharacter() {
-        if (!currentCharacter) return;
-        currentCharacter.data = currentCharacter.data && typeof currentCharacter.data === "object" ? currentCharacter.data : {};
-        currentCharacter.data.spells = toPersist();
-    }
-
-    function markDirtyAndScheduleSave() {
-        writeStateIntoCharacter();
-        pendingSave = true;
-
-        if (saveTimer) clearTimeout(saveTimer);
-        saveTimer = setTimeout(() => {
-            void saveNow();
-        }, 650);
-    }
-
-    async function loadCharacterAndHydrate() {
-        const id = getSelectedCharacterId();
-        if (!id) {
-            console.warn("[spells.js] No selected character id in localStorage. Running in-memory only.");
-            applyPersist(emptyPersistSpells());
-            return;
-        }
-
-        try {
-            // Character laden (API nutzt dnd_token automatisch)
-            const c = await API.getCharacter(Number(id));
-
-            // optional: wenn du beide Caches behalten willst
-            currentCharacter = c;
-            boundCharacter = c;
-
-            const persist = c?.data?.spells ?? emptyPersistSpells();
-            applyPersist(persist);
-        } catch (e) {
-            console.error("[spells.js] Failed to load character. Running in-memory only.", e);
-            applyPersist(emptyPersistSpells());
-        }
-    }
-
-    async function patchCharacter(payload) {
-        // Erwartet: Backend nutzt updated_at für optimistic locking
-        // => wir schicken updated_at mit, und bei 409 reload + retry 1x.
-        const id = currentCharacter?.id;
-        if (!id) return;
-
-        return apiFetch(`/characters/${encodeURIComponent(id)}`, {
-            method: "PATCH",
-            body: payload,
-        });
-    }
-
-    async function saveNow() {
-        if (!currentCharacter) return;
-        if (!pendingSave) return;
-        if (isSaving) return;
-
-        isSaving = true;
-        pendingSave = false;
-
-        try {
-            // state -> character.data.spells
-            writeStateIntoCharacter();
-
-            const payload = {
-                updated_at: currentCharacter.updated_at,
-                data: currentCharacter.data,
-            };
-
-            const updated = await patchCharacter(payload);
-            currentCharacter = updated; // updated_at refresh
-        } catch (e) {
-            if (e?.status === 409) {
-                // Konflikt: reload, client wins (spells), retry einmal
-                try {
-                    const id = currentCharacter?.id;
-                    const latest = await apiFetch(`/characters/${encodeURIComponent(id)}`);
-
-                    // merge: wir behalten unsere spells, übernehmen den Rest vom Server
-                    const mySpells = toPersist();
-                    currentCharacter = latest;
-                    currentCharacter.data = currentCharacter.data && typeof currentCharacter.data === "object" ? currentCharacter.data : {};
-                    currentCharacter.data.spells = mySpells;
-
-                    const payload2 = {
-                        updated_at: currentCharacter.updated_at,
-                        data: currentCharacter.data,
-                    };
-
-                    const updated2 = await patchCharacter(payload2);
-                    currentCharacter = updated2;
-                } catch (e2) {
-                    console.error("[spells.js] Save failed after 409 retry.", e2);
-                }
-            } else {
-                console.error("[spells.js] Save failed.", e);
-            }
-        } finally {
-            isSaving = false;
-            // falls während save Änderungen kamen
-            if (pendingSave) {
-                if (saveTimer) clearTimeout(saveTimer);
-                saveTimer = setTimeout(() => void saveNow(), 400);
-            }
-        }
     }
 
     // 1 State: Welche Variablen den Zustand definieren
@@ -310,6 +138,155 @@ document.addEventListener("DOMContentLoaded", () => {
         "8": [],
         "9": [],
     };
+
+    function applyPersist(persist) {
+        const p = persist && typeof persist === "object" ? persist : emptyPersistSpells();
+
+        for (const lvl of LEVELS) {
+            slotCountsByLevel[lvl] = Math.max(0, Number(p.slotCountsByLevel?.[lvl] ?? 0));
+
+            const usedArr = Array.isArray(p.slotUsedByLevel?.[lvl]) ? p.slotUsedByLevel[lvl] : [];
+            slotUsedByLevel[lvl] = new Set(usedArr.map(Number).filter(Number.isFinite));
+
+            spellsByLevel[lvl] = Array.isArray(p.spellsByLevel?.[lvl]) ? p.spellsByLevel[lvl] : [];
+            panelSpellsByLevel[lvl] = Array.isArray(p.panelSpellsByLevel?.[lvl]) ? p.panelSpellsByLevel[lvl] : [];
+        }
+    }
+
+    function toPersist() {
+        const slotUsedObj = {};
+        for (const lvl of LEVELS) {
+            slotUsedObj[lvl] = [...(slotUsedByLevel[lvl] ?? new Set())].sort((a, b) => a - b);
+        }
+        return {
+            v: 1,
+            slotCountsByLevel: {...slotCountsByLevel},
+            slotUsedByLevel: slotUsedObj,
+            spellsByLevel: structuredClone(spellsByLevel),
+            panelSpellsByLevel: structuredClone(panelSpellsByLevel),
+        };
+    }
+
+
+    function getSelectedCharacterId() {
+        return (
+            localStorage.getItem("dnd_current_character_id") ||
+            localStorage.getItem("selectedCharacterId") ||
+            ""
+        );
+    }
+
+
+    // Character cache for optimistic locking
+    let currentCharacter = null; // { id, data, updated_at, ... }
+    let saveTimer = null;
+    let isSaving = false;
+    let pendingSave = false;
+    let boundCharacter = null;
+
+// Debug-Expose (nur Dev)
+    window.__spellDebug = {
+        get currentCharacter() {
+            return currentCharacter;
+        },
+        get boundCharacter() {
+            return boundCharacter;
+        },
+        toPersist,
+    };
+
+    function writeStateIntoCharacter() {
+        if (!currentCharacter) return;
+        currentCharacter.data = currentCharacter.data && typeof currentCharacter.data === "object" ? currentCharacter.data : {};
+        currentCharacter.data.spells = toPersist();
+    }
+
+    function markDirtyAndScheduleSave() {
+        writeStateIntoCharacter();
+        pendingSave = true;
+
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+            //void saveNow();//
+        }, 650);
+    }
+
+    async function loadCharacterAndHydrate() {
+        const id = getSelectedCharacterId();
+        if (!id) {
+            console.warn("[spells.js] No selected character id in localStorage. Running in-memory only.");
+            applyPersist(emptyPersistSpells());
+            return;
+        }
+
+        try {
+            const c = await API.getCharacter(Number(id));
+            currentCharacter = c;
+            boundCharacter = c;
+
+            const persist = c?.data?.spells ?? emptyPersistSpells();
+            applyPersist(persist);
+        } catch (e) {
+            console.error("[spells.js] Failed to load character. Running in-memory only.", e);
+            applyPersist(emptyPersistSpells());
+        }
+    }
+
+    async function saveNow() {
+        if (!currentCharacter) return;
+        if (!pendingSave) return;
+        if (isSaving) return;
+
+        isSaving = true;
+        pendingSave = false;
+
+        try {
+            // state -> character.data.spells
+            writeStateIntoCharacter();
+
+            const payload = {
+                updated_at: currentCharacter.updated_at,
+                data: currentCharacter.data,
+            };
+
+            const updated = await patchCharacter(payload);
+            currentCharacter = updated; // updated_at refresh
+        } catch (e) {
+            if (e?.status === 409) {
+                // Konflikt: reload, client wins (spells), retry einmal
+                try {
+                    const id = currentCharacter?.id;
+                    const latest = await apiFetch(`/characters/${encodeURIComponent(id)}`);
+
+                    // merge: wir behalten unsere spells, übernehmen den Rest vom Server
+                    const mySpells = toPersist();
+                    currentCharacter = latest;
+                    currentCharacter.data = currentCharacter.data && typeof currentCharacter.data === "object" ? currentCharacter.data : {};
+                    currentCharacter.data.spells = mySpells;
+
+                    const payload2 = {
+                        updated_at: currentCharacter.updated_at,
+                        data: currentCharacter.data,
+                    };
+
+                    const updated2 = await patchCharacter(payload2);
+                    currentCharacter = updated2;
+                } catch (e2) {
+                    console.error("[spells.js] Save failed after 409 retry.", e2);
+                }
+            } else {
+                console.error("[spells.js] Save failed.", e);
+            }
+        } finally {
+            isSaving = false;
+            // falls während save Änderungen kamen
+            if (pendingSave) {
+                if (saveTimer) clearTimeout(saveTimer);
+                saveTimer = setTimeout(() => void saveNow(), 400);
+            }
+        }
+    }
+
 
     // 2 UI/Helper: Reine Anzeige/kleine Tools
     function createEmptySpell() {
@@ -482,89 +459,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 2a Derived Calculations
-    // (aktuell keine derived calculations für spells)
-
-    // -----------------------------------------
-    // 3 Characters: Bind spells to selected character (NO SAVE YET)
-    // -----------------------------------------
-
-    function emptyPersistSpells() {
-        const slotCountsByLevel = {};
-        const slotUsedByLevel = {};
-        const spellsByLevelPersist = {};
-        const panelSpellsByLevelPersist = {};
-
-        for (const lvl of LEVELS) {
-            slotCountsByLevel[lvl] = 0;
-            slotUsedByLevel[lvl] = [];
-            spellsByLevelPersist[lvl] = [];
-            panelSpellsByLevelPersist[lvl] = [];
-        }
-
-        return {
-            v: 1,
-            slotCountsByLevel,
-            slotUsedByLevel,
-            spellsByLevel: spellsByLevelPersist,
-            panelSpellsByLevel: panelSpellsByLevelPersist,
-        };
-    }
-
-    function applyPersist(persist) {
-        const p = persist && typeof persist === "object" ? persist : emptyPersistSpells();
-
-        for (const lvl of LEVELS) {
-            slotCountsByLevel[lvl] = Math.max(0, Number(p.slotCountsByLevel?.[lvl] ?? 0));
-
-            const usedArr = Array.isArray(p.slotUsedByLevel?.[lvl]) ? p.slotUsedByLevel[lvl] : [];
-            slotUsedByLevel[lvl] = new Set(usedArr.map(Number).filter(Number.isFinite));
-
-            spellsByLevel[lvl] = Array.isArray(p.spellsByLevel?.[lvl]) ? p.spellsByLevel[lvl] : [];
-            panelSpellsByLevel[lvl] = Array.isArray(p.panelSpellsByLevel?.[lvl]) ? p.panelSpellsByLevel[lvl] : [];
-        }
-    }
-
-    function toPersist() {
-        const usedObj = {};
-        for (const lvl of LEVELS) {
-            usedObj[lvl] = [...(slotUsedByLevel[lvl] ?? new Set())].sort((a, b) => a - b);
-        }
-        return {
-            v: 1,
-            slotCountsByLevel: { ...slotCountsByLevel },
-            slotUsedByLevel: usedObj,
-            spellsByLevel: structuredClone(spellsByLevel),
-            panelSpellsByLevel: structuredClone(panelSpellsByLevel),
-        };
-    }
-    function applyPersist(persist) {
-        const p = persist && typeof persist === "object" ? persist : emptyPersistSpells();
-
-        for (const lvl of LEVELS) {
-            // Counts
-            slotCountsByLevel[lvl] = Math.max(0, Number(p.slotCountsByLevel?.[lvl] ?? 0));
-
-            // Used (Array -> Set)
-            const usedArr = Array.isArray(p.slotUsedByLevel?.[lvl]) ? p.slotUsedByLevel[lvl] : [];
-            slotUsedByLevel[lvl] = new Set(usedArr.map(Number).filter(Number.isFinite));
-
-            // Spellbook + Panel
-            spellsByLevel[lvl] = Array.isArray(p.spellsByLevel?.[lvl]) ? p.spellsByLevel[lvl] : [];
-            panelSpellsByLevel[lvl] = Array.isArray(p.panelSpellsByLevel?.[lvl]) ? p.panelSpellsByLevel[lvl] : [];
-        }
-    }
-
-
-    // Character cache (only for binding right now)
-    let boundCharacter = null;
-
-    function writeBackToCharacterData() {
-        if (!boundCharacter) return;
-        boundCharacter.data = boundCharacter.data && typeof boundCharacter.data === "object" ? boundCharacter.data : {};
-        boundCharacter.data.spells = toPersist();
-    }
-
     function writeBackToCharacterData() {
         if (!boundCharacter) return;
         boundCharacter.data = boundCharacter.data && typeof boundCharacter.data === "object" ? boundCharacter.data : {};
@@ -665,7 +559,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!spell) return;
 
             // id mitnehmen, damit Panel-Eintrag eindeutig bleibt
-            panelSpellsByLevel[currentLevel].push({ ...spell, id: spell.id });
+            panelSpellsByLevel[currentLevel].push({...spell, id: spell.id});
             renderPanel(currentLevel);
             writeBackToCharacterData();
             markDirtyAndScheduleSave();
