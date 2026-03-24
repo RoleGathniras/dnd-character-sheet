@@ -5,18 +5,13 @@ import {API} from "./api.js";
 document.addEventListener("DOMContentLoaded", () => {
     // 0 DOM: Welche HTML-Elemente benutzt werden
     const tabs = [...document.querySelectorAll(".tab[data-spell-level]")];
-
     const slotsEl = document.getElementById("spellSlots");
     const slotsCountInput = document.getElementById("spellSlotsCountInput");
-
     const spellbookList = document.getElementById("spellbookList");
     const btnAddSpell = document.getElementById("btnAddSpell");
-
     const spellPanelRows = document.getElementById("spellPanelRows");
     const btnUseInPanel = document.getElementById("btnUseInPanel");
-
     const btnDeleteSpell = document.getElementById("btnDeleteSpell");
-
     const descBox = document.getElementById("spellDescriptionBox");
     const btnCloseDesc = document.getElementById("btnCloseSpellDesc");
     const spellDescTitle = document.getElementById("spellDescTitle");
@@ -29,6 +24,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const sb_hit = document.getElementById("sb_hit");
     const sb_effect = document.getElementById("sb_effect");
     const sb_desc = document.getElementById("sb_desc");
+
+    // Charakter Drawer
+    const btnMenu = document.getElementById("btnMenu");
+    const drawer = document.getElementById("drawer");
+    const backdrop = document.getElementById("backdrop");
+    const btnCloseDrawer = document.getElementById("btnCloseDrawer");
+    const listMine = document.getElementById("listMine");
+    const listNpcs = document.getElementById("listNpcs");
+    const drawerActionsSection = document.getElementById("drawerActionsSection");
+    const btnAdmin = document.getElementById("btnAdmin");
 
     // Defensive
     if (
@@ -50,10 +55,21 @@ document.addEventListener("DOMContentLoaded", () => {
         !sb_hit ||
         !sb_effect ||
         !sb_desc
+
+        !btnMenu ||
+        !drawer ||
+        !backdrop ||
+        !btnCloseDrawer ||
+        !listMine ||
+        !listNpcs ||
+        !drawerActionsSection ||
+        !btnAdmin
     ) {
         console.warn("[spells.js] Missing required DOM elements. Script skipped.");
         return;
     }
+    drawerActionsSection.hidden = true;
+    btnAdmin.hidden = true;
     // ----------------------------
     // Character Binding + Persist
     // ----------------------------
@@ -576,12 +592,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const spell = getSelectedSpell(currentLevel);
             if (!spell) return;
 
-            // id mitnehmen, damit Panel-Eintrag eindeutig bleibt
-            panelSpellsByLevel[currentLevel].push({...spell, id: spell.id});
+            const list = panelSpellsByLevel[currentLevel];
+            if (list.some(s => s.id === spell.id)) return; // schon drin
+
+            list.push({ ...spell, id: spell.id });
             renderPanel(currentLevel);
             writeBackToCharacterData();
             markDirtyAndScheduleSave();
-        });
+          });
     }
 
     function bindPanelClick() {
@@ -647,6 +665,59 @@ document.addEventListener("DOMContentLoaded", () => {
         renderPanel(level);
         fillSpellDetails(getSelectedSpell(level));
     }
+    async function loadCharactersForDrawer() {
+        listMine.innerHTML = "";
+        listNpcs.innerHTML = "";
+
+        let chars = [];
+        try {
+            chars = await API.characters();
+        } catch (e) {
+            console.warn("[spells.js] Failed to load characters", e);
+            return;
+        }
+
+        const currentId = Number(localStorage.getItem("selectedCharacterId"));
+
+        for (const c of chars) {
+            const b = document.createElement("button");
+            b.className = "drawer__item";
+
+            if (Number(c.id) === currentId) {
+                b.classList.add("is-active");
+            }
+
+            const name = c.name ?? "";
+            const kind = (c.kind ?? "").toUpperCase();
+            const owner = c.owner_username ?? "";
+
+            b.innerHTML = `
+                <span class="drawerItem__main">
+                    <span class="drawerItem__name">${name}</span>
+                    <span class="drawerItem__kind">${kind}</span>
+                </span>
+                ${owner ? `<span class="drawerItem__sub">${owner}</span>` : ``}
+            `;
+
+            b.addEventListener("click", async () => {
+                setSelectedCharacterId(c.id);
+                closeDrawer();
+                await loadCharacterAndHydrate();
+            });
+
+            if (c.kind === "npc") listNpcs.appendChild(b);
+            else listMine.appendChild(b);
+        }
+    }
+    function setSelectedCharacterId(id) {
+    if (id) {
+        localStorage.setItem("dnd_current_character_id", String(id));
+        localStorage.setItem("selectedCharacterId", String(id));
+    } else {
+        localStorage.removeItem("dnd_current_character_id");
+        localStorage.removeItem("selectedCharacterId");
+    }
+}
 
     async function startup() {
         bindSpellDetailsInputs();

@@ -20,6 +20,51 @@
     </div>
 </header>
 
+<!-- Drawer -->
+<div id="drawer" class="drawer" aria-hidden="true">
+    <div class="drawer__header">
+        <strong id="drawerUserTitle">Charaktere</strong>
+        <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+    </div>
+
+    <div class="drawer__content">
+        <div class="drawer__section">
+            <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
+                Charaktere
+            </button>
+            <div id="listMine" class="drawer__list">
+                <button class="drawer__item" disabled>(noch keine Daten)</button>
+            </div>
+        </div>
+
+        <div class="drawer__section">
+            <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
+                NPCs
+            </button>
+            <div id="listNpcs" class="drawer__list" hidden>
+                <button class="drawer__item" disabled>(noch keine Daten)</button>
+            </div>
+        </div>
+
+        <div class="drawer__section" id="drawerActionsSection" hidden>
+            <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
+                Aktionen
+            </button>
+
+            <div id="actionsMenu" class="actionsMenu drawer__list" hidden>
+                <button id="btnCreatePC" class="btn drawer__item" disabled hidden>Neuer Charakter</button>
+                <button id="btnCreateNPC" class="btn drawer__item" disabled hidden>Neuer NPC</button>
+                <button id="btnSave" class="btn btn--primary drawer__item" disabled hidden>Speichern</button>
+                <button id="btnDelete" class="btn btn--danger drawer__item" disabled hidden>Charakter löschen</button>
+            </div>
+        </div>
+
+        <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
+    </div>
+</div>
+
+<div id="backdrop" class="backdrop" hidden></div>
+
 <main class="page page--spells">
     <!-- Zauberangriffe -->
     <section id="sec-spell-attacks" data-nav-label="Zauberangriffe">
