@@ -74,7 +74,6 @@
                 <div class="card__header">
                     <div>
                         <div class="h2">Zauberangriffe</div>
-                        <div class="muted small">Wie dein Angriffspanel – nur mit mehr Magie und weniger Ausreden.</div>
                     </div>
 
                     <div class="row gap">
@@ -129,7 +128,6 @@
                         <div class="slotsBar__left">
                             <div class="h3">Zauberslots</div>
                             <div class="muted small">
-                                Anzahl kommt später aus dem Zauberbuch (Slots pro Grad). Hier erstmal UI.
                             </div>
                         </div>
 
@@ -150,7 +148,6 @@
                 <div class="card__header">
                     <div>
                         <div class="h2">Zauberpanel</div>
-                        <div class="muted small">Deine “bereit zum Wirken”-Liste pro Grad.</div>
                     </div>
                 </div>
 
@@ -159,18 +156,18 @@
                         <table class="table table--spells" aria-label="Zauberpanel">
                             <thead>
                                 <tr>
-                                    <th style="width: 30%;">Zauber (Name)</th>
+                                    <th style="width: 24%;">Zauber (Name)</th>
                                     <th style="width: 12%;">Zeit</th>
-                                    <th style="width: 14%;">Reichweite</th>
+                                    <th style="width: 12%;">Reichweite</th>
                                     <th style="width: 12%;">Trefferwert</th>
-                                    <th style="width: 1%;">Aktion</th>
-                                    <th>Effekt</th>
+                                    <th style="width: 10%;">Art</th>
+                                    <th style="width: 24%;">Effekt</th>
+                                    <th style="width: 48px;"></th>
                                 </tr>
                             </thead>
                             <tbody id="spellPanelRows">
                                 <tr class="rowHint">
-                                    <td colspan="6" class="muted small">
-                                        Noch leer. Zauber aus Zauberbuch hinzufügen.
+                                    <td colspan="7" class="muted small">
                                     </td>
                                 </tr>
                             </tbody>
@@ -191,7 +188,7 @@
             </section>
         </section>
 
-        <!-- Zauberbuch + Detail (unten, 2 Spalten) -->Effekt
+        <!-- Zauberbuch + Detail (unten, 2 Spalten) -->
         <section class="grid2">
             <!-- Zauberbuch Liste -->
             <section id="sec-spellbook" data-nav-label="Zauberbuch">
@@ -259,11 +256,13 @@
                                 <span class="label">Trefferwert</span>
                                 <input id="sb_hit" type="text" placeholder="z.B. +7 / Rettungswurf" />
                             </label>
-
+                            <label>
+                                <span>Art</span>
+                                <input id="sb_kind" type="text" placeholder="z.B. Aktion / Bonusaktion / Ritual" />
+                            </label>
                             <label class="field field--full">
                                 <span class="label">Effekt (kurz)</span>
-                                <input id="sb_effect" type="text"
-                                    placeholder="Kurzbeschreibung für Panel-Spalte Effekt" />
+                                <input id="sb_effect" type="text" placeholder="z.B. Brennend" />
                             </label>
 
                             <label class="field field--full">
@@ -272,10 +271,6 @@
                             </label>
                         </div>
 
-                        <div class="muted small">
-                            Hinweis: In der echten Version wird “Beschreibung” beim Klick auf den Zaubernamen im Panel
-                            angezeigt.
-                        </div>
                     </div>
                 </section>
             </section>
@@ -297,4 +292,4 @@
     <script type="module" src="/spells.js"></script>
 </body>
 
-</html> 12
+</html>

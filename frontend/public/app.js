@@ -545,6 +545,13 @@ import { buildSheetNav } from "/nav.js";
 
         recalcAttacks();
     }
+    function toggleSection(toggleBtn, sectionEl) {
+        if (!toggleBtn || !sectionEl) return;
+
+        const willOpen = sectionEl.hidden;
+        sectionEl.hidden = !willOpen;
+        toggleBtn.setAttribute("aria-expanded", String(willOpen));
+    }
 
 
     // ============================================================

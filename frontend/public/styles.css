@@ -36,7 +36,8 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     background: var(--bg);
@@ -116,7 +117,8 @@ html, body {
     cursor: pointer;
 }
 
-.btn:hover, .select:hover {
+.btn:hover,
+.select:hover {
     border-color: var(--borderStrong);
 }
 
@@ -236,13 +238,15 @@ html, body {
 }
 
 .drawer__toggle::after {
-    content: "\25BE"; /* ▾ */
+    content: "\25BE";
+    /* ▾ */
     float: right;
     opacity: .8;
 }
 
 .drawer__toggle[aria-expanded="false"]::after {
-    content: "\25B8"; /* ▸ */
+    content: "\25B8";
+    /* ▸ */
 }
 
 .drawer__list[hidden] {
@@ -639,8 +643,8 @@ html, body {
 
     /* 2 Zeilen, sauber zugewiesen */
     grid-template-areas:
-    "insp pb init speed"
-    "ac   hpmax hpcur hptemp";
+        "insp pb init speed"
+        "ac   hpmax hpcur hptemp";
 }
 
 /* Blöcke und Felder in die Areas mappen */
@@ -720,7 +724,7 @@ html, body {
 }
 
 /* Ability score input: space for MOD badge */
-.abilityCard > input[type="number"] {
+.abilityCard>input[type="number"] {
     padding-right: 120px;
 }
 
@@ -728,7 +732,8 @@ html, body {
 .modBadge {
     position: absolute;
     right: 12px;
-    bottom: 12px; /* Abstand zum unteren Rand der abilityCard */
+    bottom: 12px;
+    /* Abstand zum unteren Rand der abilityCard */
 
     width: 96px;
     padding: 8px;
@@ -947,32 +952,39 @@ html, body {
 .attacksRowGrid {
     display: grid;
     grid-template-columns:
-    2.2fr   /* Angriffsart */
-    0.9fr   /* Attr */
-    1.1fr   /* geübt Toggle */
-    0.8fr   /* Bonus */
-    0.8fr   /* ATK */
-    1.2fr   /* Reichweite */
-    2.2fr; /* Schaden */
+        2.2fr
+        /* Angriffsart */
+        0.9fr
+        /* Attr */
+        1.1fr
+        /* geübt Toggle */
+        0.8fr
+        /* Bonus */
+        0.8fr
+        /* ATK */
+        1.2fr
+        /* Reichweite */
+        2.2fr;
+    /* Schaden */
     gap: 10px;
     align-items: center;
 }
 
 /* Angriffsart */
-.attacksRowGrid > :nth-child(1) {
+.attacksRowGrid> :nth-child(1) {
     font-weight: 600;
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(122, 162, 255, 0.35);
 }
 
 /* Schaden */
-.attacksRowGrid > :nth-child(7) {
+.attacksRowGrid> :nth-child(7) {
     font-weight: 600;
     background: rgba(255, 255, 255, .08);
     border-color: rgba(255, 80, 80, 0.35);
 }
 
-.attacksRowGrid > * {
+.attacksRowGrid>* {
     min-width: 0;
 }
 
@@ -997,7 +1009,8 @@ html, body {
 
 .atkProf span:last-child {
     position: relative;
-    top: -10px; /* 3–6px testen */
+    top: -10px;
+    /* 3–6px testen */
 }
 
 /* Native Checkbox unsichtbar, aber fokussierbar */
@@ -1085,7 +1098,8 @@ html, body {
     color: var(--text);
 
     outline: none;
-    appearance: none; /* gleiche Optik */
+    appearance: none;
+    /* gleiche Optik */
     -webkit-appearance: none;
     -moz-appearance: none;
 }
@@ -1094,9 +1108,9 @@ html, body {
 .attacksRow select,
 .attacksRowGrid select {
     background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
-    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
     background-position: calc(100% - 18px) 50%,
-    calc(100% - 12px) 50%;
+        calc(100% - 12px) 50%;
     background-size: 6px 6px, 6px 6px;
     background-repeat: no-repeat;
     padding-right: 34px;
@@ -1149,38 +1163,38 @@ html, body {
     }
 
     /* 1) Angriffsart volle Breite */
-    .attacksRowGrid > :where([id$="_type"]) {
+    .attacksRowGrid> :where([id$="_type"]) {
         grid-column: 1 / -1;
     }
 
     /* 2) abil | prof | misc | range */
-    .attacksRowGrid > :where([id$="_abil"]) {
+    .attacksRowGrid> :where([id$="_abil"]) {
         grid-column: 1 / 2;
     }
 
-    .attacksRowGrid > :where([id$="_prof"]) {
+    .attacksRowGrid> :where([id$="_prof"]) {
         grid-column: 2 / 3;
     }
 
-    .attacksRowGrid > :where([id$="_misc"]) {
+    .attacksRowGrid> :where([id$="_misc"]) {
         grid-column: 3 / 4;
     }
 
-    .attacksRowGrid > :where([id$="_range"]) {
+    .attacksRowGrid> :where([id$="_range"]) {
         grid-column: 4 / 5;
     }
 
     /* 3) ATK + Schaden */
-    .attacksRowGrid > :where([id$="_bonus"]) {
+    .attacksRowGrid> :where([id$="_bonus"]) {
         grid-column: 1 / 2;
     }
 
-    .attacksRowGrid > :where([id$="_damage"]) {
+    .attacksRowGrid> :where([id$="_damage"]) {
         grid-column: 1 / -1;
     }
 
     /* vorher hattest du margin-bottom am damage – das killt dir die Box-Optik */
-    .attacksRowGrid > :where([id$="_damage"]) {
+    .attacksRowGrid> :where([id$="_damage"]) {
         margin-bottom: 0;
     }
 }
@@ -1235,10 +1249,10 @@ html, body {
         align-items: start;
 
         grid-template-areas:
-      "insp  ac"
-      "pb    hpmax"
-      "init  hpcur"
-      "speed hptemp";
+            "insp  ac"
+            "pb    hpmax"
+            "init  hpcur"
+            "speed hptemp";
     }
 
     /* ALLE HP-Sonderstyles deaktivieren */
@@ -1334,7 +1348,8 @@ html, body {
     min-width: 760px;
 }
 
-.table th, .table td {
+.table th,
+.table td {
     padding: 10px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     vertical-align: top;
@@ -1426,4 +1441,525 @@ html, body {
 
 .gap {
     gap: 8px;
+}
+
+/* komplette Tabelle stabilisieren */
+#spellPanelRows table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* alle Zellen dürfen umbrechen */
+#spellPanelRows td {
+    word-break: break-word;
+    vertical-align: top;
+}
+
+/* DELETE-SPALTE */
+.panel-col-delete {
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
+    text-align: right;
+}
+
+/* Button schön rechts kleben */
+.panel-col-delete button {
+    display: block;
+    margin-left: auto;
+}
+
+.table--spells {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.table--spells th,
+.table--spells td {
+    vertical-align: top;
+}
+
+.table--spells td {
+    word-break: break-word;
+}
+
+.table--spells th:last-child,
+.table--spells td:last-child {
+    width: 48px;
+    min-width: 48px;
+    max-width: 48px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.table--spells td:last-child button {
+    display: inline-flex;
+    margin-left: auto;
+}
+
+.table--spells td:not(:last-child) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+
+    .table--spells th,
+    .table--spells td {
+        font-size: 12px;
+        padding: 6px 6px;
+    }
+
+    .table--spells th:nth-child(3),
+    .table--spells td:nth-child(3),
+    /* Reichweite */
+    .table--spells th:nth-child(4),
+    .table--spells td:nth-child(4)
+
+    /* Trefferwert */
+        {
+        display: none;
+    }
+
+    .table--spells th:nth-child(1) {
+        width: 30%;
+    }
+
+    .table--spells th:nth-child(2) {
+        width: 20%;
+    }
+
+    .table--spells th:nth-child(5) {
+        width: 20%;
+    }
+
+    .table--spells th:nth-child(6) {
+        width: 30%;
+    }
+}
+
+/* =========================
+   SPELL PAGE – LAYOUT CLEANUP
+   ========================= */
+
+.page--spells {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 20px 20px 40px;
+}
+
+.page--spells section.card {
+    margin-bottom: 18px;
+}
+
+.page--spells .card__header {
+    margin-bottom: 14px;
+}
+
+.page--spells .card__body {
+    display: block;
+}
+
+/* =========================
+   HEADINGS / TEXT HIERARCHY
+   ========================= */
+
+.page--spells .h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.2;
+}
+
+.page--spells .h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.2;
+}
+
+.page--spells .muted.small {
+    font-size: 0.82rem;
+    line-height: 1.35;
+    opacity: 0.78;
+}
+
+/* =========================
+   SPELL ATTACKS / TOP AREA
+   ========================= */
+
+.page--spells .card:first-of-type .card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.page--spells .row.gap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: end;
+}
+
+.page--spells .field--mini {
+    min-width: 180px;
+    flex: 0 1 220px;
+}
+
+/* =========================
+   TABS
+   ========================= */
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tab {
+    min-height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+}
+
+/* =========================
+   SLOT BAR
+   ========================= */
+
+.slotsBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 16px;
+}
+
+.slotsBar__left {
+    flex: 1 1 auto;
+    min-width: 240px;
+}
+
+.slotsBar__right {
+    flex: 0 0 auto;
+    min-width: 240px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* =========================
+   SPELL PANEL
+   ========================= */
+
+.tableWrap {
+    overflow-x: hidden;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.table--spells {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.table--spells thead th {
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.table--spells tbody td {
+    padding: 16px 12px;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    word-break: break-word;
+    line-height: 1.35;
+}
+
+.table--spells tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table--spells th:last-child,
+.table--spells td:last-child {
+    width: 56px;
+    min-width: 56px;
+    max-width: 56px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.table--spells td:last-child button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    margin-left: auto;
+}
+
+/* Zellen mit langem Inhalt kontrollieren */
+.table--spells td:not(:last-child) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================
+   DESCRIPTION BOX
+   ========================= */
+
+.spellDesc {
+    margin-top: 14px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.spellDesc__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.spellDesc__body textarea {
+    width: 100%;
+    min-height: 160px;
+    resize: vertical;
+}
+
+/* =========================
+   LOWER 2-COLUMN AREA
+   ========================= */
+
+.grid2 {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(420px, 1.1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+/* =========================
+   SPELLBOOK
+   ========================= */
+
+#sec-spellbook .card,
+#sec-spell-details .card {
+    height: 100%;
+}
+
+#sec-spellbook .card__header,
+#sec-spell-details .card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.spellbook {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.spellbook__item {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    min-height: 42px;
+    padding: 10px 14px;
+    border-radius: 12px;
+}
+
+.spellbook__item.is-active {
+    outline: 2px solid rgba(122, 162, 255, 0.35);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.spellbook__empty {
+    padding: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+}
+
+/* =========================
+   DETAIL FORM
+   ========================= */
+
+.formGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+    align-items: start;
+}
+
+.formGrid .field,
+.formGrid>label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.formGrid .field--full {
+    grid-column: 1 / -1;
+}
+
+.formGrid .label,
+.formGrid>label>span:first-child {
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.formGrid input,
+.formGrid textarea,
+.formGrid select {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+#sb_desc {
+    min-height: 180px;
+    resize: vertical;
+}
+
+/* Buttons im Details-Bereich schöner gruppieren */
+#sec-spell-details .row.gap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* =========================
+   CLEANUP SPECIFIC ISSUES
+   ========================= */
+
+/* Das einzelne freie "Effekt" oberhalb des unteren Bereichs neutralisieren,
+   falls es noch als nackter Text im HTML steht, muss es später aus HTML raus.
+   CSS kann nackten Text leider nicht wirklich heilen. */
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 980px) {
+    .grid2 {
+        grid-template-columns: 1fr;
+    }
+
+    #sec-spellbook .card__header,
+    #sec-spell-details .card__header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .slotsBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .slotsBar__right {
+        justify-content: flex-start;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .page--spells {
+        padding: 14px 14px 28px;
+    }
+
+    .tableWrap {
+        overflow-x: auto;
+    }
+
+    .table--spells {
+        min-width: 760px;
+    }
+
+    .table--spells thead th,
+    .table--spells tbody td {
+        padding: 12px 10px;
+        font-size: 0.9rem;
+    }
+
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .field--mini {
+        min-width: 0;
+        flex: 1 1 100%;
+    }
+}
+
+@media (max-width: 768px) {
+
+    /* Tabelle kompakter */
+    .table--spells {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    .table--spells th,
+    .table--spells td {
+        font-size: 12px;
+        padding: 8px 6px;
+    }
+
+    /* Weniger wichtige Spalten ausblenden */
+    .table--spells th:nth-child(3),
+    .table--spells td:nth-child(3),
+    /* Reichweite */
+    .table--spells th:nth-child(4),
+    .table--spells td:nth-child(4)
+
+    /* Trefferwert */
+        {
+        display: none;
+    }
+
+    /* Breiten neu verteilen */
+    .table--spells th:nth-child(1) {
+        width: 32%;
+    }
+
+    /* Name */
+    .table--spells th:nth-child(2) {
+        width: 20%;
+    }
+
+    /* Zeit */
+    .table--spells th:nth-child(5) {
+        width: 18%;
+    }
+
+    /* Art */
+    .table--spells th:nth-child(6) {
+        width: 30%;
+    }
+
+    /* Effekt */
+
+    /* Delete Button fix */
+    .table--spells th:last-child,
+    .table--spells td:last-child {
+        width: 40px;
+        min-width: 40px;
+        max-width: 40px;
+    }
+
+    /* Text sauber umbrechen */
+    .table--spells td {
+        word-break: break-word;
+    }
 }

@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const sb_time = document.getElementById("sb_time");
     const sb_range = document.getElementById("sb_range");
     const sb_hit = document.getElementById("sb_hit");
+    const sb_kind = document.getElementById("sb_kind");
     const sb_effect = document.getElementById("sb_effect");
     const sb_desc = document.getElementById("sb_desc");
 
@@ -53,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
         !sb_time ||
         !sb_range ||
         !sb_hit ||
+        !sb_kind ||
         !sb_effect ||
         !sb_desc ||
 
@@ -352,6 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
             time: "",
             range: "",
             hit: "",
+            kind: "",
             effect: "",
             desc: "",
         };
@@ -397,6 +400,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sb_time.value = "";
         sb_range.value = "";
         sb_hit.value = "";
+        sb_kind.value = "";
         sb_effect.value = "";
         sb_desc.value = "";
     }
@@ -410,6 +414,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sb_time.value = spell.time || "";
         sb_range.value = spell.range || "";
         sb_hit.value = spell.hit || "";
+        sb_kind.value = spell.kind || "";
         sb_effect.value = spell.effect || "";
         sb_desc.value = spell.desc || "";
     }
@@ -500,16 +505,17 @@ document.addEventListener("DOMContentLoaded", () => {
             tr.dataset.panelOpen = "1";
             tr.dataset.panelSpellId = spell.id;
             tr.innerHTML = `
-        <td>${spell.name || "-"}</td>
-        <td>${spell.time || "-"}</td>
-        <td>${spell.range || "-"}</td>
-        <td>${spell.hit || "-"}</td>
+        <td>${escapeHtml(spell.name || "-")}</td>
+        <td>${escapeHtml(spell.time || "-")}</td>
+        <td>${escapeHtml(spell.range || "-")}</td>
+        <td>${escapeHtml(spell.hit || "-")}</td>
+        <td>${escapeHtml(spell.kind || "-")}</td>
         <td>${escapeHtml(spell.effect || "-")}</td>
-        <td class="cell-actions">
+        <td class="cell-actions panel-col-delete">
           <button type="button"
-                  class="btn btn--ghost btn--mini"
-                  data-panel-remove="${idx}"
-                  aria-label="Zauber aus Panel entfernen">✕</button>
+                    class="btn btn--ghost btn--mini"
+                    data-panel-remove="${idx}"
+                    aria-label="Zauber aus Panel entfernen">✕</button>
         </td>
       `;
             spellPanelRows.appendChild(tr);
@@ -550,6 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sb_time.addEventListener("input", () => applyPatch((s) => (s.time = sb_time.value)));
         sb_range.addEventListener("input", () => applyPatch((s) => (s.range = sb_range.value)));
         sb_hit.addEventListener("input", () => applyPatch((s) => (s.hit = sb_hit.value)));
+        sb_kind.addEventListener("input", () => applyPatch((s) => (s.kind = sb_kind.value)));
         sb_effect.addEventListener("input", () => applyPatch((s) => (s.effect = sb_effect.value)));
         sb_desc.addEventListener("input", () => applyPatch((s) => (s.desc = sb_desc.value)));
     }
