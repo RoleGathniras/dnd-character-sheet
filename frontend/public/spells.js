@@ -177,23 +177,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // Character cache for optimistic locking
+// Character cache for optimistic locking
     let currentCharacter = null; // { id, data, updated_at, ... }
-    let saveTimer = null;
-    let isSaving = false;
-    let pendingSave = false;
-    let boundCharacter = null;
-
+    let boundCharacterId = null; // Number | null
 // Debug-Expose (nur Dev)
     window.__spellDebug = {
         get currentCharacter() {
             return currentCharacter;
         },
-        get boundCharacter() {
-            return boundCharacter;
+        get boundCharacterId() {
+            return boundCharacterId;
         },
         toPersist,
     };
+    let saveTimer = null;
+    let isSaving = false;
+    let pendingSave = false;
+
+
+    function getHttpStatus(err) {
+        return (
+            err?.status ??
+            err?.response?.status ??
+            err?.cause?.status ??
+            err?.data?.status ??
+            null
+        );
+    }
+
+    function isConflict409(err) {
+        const s = String(err ?? "");
+        return (
+            getHttpStatus(err) === 409 ||
+            s.includes("409") ||
+            s.includes("Conflict")
+        );
+    }
 
     function writeStateIntoCharacter() {
         if (!currentCharacter) return;
@@ -205,15 +224,18 @@ document.addEventListener("DOMContentLoaded", () => {
         writeStateIntoCharacter();
         pendingSave = true;
 
+        if (!currentCharacter || !boundCharacterId) return;
+
         if (saveTimer) clearTimeout(saveTimer);
         saveTimer = setTimeout(() => {
-            //void saveNow();//
+            void saveNow();
         }, 650);
     }
 
     async function loadCharacterAndHydrate() {
         const id = getSelectedCharacterId();
         if (!id) {
+            boundCharacterId = null;
             console.warn("[spells.js] No selected character id in localStorage. Running in-memory only.");
             applyPersist(emptyPersistSpells());
             return;
@@ -222,11 +244,12 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const c = await API.getCharacter(Number(id));
             currentCharacter = c;
-            boundCharacter = c;
+            boundCharacterId = c.id;
 
             const persist = c?.data?.spells ?? emptyPersistSpells();
             applyPersist(persist);
         } catch (e) {
+            boundCharacterId = null;
             console.error("[spells.js] Failed to load character. Running in-memory only.", e);
             applyPersist(emptyPersistSpells());
         }
@@ -237,40 +260,37 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!pendingSave) return;
         if (isSaving) return;
 
+        const selectedNow = Number(getSelectedCharacterId() || 0);
+        if (!selectedNow || selectedNow !== boundCharacterId) {
+            pendingSave = false;
+            return;
+        }
+
         isSaving = true;
         pendingSave = false;
 
+        const id = Number(currentCharacter.id);
+
         try {
-            // state -> character.data.spells
             writeStateIntoCharacter();
 
             const payload = {
-                updated_at: currentCharacter.updated_at,
                 data: currentCharacter.data,
+                updated_at: currentCharacter.updated_at,
             };
 
-            const updated = await patchCharacter(payload);
-            currentCharacter = updated; // updated_at refresh
+            currentCharacter = await API.patchCharacter(id, payload);
         } catch (e) {
-            if (e?.status === 409) {
-                // Konflikt: reload, client wins (spells), retry einmal
+            if (isConflict409(e)) {
                 try {
-                    const id = currentCharacter?.id;
-                    const latest = await apiFetch(`/characters/${encodeURIComponent(id)}`);
-
-                    // merge: wir behalten unsere spells, übernehmen den Rest vom Server
                     const mySpells = toPersist();
-                    currentCharacter = latest;
-                    currentCharacter.data = currentCharacter.data && typeof currentCharacter.data === "object" ? currentCharacter.data : {};
-                    currentCharacter.data.spells = mySpells;
+                    const latest = await API.getCharacter(id);
 
-                    const payload2 = {
-                        updated_at: currentCharacter.updated_at,
-                        data: currentCharacter.data,
-                    };
+                    latest.data = (latest.data && typeof latest.data === "object") ? latest.data : {};
+                    latest.data.spells = mySpells;
 
-                    const updated2 = await patchCharacter(payload2);
-                    currentCharacter = updated2;
+                    const payload2 = {data: latest.data, updated_at: latest.updated_at};
+                    currentCharacter = await API.patchCharacter(id, payload2);
                 } catch (e2) {
                     console.error("[spells.js] Save failed after 409 retry.", e2);
                 }
@@ -279,10 +299,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } finally {
             isSaving = false;
-            // falls während save Änderungen kamen
+
             if (pendingSave) {
                 if (saveTimer) clearTimeout(saveTimer);
-                saveTimer = setTimeout(() => void saveNow(), 400);
+                saveTimer = setTimeout(() => void saveNow(), 650);
             }
         }
     }
@@ -460,9 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function writeBackToCharacterData() {
-        if (!boundCharacter) return;
-        boundCharacter.data = boundCharacter.data && typeof boundCharacter.data === "object" ? boundCharacter.data : {};
-        boundCharacter.data.spells = toPersist();
+        writeStateIntoCharacter();
     }
 
     // 4 Admin
