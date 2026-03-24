@@ -1,6 +1,6 @@
 // frontend/public/spells.js
 // UI-only: Spell Tabs + Slots + Spellbook + Panel + Description (In-Memory)
-import {API} from "./api.js";
+import { API } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     // 0 DOM: Welche HTML-Elemente benutzt werden
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
         !sb_range ||
         !sb_hit ||
         !sb_effect ||
-        !sb_desc
+        !sb_desc ||
 
         !btnMenu ||
         !drawer ||
@@ -70,6 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     drawerActionsSection.hidden = true;
     btnAdmin.hidden = true;
+
+    btnMenu.addEventListener("click", openDrawer);
+    btnCloseDrawer.addEventListener("click", closeDrawer);
+    backdrop.addEventListener("click", closeDrawer);
     // ----------------------------
     // Character Binding + Persist
     // ----------------------------
@@ -176,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return {
             v: 1,
-            slotCountsByLevel: {...slotCountsByLevel},
+            slotCountsByLevel: { ...slotCountsByLevel },
             slotUsedByLevel: slotUsedObj,
             spellsByLevel: structuredClone(spellsByLevel),
             panelSpellsByLevel: structuredClone(panelSpellsByLevel),
@@ -193,10 +197,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-// Character cache for optimistic locking
+    // Character cache for optimistic locking
     let currentCharacter = null; // { id, data, updated_at, ... }
     let boundCharacterId = null; // Number | null
-// Debug-Expose (nur Dev)
+    // Debug-Expose (nur Dev)
     window.__spellDebug = {
         get currentCharacter() {
             return currentCharacter;
@@ -250,10 +254,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadCharacterAndHydrate() {
         const id = getSelectedCharacterId();
+        console.log("[spells.js] loadCharacterAndHydrate -> selectedCharacterId =", id);
         if (!id) {
             boundCharacterId = null;
             console.warn("[spells.js] No selected character id in localStorage. Running in-memory only.");
             applyPersist(emptyPersistSpells());
+            renderSlots(getCountFor(currentLevel));
+            renderSpellbook(currentLevel);
+            renderPanel(currentLevel);
+            const selectedSpell = getSelectedSpell();
+            fillSpellDetails(selectedSpell);
             return;
         }
 
@@ -264,10 +274,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const persist = c?.data?.spells ?? emptyPersistSpells();
             applyPersist(persist);
+            renderSlots(getCountFor(currentLevel));
+            renderSpellbook(currentLevel);
+            renderPanel(currentLevel);
+            const selectedSpell = getSelectedSpell();
+            fillSpellDetails(selectedSpell);
         } catch (e) {
             boundCharacterId = null;
             console.error("[spells.js] Failed to load character. Running in-memory only.", e);
             applyPersist(emptyPersistSpells());
+            renderSlots(getCountFor(currentLevel));
+            renderSpellbook(currentLevel);
+            renderPanel(currentLevel);
+            const selectedSpell = getSelectedSpell();
+            fillSpellDetails(selectedSpell);
         }
     }
 
@@ -305,7 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     latest.data = (latest.data && typeof latest.data === "object") ? latest.data : {};
                     latest.data.spells = mySpells;
 
-                    const payload2 = {data: latest.data, updated_at: latest.updated_at};
+                    const payload2 = { data: latest.data, updated_at: latest.updated_at };
                     currentCharacter = await API.patchCharacter(id, payload2);
                 } catch (e2) {
                     console.error("[spells.js] Save failed after 409 retry.", e2);
@@ -396,6 +416,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderSlots(n) {
         slotsEl.innerHTML = "";
+        slotsCountInput.value = n > 0 ? String(n) : "";
 
         if (n <= 0) {
             slotsEl.innerHTML =
@@ -483,7 +504,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${spell.time || "-"}</td>
         <td>${spell.range || "-"}</td>
         <td>${spell.hit || "-"}</td>
-        <td>${spell.effect || "-"}</td>
+        <td>${escapeHtml(spell.effect || "-")}</td>
         <td class="cell-actions">
           <button type="button"
                   class="btn btn--ghost btn--mini"
@@ -497,6 +518,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function writeBackToCharacterData() {
         writeStateIntoCharacter();
+    }
+    function escapeHtml(str) {
+        return String(str)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;");
     }
 
     // 4 Admin
@@ -599,7 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderPanel(currentLevel);
             writeBackToCharacterData();
             markDirtyAndScheduleSave();
-          });
+        });
     }
 
     function bindPanelClick() {
@@ -665,7 +692,19 @@ document.addEventListener("DOMContentLoaded", () => {
         renderPanel(level);
         fillSpellDetails(getSelectedSpell(level));
     }
+    function openDrawer() {
+        drawer.classList.add("is-open");
+        drawer.setAttribute("aria-hidden", "false");
+        backdrop.hidden = false;
+    }
+
+    function closeDrawer() {
+        drawer.classList.remove("is-open");
+        drawer.setAttribute("aria-hidden", "true");
+        backdrop.hidden = true;
+    }
     async function loadCharactersForDrawer() {
+        console.log("[spells.js] loadCharactersForDrawer called");
         listMine.innerHTML = "";
         listNpcs.innerHTML = "";
 
@@ -703,6 +742,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setSelectedCharacterId(c.id);
                 closeDrawer();
                 await loadCharacterAndHydrate();
+                await loadCharactersForDrawer();
             });
 
             if (c.kind === "npc") listNpcs.appendChild(b);
@@ -710,14 +750,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     function setSelectedCharacterId(id) {
-    if (id) {
-        localStorage.setItem("dnd_current_character_id", String(id));
-        localStorage.setItem("selectedCharacterId", String(id));
-    } else {
-        localStorage.removeItem("dnd_current_character_id");
-        localStorage.removeItem("selectedCharacterId");
+        if (id) {
+            localStorage.setItem("dnd_current_character_id", String(id));
+            localStorage.setItem("selectedCharacterId", String(id));
+        } else {
+            localStorage.removeItem("dnd_current_character_id");
+            localStorage.removeItem("selectedCharacterId");
+        }
     }
-}
 
     async function startup() {
         bindSpellDetailsInputs();
@@ -733,5 +773,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setActiveTab("cantrip");           // rendert jetzt mit hydriertem state
     }
 
-    startup();
+    startup().then(() => {
+        loadCharactersForDrawer();
+    })
 });
