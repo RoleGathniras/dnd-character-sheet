@@ -1268,104 +1268,431 @@ body {
 }
 
 
-/* ===== Spells Page (UI Mock) ===== */
+/* =========================================================
+   SPELL PAGE – MOBILE FIRST (CLEAN RESET)
+   ========================================================= */
+
+/* ===== BASE ===== */
+
 .page--spells {
+    max-width: 100%;
+    margin: 0;
     padding: 12px;
     display: grid;
-    gap: 12px;
+    gap: 14px;
 }
 
-.grid2 {
+/* ===== CARDS ===== */
+
+.page--spells .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.page--spells .card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+}
+
+.page--spells .card__body {
+    padding: 12px;
+}
+
+/* ===== TYPO ===== */
+
+.page--spells .h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.page--spells .h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.page--spells .small {
+    font-size: 0.8rem;
+}
+
+/* =========================================================
+   SSPELL ATTACKS → BOX STYLE
+   ========================================================= */
+
+#sec-spell-attacks .row.gap {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
 }
 
-@media (max-width: 900px) {
-    .grid2 {
-        grid-template-columns: 1fr;
-    }
+/* einzelne Box */
+#sec-spell-attacks .field {
+    background: rgba(255, 255, 255, 0.06);
+    /* wie Buttons */
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+}
+
+
+/* Label schöner */
+#sec-spell-attacks .label {
+    color: var(--muted);
+}
+
+/* Input clean */
+#sec-spell-attacks input,
+#sec-spell-attacks select {
+    color: var(--text);
+    background: transparent;
+    border: none;
+}
+
+/* Fokus nice */
+#sec-spell-attacks .field:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(122, 162, 255, 0.2);
+}
+
+#sec-spell-attacks .row.gap {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#sec-spell-attacks input {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* Fokus sauber NUR auf einzelne Box */
+#sec-spell-attacks .field:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(122, 162, 255, 0.2);
+}
+
+/* GLOBALEN Input-Fokus hier neutralisieren */
+#sec-spell-attacks input:focus,
+#sec-spell-attacks select:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+#sec-spell-attacks .field:hover {
+    border-color: var(--borderStrong);
+}
+
+/* =========================================================
+   SPELL LEVEL TABS 
+   ========================================================= */
+
+#sec-spell-slots .card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#sec-spell-slots .h3,
+#sec-spell-slots .label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0;
 }
 
 .tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .tab {
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(255, 255, 255, 0.04);
-    color: inherit;
-    padding: 8px 10px;
-    border-radius: 999px;
+    min-height: 52px;
+    padding: 10px 8px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
     cursor: pointer;
+    transition: border-color .12s ease, background .12s ease, transform .06s ease;
+}
+
+.tab:hover {
+    border-color: var(--borderStrong);
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.tab:active {
+    transform: translateY(1px);
+}
+
+.tab:focus-visible {
+    outline: none;
+    box-shadow: none;
+    border-color: var(--accent);
 }
 
 .tab.is-active {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.22);
+    border-color: rgba(122, 162, 255, .55);
+    background: rgba(122, 162, 255, .15);
+    box-shadow: 0 0 0 2px rgba(122, 162, 255, .15) inset;
 }
+
+/* Mobile first */
+@media (max-width: 599px) {
+    .tabs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Ab etwas mehr Platz */
+@media (min-width: 600px) {
+    .tabs {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+/* Desktop */
+@media (min-width: 900px) {
+    .tabs {
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+    }
+}
+
+/* =========================================================
+   SLOT BAR
+   ========================================================= */
 
 .slotsBar {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.slotsBar__right {
+    justify-content: flex-start;
 }
 
 .slots {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-.slot {
-    display: inline-flex;
-    align-items: center;
     gap: 6px;
-    padding: 6px 8px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(255, 255, 255, 0.04);
 }
 
-.slot input {
-    transform: translateY(1px);
-}
+/* =========================================================
+   SPELL PANEL – MOBILE FIRST CLEAN CARDS
+   ========================================================= */
 
 .tableWrap {
-    overflow: auto;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
 }
 
-.table {
+.table--spells {
     width: 100%;
     border-collapse: collapse;
-    min-width: 760px;
 }
 
-.table th,
-.table td {
-    padding: 10px 10px;
+.table--spells thead {
+    display: none;
+}
+
+.table--spells,
+.table--spells tbody,
+.table--spells tr,
+.table--spells td {
+    display: block;
+    width: 100%;
+}
+
+.panel-row td.panelCell {
+    padding: 0;
+    border: 0;
+}
+
+.panelSpell {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    padding: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    vertical-align: top;
+    background: rgba(255, 255, 255, 0.02);
 }
 
-.table thead th {
-    position: sticky;
-    top: 0;
-    background: rgba(20, 20, 20, 0.9);
-    backdrop-filter: blur(6px);
+.panel-row:last-child .panelSpell {
+    border-bottom: none;
 }
+
+/* obere Zeile */
+.panelSpell__top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 36px;
+    grid-template-areas:
+        "name delete"
+        "meta meta";
+    gap: 8px;
+    align-items: start;
+    width: 100%;
+}
+
+.panelSpell__name {
+    grid-area: name;
+    min-width: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin: 0;
+    color: var(--text);
+    font: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.25;
+    text-align: left;
+    cursor: pointer;
+    word-break: break-word;
+}
+
+.panelSpell__name:hover {
+    color: var(--accent);
+}
+
+.panelSpell__delete {
+    grid-area: delete;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.panelSpell__meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+
+.panelSpell__meta span,
+.panelSpell__sub span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    font-size: 0.78rem;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+/* unterer Bereich */
+.panelSpell__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.panelSpell__effect {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 8px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+
+    font-size: 0.78rem;
+    line-height: 1.2;
+
+    white-space: nowrap;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.panelSpell__sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
+@media (min-width: 900px) {
+    .table--spells {
+        table-layout: fixed;
+    }
+
+    .table--spells thead {
+        display: table-header-group;
+    }
+
+    .table--spells {
+        display: table;
+        width: 100%;
+    }
+
+    .table--spells tbody {
+        display: table-row-group;
+    }
+
+    .table--spells tr {
+        display: table-row;
+    }
+
+    .table--spells td {
+        display: table-cell;
+        width: auto;
+    }
+
+    .table--spells thead th {
+        padding: 12px 10px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+    }
+
+    .panel-row td.panelCell {
+        padding: 0;
+    }
+
+    .panelSpell {
+        padding: 14px 16px;
+    }
+}
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
 
 .spellDesc {
-    margin-top: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
+    margin-top: 12px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
     overflow: hidden;
 }
 
@@ -1377,355 +1704,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 10px;
     padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .spellDesc__body {
     padding: 12px;
-}
-
-.spellbook {
-    display: grid;
-    gap: 8px;
-}
-
-.spellbook__empty {
-    padding: 10px;
-    border: 1px dashed rgba(255, 255, 255, 0.18);
-    border-radius: 12px;
-}
-
-.formGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.field--full {
-    grid-column: 1 / -1;
-}
-
-/* Optional, falls du diese Klassen noch nicht hast */
-.h1 {
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.h2 {
-    font-size: 16px;
-    font-weight: 700;
-}
-
-.h3 {
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.small {
-    font-size: 12px;
-}
-
-.strong {
-    font-weight: 700;
-}
-
-.muted {
-    opacity: 0.75;
-}
-
-.row {
-    display: flex;
-    align-items: center;
-}
-
-.gap {
-    gap: 8px;
-}
-
-/* komplette Tabelle stabilisieren */
-#spellPanelRows table {
-    table-layout: fixed;
-    width: 100%;
-}
-
-/* alle Zellen dürfen umbrechen */
-#spellPanelRows td {
-    word-break: break-word;
-    vertical-align: top;
-}
-
-/* DELETE-SPALTE */
-.panel-col-delete {
-    width: 40px;
-    min-width: 40px;
-    max-width: 40px;
-    text-align: right;
-}
-
-/* Button schön rechts kleben */
-.panel-col-delete button {
-    display: block;
-    margin-left: auto;
-}
-
-.table--spells {
-    table-layout: fixed;
-    width: 100%;
-}
-
-.table--spells th,
-.table--spells td {
-    vertical-align: top;
-}
-
-.table--spells td {
-    word-break: break-word;
-}
-
-.table--spells th:last-child,
-.table--spells td:last-child {
-    width: 48px;
-    min-width: 48px;
-    max-width: 48px;
-    text-align: right;
-    white-space: nowrap;
-}
-
-.table--spells td:last-child button {
-    display: inline-flex;
-    margin-left: auto;
-}
-
-.table--spells td:not(:last-child) {
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-@media (max-width: 768px) {
-
-    .table--spells th,
-    .table--spells td {
-        font-size: 12px;
-        padding: 6px 6px;
-    }
-
-    .table--spells th:nth-child(3),
-    .table--spells td:nth-child(3),
-    /* Reichweite */
-    .table--spells th:nth-child(4),
-    .table--spells td:nth-child(4)
-
-    /* Trefferwert */
-        {
-        display: none;
-    }
-
-    .table--spells th:nth-child(1) {
-        width: 30%;
-    }
-
-    .table--spells th:nth-child(2) {
-        width: 20%;
-    }
-
-    .table--spells th:nth-child(5) {
-        width: 20%;
-    }
-
-    .table--spells th:nth-child(6) {
-        width: 30%;
-    }
-}
-
-/* =========================
-   SPELL PAGE – LAYOUT CLEANUP
-   ========================= */
-
-.page--spells {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 20px 20px 40px;
-}
-
-.page--spells section.card {
-    margin-bottom: 18px;
-}
-
-.page--spells .card__header {
-    margin-bottom: 14px;
-}
-
-.page--spells .card__body {
-    display: block;
-}
-
-/* =========================
-   HEADINGS / TEXT HIERARCHY
-   ========================= */
-
-.page--spells .h2 {
-    font-size: 1.15rem;
-    font-weight: 700;
-    margin-bottom: 4px;
-    line-height: 1.2;
-}
-
-.page--spells .h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 4px;
-    line-height: 1.2;
-}
-
-.page--spells .muted.small {
-    font-size: 0.82rem;
-    line-height: 1.35;
-    opacity: 0.78;
-}
-
-/* =========================
-   SPELL ATTACKS / TOP AREA
-   ========================= */
-
-.page--spells .card:first-of-type .card__header {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.page--spells .row.gap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: end;
-}
-
-.page--spells .field--mini {
-    min-width: 180px;
-    flex: 0 1 220px;
-}
-
-/* =========================
-   TABS
-   ========================= */
-
-.tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.tab {
-    min-height: 34px;
-    padding: 0 14px;
-    border-radius: 999px;
-}
-
-/* =========================
-   SLOT BAR
-   ========================= */
-
-.slotsBar {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    gap: 16px;
-}
-
-.slotsBar__left {
-    flex: 1 1 auto;
-    min-width: 240px;
-}
-
-.slotsBar__right {
-    flex: 0 0 auto;
-    min-width: 240px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-/* =========================
-   SPELL PANEL
-   ========================= */
-
-.tableWrap {
-    overflow-x: hidden;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.table--spells {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.table--spells thead th {
-    font-size: 0.95rem;
-    font-weight: 700;
-    padding: 14px 12px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-}
-
-.table--spells tbody td {
-    padding: 16px 12px;
-    vertical-align: top;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    word-break: break-word;
-    line-height: 1.35;
-}
-
-.table--spells tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.table--spells th:last-child,
-.table--spells td:last-child {
-    width: 56px;
-    min-width: 56px;
-    max-width: 56px;
-    text-align: right;
-    white-space: nowrap;
-}
-
-.table--spells td:last-child button {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: 34px;
-    height: 34px;
-    padding: 0;
-    margin-left: auto;
-}
-
-/* Zellen mit langem Inhalt kontrollieren */
-.table--spells td:not(:last-child) {
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* =========================
-   DESCRIPTION BOX
-   ========================= */
-
-.spellDesc {
-    margin-top: 14px;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.spellDesc__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
 }
 
 .spellDesc__body textarea {
@@ -1734,232 +1719,77 @@ body {
     resize: vertical;
 }
 
-/* =========================
-   LOWER 2-COLUMN AREA
-   ========================= */
+/* =========================================================
+   SPELLBOOK + DETAILS
+   ========================================================= */
 
 .grid2 {
     display: grid;
-    grid-template-columns: minmax(320px, 1fr) minmax(420px, 1.1fr);
-    gap: 20px;
-    align-items: start;
-}
-
-/* =========================
-   SPELLBOOK
-   ========================= */
-
-#sec-spellbook .card,
-#sec-spell-details .card {
-    height: 100%;
-}
-
-#sec-spellbook .card__header,
-#sec-spell-details .card__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    gap: 16px;
-    flex-wrap: wrap;
+    grid-template-columns: 1fr;
+    gap: 14px;
 }
 
 .spellbook {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
-
-.spellbook__item {
-    width: 100%;
-    justify-content: flex-start;
-    text-align: left;
-    min-height: 42px;
-    padding: 10px 14px;
-    border-radius: 12px;
-}
-
-.spellbook__item.is-active {
-    outline: 2px solid rgba(122, 162, 255, 0.35);
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.spellbook__empty {
-    padding: 14px;
-    border: 1px dashed rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-}
-
-/* =========================
-   DETAIL FORM
-   ========================= */
 
 .formGrid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 16px;
-    align-items: start;
-}
-
-.formGrid .field,
-.formGrid>label {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
-}
-
-.formGrid .field--full {
-    grid-column: 1 / -1;
-}
-
-.formGrid .label,
-.formGrid>label>span:first-child {
-    font-size: 0.92rem;
-    font-weight: 600;
-    line-height: 1.2;
-}
-
-.formGrid input,
-.formGrid textarea,
-.formGrid select {
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-}
-
-#sb_desc {
-    min-height: 180px;
-    resize: vertical;
-}
-
-/* Buttons im Details-Bereich schöner gruppieren */
-#sec-spell-details .row.gap {
-    display: flex;
-    flex-wrap: wrap;
+    grid-template-columns: 1fr;
     gap: 10px;
 }
 
-/* =========================
-   CLEANUP SPECIFIC ISSUES
-   ========================= */
-
-/* Das einzelne freie "Effekt" oberhalb des unteren Bereichs neutralisieren,
-   falls es noch als nackter Text im HTML steht, muss es später aus HTML raus.
-   CSS kann nackten Text leider nicht wirklich heilen. */
-
-/* =========================
-   RESPONSIVE
-   ========================= */
-
-@media (max-width: 980px) {
-    .grid2 {
-        grid-template-columns: 1fr;
-    }
-
-    #sec-spellbook .card__header,
-    #sec-spell-details .card__header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .slotsBar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .slotsBar__right {
-        justify-content: flex-start;
-        min-width: 0;
-    }
+.formGrid input,
+.formGrid textarea {
+    width: 100%;
 }
 
-@media (max-width: 768px) {
-    .page--spells {
-        padding: 14px 14px 28px;
-    }
+/* =========================================================
+   TABLET
+   ========================================================= */
 
-    .tableWrap {
-        overflow-x: auto;
-    }
+@media (min-width: 600px) {
 
-    .table--spells {
-        min-width: 760px;
-    }
-
-    .table--spells thead th,
-    .table--spells tbody td {
-        padding: 12px 10px;
-        font-size: 0.9rem;
+    #sec-spell-attacks .row.gap {
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .formGrid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .field--mini {
-        min-width: 0;
-        flex: 1 1 100%;
-    }
 }
 
-@media (max-width: 768px) {
+/* =========================================================
+   DESKTOP
+   ========================================================= */
 
-    /* Tabelle kompakter */
-    .table--spells {
-        table-layout: fixed;
-        width: 100%;
+@media (min-width: 900px) {
+
+    .page--spells {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .grid2 {
+        grid-template-columns: 1fr 1fr;
     }
 
     .table--spells th,
     .table--spells td {
-        font-size: 12px;
-        padding: 8px 6px;
+        font-size: 14px;
+        padding: 12px;
     }
 
-    /* Weniger wichtige Spalten ausblenden */
+    /* Versteckte Spalten wieder anzeigen */
     .table--spells th:nth-child(3),
     .table--spells td:nth-child(3),
-    /* Reichweite */
     .table--spells th:nth-child(4),
-    .table--spells td:nth-child(4)
-
-    /* Trefferwert */
-        {
-        display: none;
+    .table--spells td:nth-child(4) {
+        display: table-cell;
     }
 
-    /* Breiten neu verteilen */
-    .table--spells th:nth-child(1) {
-        width: 32%;
-    }
-
-    /* Name */
-    .table--spells th:nth-child(2) {
-        width: 20%;
-    }
-
-    /* Zeit */
-    .table--spells th:nth-child(5) {
-        width: 18%;
-    }
-
-    /* Art */
-    .table--spells th:nth-child(6) {
-        width: 30%;
-    }
-
-    /* Effekt */
-
-    /* Delete Button fix */
-    .table--spells th:last-child,
-    .table--spells td:last-child {
-        width: 40px;
-        min-width: 40px;
-        max-width: 40px;
-    }
-
-    /* Text sauber umbrechen */
-    .table--spells td {
-        word-break: break-word;
-    }
 }

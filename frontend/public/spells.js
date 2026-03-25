@@ -103,7 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 1 State: Welche Variablen den Zustand definieren
-    let currentLevel = "cantrip";
+    let currentLevel =
+        document.querySelector('.tab.is-active')?.dataset.spellLevel ||
+        "cantrip";
+
     let selectedSpellId = null;
 
     const slotCountsByLevel = {
@@ -485,7 +488,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function renderPanel(level) {
+    /*function renderPanel(level) {
         const list = panelSpellsByLevel[level] ?? [];
         spellPanelRows.innerHTML = "";
 
@@ -516,6 +519,64 @@ document.addEventListener("DOMContentLoaded", () => {
                     class="btn btn--ghost btn--mini"
                     data-panel-remove="${idx}"
                     aria-label="Zauber aus Panel entfernen">✕</button>
+        </td>
+      `;
+            spellPanelRows.appendChild(tr);
+        });
+    }*/
+    function renderPanel(level) {
+        const list = panelSpellsByLevel[level] ?? [];
+        spellPanelRows.innerHTML = "";
+
+        if (!list.length) {
+            spellPanelRows.innerHTML = `
+        <tr class="rowHint">
+          <td colspan="7" class="muted small">
+            Noch leer. Zauber aus dem Zauberbuch hinzufügen.
+          </td>
+        </tr>
+      `;
+            return;
+        }
+
+        list.forEach((spell, idx) => {
+            const tr = document.createElement("tr");
+            tr.className = "panel-row";
+            tr.dataset.panelOpen = "1";
+            tr.dataset.panelSpellId = spell.id;
+
+            tr.innerHTML = `
+        <td colspan="7" class="panelCell">
+          <div class="panelSpell">
+            
+            <div class="panelSpell__top">
+              <button type="button" class="panelSpell__name" data-panel-open="${idx}">
+                ${escapeHtml(spell.name || "-")}
+              </button>
+
+              <div class="panelSpell__meta">
+                <span>${escapeHtml(spell.time || "-")}</span>
+                <span>${escapeHtml(spell.kind || "-")}</span>
+              </div>
+
+              <button type="button"
+                class="btn btn--ghost btn--mini panelSpell__delete"
+                data-panel-remove="${idx}"
+                aria-label="Zauber aus Panel entfernen">✕</button>
+            </div>
+
+            <div class="panelSpell__bottom">
+              <div class="panelSpell__effect">
+                ${escapeHtml(spell.effect || "-")}
+              </div>
+
+              <div class="panelSpell__sub">
+                <span>RW: ${escapeHtml(spell.range || "-")}</span>
+                <span>TW: ${escapeHtml(spell.hit || "-")}</span>
+              </div>
+            </div>
+
+          </div>
         </td>
       `;
             spellPanelRows.appendChild(tr);
@@ -563,11 +624,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function bindTabs() {
         tabs.forEach((t) => {
-            t.addEventListener("click", () => setActiveTab(t.dataset.spellLevel));
+            t.addEventListener("click", () => {
+                currentLevel = t.dataset.spellLevel; // 👉 DAS HIER NEU
+                setActiveTab(t.dataset.spellLevel);
+            });
 
             t.addEventListener("keydown", (e) => {
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
+                    currentLevel = t.dataset.spellLevel; // 👉 UND HIER
                     setActiveTab(t.dataset.spellLevel);
                 }
             });
@@ -589,18 +654,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function bindAddSpell() {
-        btnAddSpell.addEventListener("click", () => {
-            if (!currentLevel) return;
+        if (!btnAddSpell) return;
+
+        const onAddSpell = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const level =
+                currentLevel ||
+                document.querySelector('.tab.is-active')?.dataset.spellLevel ||
+                "cantrip";
+
+            if (!level) return;
+
+            currentLevel = level;
 
             const spell = createEmptySpell();
-            getSpellsFor(currentLevel).push(spell);
+            getSpellsFor(level).push(spell);
 
             selectedSpellId = spell.id;
-            renderSpellbook(currentLevel);
+            renderSpellbook(level);
             fillSpellDetails(spell);
             writeBackToCharacterData();
             markDirtyAndScheduleSave();
-        });
+        };
+
+        btnAddSpell.addEventListener("click", onAddSpell);
+        btnAddSpell.addEventListener("touchend", onAddSpell, { passive: false });
     }
 
     function bindDeleteSpell() {
