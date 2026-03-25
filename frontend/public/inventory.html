@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>D&D 5E – Inventar</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="app">
+    <!-- Topbar -->
+    <header class="appbar">
+        <div class="appbar__left"></div>
+
+        <div class="appbar__right">
+            <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
+            <button id="btnNavOpen" class="btn" aria-label="Inventar Navigation">Navigation ☰</button>
+        </div>
+    </header>
+
+    <!-- Charakter-Drawer -->
+    <div id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <strong id="drawerUserTitle">Charaktere</strong>
+            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+        </div>
+
+        <div class="drawer__content">
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
+                    Charaktere
+                </button>
+                <div id="listMine" class="drawer__list">
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
+            </div>
+
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
+                    NPCs
+                </button>
+                <div id="listNpcs" class="drawer__list" hidden>
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
+            </div>
+
+            <div class="drawer__section" id="drawerActionsSection" hidden>
+                <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
+                    Aktionen
+                </button>
+
+                <div id="actionsMenu" class="actionsMenu drawer__list" hidden>
+                    <button id="btnCreatePC" class="btn drawer__item" disabled hidden>Neuer Charakter</button>
+                    <button id="btnCreateNPC" class="btn drawer__item" disabled hidden>Neuer NPC</button>
+                    <button id="btnSave" class="btn btn--primary drawer__item" disabled hidden>Speichern</button>
+                    <button id="btnDelete" class="btn btn--danger drawer__item" disabled hidden>Charakter
+                        löschen</button>
+                </div>
+            </div>
+
+            <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
+        </div>
+    </div>
+
+    <div id="backdrop" class="backdrop" hidden></div>
+
+    <main class="page page--inventory">
+        <!-- Geld -->
+        <section id="sec-money" data-nav-label="Geld">
+            <section class="card">
+                <div class="card__header">
+                    <div>
+                        <div class="h2">Geld</div>
+                        <div class="muted small">Alle Münzwerte deines Charakters im Überblick.</div>
+                    </div>
+                </div>
+
+                <div class="card__body">
+                    <div class="moneyGrid">
+                        <label class="field field--mini">
+                            <span class="label">PM</span>
+                            <input id="money_pm" type="number" min="0" inputmode="numeric" />
+                        </label>
+
+                        <label class="field field--mini">
+                            <span class="label">GM</span>
+                            <input id="money_gm" type="number" min="0" inputmode="numeric" />
+                        </label>
+
+                        <label class="field field--mini">
+                            <span class="label">SM</span>
+                            <input id="money_sm" type="number" min="0" inputmode="numeric" />
+                        </label>
+
+                        <label class="field field--mini">
+                            <span class="label">EM</span>
+                            <input id="money_em" type="number" min="0" inputmode="numeric" />
+                        </label>
+
+                        <label class="field field--mini">
+                            <span class="label">KM</span>
+                            <input id="money_km" type="number" min="0" inputmode="numeric" />
+                        </label>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Traglast -->
+        <section id="sec-weight" data-nav-label="Traglast">
+            <section class="card">
+                <div class="card__header">
+                    <div>
+                        <div class="h2">Ausrüstungsgewicht & Traglast</div>
+                        <div class="muted small">Aktuelles Gewicht wird automatisch summiert. Traglast wird aus dem
+                            Konstitutionswert berechnet.</div>
+                    </div>
+                </div>
+
+                <div class="card__body">
+                    <div class="weightGrid">
+                        <label class="field field--mini">
+                            <span class="label">Aktuelles Ausrüstungsgewicht</span>
+                            <input id="currentCarryWeight" type="number" value="0" readonly />
+                        </label>
+
+                        <label class="field field--mini">
+                            <span class="label">Traglast</span>
+                            <input id="maxCarryWeight" type="number" value="0" readonly />
+                        </label>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Gegenstand hinzufügen -->
+        <section id="sec-add-item" data-nav-label="Gegenstand hinzufügen">
+            <section class="card">
+                <div class="card__header">
+                    <div>
+                        <div class="h2">Gegenstand hinzufügen</div>
+                        <div class="muted small">Neuen Gegenstand eintragen und automatisch in die passende Kategorie
+                            einsortieren.</div>
+                    </div>
+                </div>
+
+                <div class="card__body">
+                    <div class="formGrid">
+                        <label class="field">
+                            <span class="label">Name</span>
+                            <input id="item_name" type="text" placeholder="z.B. Langschwert" />
+                        </label>
+
+                        <label class="field">
+                            <span class="label">Anzahl</span>
+                            <input id="item_count" type="number" min="1" value="1" inputmode="numeric" />
+                        </label>
+
+                        <label class="field">
+                            <span class="label">Art</span>
+                            <select id="item_type">
+                                <option value="waffe">Waffe</option>
+                                <option value="ruestung">Rüstung</option>
+                                <option value="zutat">Zutat</option>
+                                <option value="quest">Questgegenstand</option>
+                                <option value="sonstiges">Sonstiges</option>
+                            </select>
+                        </label>
+
+                        <label class="field">
+                            <span class="label">Gewicht</span>
+                            <input id="item_weight" type="number" min="0" step="0.01" inputmode="decimal"
+                                placeholder="z.B. 1.5" />
+                        </label>
+
+                        <label class="field field--full">
+                            <span class="label">Beschreibung</span>
+                            <textarea id="item_desc" rows="6" placeholder="Beschreibung des Gegenstandes…"></textarea>
+                        </label>
+                    </div>
+
+                    <div class="row gap">
+                        <button id="btnAddItem" class="btn" type="button">+ Gegenstand hinzufügen</button>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Waffen -->
+        <section id="sec-items-weapons" data-nav-label="Waffen">
+            <section class="card">
+                <div class="card__header">
+                    <div>
+                        <div class="h2">Waffen</div>
+                        <div class="muted small">Klick auf einen Gegenstand öffnet die Beschreibung und Bearbeitung.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card__body">
+                    <div class="inventoryTableWrap">
+                        <table class="table table--inventory" aria-label="Waffen">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Anzahl</th>
+                                    <th>Gewicht</th>
+                                    <th style="width: 48px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryWeaponsRows">
+                                <tr class="rowHint">
+                                    <td colspan="4" class="muted small">Noch keine Waffen eingetragen.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Rüstung -->
+        <section id="sec-items-armor" data-nav-label="Rüstung">
+            <section class="card">
+                <div class="card__header">
+                    <div>
+                        <div class="h2">Rüstung</div>
+                        <div class="muted small">Hier landen alle eingetragenen Rüstungsgegenstände.</div>
+                    </div>
+                </div>
+
+                <div class="card__body">
+                    <div class="inventoryTableWrap">
+                        <table class="table table--inventory" aria-label="Rüstung">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Anzahl</th>
+                                    <th>Gewicht</th>
+                                    <th style="width: 48px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryArmorRows">
+                                <tr class="rowHint">
+                                    <td colspan="4" class="muted small">Noch keine Rüstungen eingetragen.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Zutaten -->
+        <section id="sec-items-ingredients" data-nav-label="Zutaten">
+            <section class="card">
+                <div class="card__header">
+                    <div>
+                        <div class="h2">Zutaten</div>
+                        <div class="muted small">Komponenten, Materialien und sonstige alchemistische Freude.</div>
+                    </div>
+                </div>
+
+                <div class="card__body">
+                    <div class="inventoryTableWrap">
+                        <table class="table table--inventory" aria-label="Zutaten">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Anzahl</th>
+                                    <th>Gewicht</th>
+                                    <th style="width: 48px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryIngredientsRows">
+                                <tr class="rowHint">
+                                    <td colspan="4" class="muted small">Noch keine Zutaten eingetragen.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Questgegenstände -->
+        <section id="sec-items-quest" data-nav-label="Questgegenstände">
+            <section class="card">
+                <div class="card__header">
+                    <div>
+                        <div class="h2">Questgegenstände</div>
+                        <div class="muted small">Dinge, die man auf keinen Fall aus Versehen verkaufen sollte. Wäre
+                            peinlich.</div>
+                    </div>
+                </div>
+
+                <div class="card__body">
+                    <div class="inventoryTableWrap">
+                        <table class="table table--inventory" aria-label="Questgegenstände">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Anzahl</th>
+                                    <th>Gewicht</th>
+                                    <th style="width: 48px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryQuestRows">
+                                <tr class="rowHint">
+                                    <td colspan="4" class="muted small">Noch keine Questgegenstände eingetragen.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Sonstiges -->
+        <section id="sec-items-other" data-nav-label="Sonstiges">
+            <section class="card">
+                <div class="card__header">
+                    <div>
+                        <div class="h2">Sonstiges</div>
+                        <div class="muted small">Alles, was sonst nirgends reinpasst. Also fast immer die Hälfte des
+                            Inventars.</div>
+                    </div>
+                </div>
+
+                <div class="card__body">
+                    <div class="inventoryTableWrap">
+                        <table class="table table--inventory" aria-label="Sonstiges">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Anzahl</th>
+                                    <th>Gewicht</th>
+                                    <th style="width: 48px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryOtherRows">
+                                <tr class="rowHint">
+                                    <td colspan="4" class="muted small">Noch keine sonstigen Gegenstände eingetragen.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <!-- Navigation Drawer -->
+    <div id="navBackdrop" class="backdrop" hidden></div>
+
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>Navigation</strong>
+            <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
+        </div>
+        <div id="navList" class="drawer__content">
+            <!-- Items kommen per JS -->
+        </div>
+    </aside>
+
+    <script type="module" src="/app.js"></script>
+    <script type="module" src="/inventory.js"></script>
+</body>
+
+</html>

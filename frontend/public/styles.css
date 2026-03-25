@@ -1275,11 +1275,13 @@ body {
 /* ===== BASE ===== */
 
 .page--spells {
+    width: 100%;
     max-width: 100%;
     margin: 0;
     padding: 12px;
     display: grid;
     gap: 14px;
+    overflow-x: hidden;
 }
 
 /* ===== CARDS ===== */
@@ -1330,25 +1332,39 @@ body {
 
 /* einzelne Box */
 #sec-spell-attacks .field {
+    display: grid;
+    grid-template-rows: auto 1fr;
+
     background: rgba(255, 255, 255, 0.06);
-    /* wie Buttons */
     border: 1px solid var(--border);
     border-radius: var(--radius);
+
     padding: 10px 12px;
+    height: 70px;
+    /* wichtig für gleiche Höhe */
 }
 
 
 /* Label schöner */
 #sec-spell-attacks .label {
+    font-size: 0.75rem;
     color: var(--muted);
+    line-height: 1;
 }
 
 /* Input clean */
 #sec-spell-attacks input,
 #sec-spell-attacks select {
-    color: var(--text);
+    align-self: end;
+
+    font-size: 1.2rem;
+    font-weight: 700;
+
     background: transparent;
     border: none;
+    color: var(--text);
+
+    padding: 0;
 }
 
 /* Fokus nice */
@@ -1792,4 +1808,121 @@ body {
         display: table-cell;
     }
 
+}
+
+/* =========================================================
+   INVENTORY PAGE
+   ========================================================= */
+
+.page--inventory {
+    max-width: 100%;
+    margin: 0;
+    padding: 12px;
+    display: grid;
+    gap: 14px;
+}
+
+.moneyGrid,
+.weightGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.moneyGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.inventoryTableWrap {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.table--inventory {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table--inventory th,
+.table--inventory td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    vertical-align: top;
+}
+
+.table--inventory th {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.inventory-item__name {
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+}
+
+.inventory-item__name:hover {
+    color: var(--accent);
+}
+
+.inventory-desc-row td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.inventory-desc-card {
+    padding: 10px 0 4px;
+}
+
+@media (max-width: 700px) {
+    .moneyGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .weightGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .table--inventory thead {
+        display: none;
+    }
+
+    .table--inventory,
+    .table--inventory tbody,
+    .table--inventory tr,
+    .table--inventory td {
+        display: block;
+        width: 100%;
+    }
+
+    .table--inventory tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .table--inventory td {
+        border-bottom: none;
+        padding: 8px 10px;
+    }
+
+    .inventory-desc-row td {
+        padding-top: 0;
+    }
+}
+
+@media (min-width: 900px) {
+    .page--inventory {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .weightGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }

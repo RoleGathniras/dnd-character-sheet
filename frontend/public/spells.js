@@ -16,7 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnCloseDesc = document.getElementById("btnCloseSpellDesc");
     const spellDescTitle = document.getElementById("spellDescTitle");
     const spellDescText = document.getElementById("spellDescText");
-
+    const spellSaveDc = document.getElementById("spellSaveDc");
+    const spellAtkBonus = document.getElementById("spellAtkBonus");
+    const spellAbility = document.getElementById("spellAbility");
     // Details-Inputs
     const sb_name = document.getElementById("sb_name");
     const sb_time = document.getElementById("sb_time");
@@ -57,6 +59,9 @@ document.addEventListener("DOMContentLoaded", () => {
         !sb_kind ||
         !sb_effect ||
         !sb_desc ||
+        !spellSaveDc ||
+        !spellAtkBonus ||
+        !spellAbility ||
 
         !btnMenu ||
         !drawer ||
@@ -244,7 +249,31 @@ document.addEventListener("DOMContentLoaded", () => {
         currentCharacter.data = currentCharacter.data && typeof currentCharacter.data === "object" ? currentCharacter.data : {};
         currentCharacter.data.spells = toPersist();
     }
+    function ensureCharacterData() {
+        if (!currentCharacter) return null;
+        currentCharacter.data = currentCharacter.data && typeof currentCharacter.data === "object"
+            ? currentCharacter.data
+            : {};
+        return currentCharacter.data;
+    }
 
+    function getSpellStatsFromCharacter() {
+        const data = ensureCharacterData();
+        const stats = data?.spellStats && typeof data.spellStats === "object"
+            ? data.spellStats
+            : { saveDc: "", atkBonus: "", ability: "" };
+
+        if (data) data.spellStats = stats;
+        return stats;
+    }
+
+    function fillSpellAttackStats() {
+        const stats = getSpellStatsFromCharacter();
+
+        spellSaveDc.value = stats.saveDc ?? "";
+        spellAtkBonus.value = stats.atkBonus ?? "";
+        spellAbility.value = stats.ability ?? "";
+    }
     function markDirtyAndScheduleSave() {
         writeStateIntoCharacter();
         pendingSave = true;
@@ -256,7 +285,22 @@ document.addEventListener("DOMContentLoaded", () => {
             void saveNow();
         }, 650);
     }
+    function bindSpellAttackInputs() {
+        function saveSpellStats() {
+            const stats = getSpellStatsFromCharacter();
+            if (!stats) return;
 
+            stats.saveDc = spellSaveDc.value;
+            stats.atkBonus = spellAtkBonus.value;
+            stats.ability = spellAbility.value;
+
+            markDirtyAndScheduleSave();
+        }
+
+        spellSaveDc.addEventListener("input", saveSpellStats);
+        spellAtkBonus.addEventListener("input", saveSpellStats);
+        spellAbility.addEventListener("change", saveSpellStats);
+    }
     async function loadCharacterAndHydrate() {
         const id = getSelectedCharacterId();
         console.log("[spells.js] loadCharacterAndHydrate -> selectedCharacterId =", id);
@@ -267,8 +311,9 @@ document.addEventListener("DOMContentLoaded", () => {
             renderSlots(getCountFor(currentLevel));
             renderSpellbook(currentLevel);
             renderPanel(currentLevel);
-            const selectedSpell = getSelectedSpell();
+            const selectedSpell = getSelectedSpell(currentLevel);
             fillSpellDetails(selectedSpell);
+            fillSpellAttackStats();
             return;
         }
 
@@ -282,8 +327,9 @@ document.addEventListener("DOMContentLoaded", () => {
             renderSlots(getCountFor(currentLevel));
             renderSpellbook(currentLevel);
             renderPanel(currentLevel);
-            const selectedSpell = getSelectedSpell();
+            const selectedSpell = getSelectedSpell(currentLevel);
             fillSpellDetails(selectedSpell);
+            fillSpellAttackStats();
         } catch (e) {
             boundCharacterId = null;
             console.error("[spells.js] Failed to load character. Running in-memory only.", e);
@@ -293,6 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderPanel(currentLevel);
             const selectedSpell = getSelectedSpell();
             fillSpellDetails(selectedSpell);
+            fillSpellAttackStats();
         }
     }
 
@@ -347,12 +394,18 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     }
+    function createSpellId() {
+        if (window.crypto?.randomUUID) {
+            return window.crypto.randomUUID();
+        }
 
+        return "spell-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+    }
 
     // 2 UI/Helper: Reine Anzeige/kleine Tools
     function createEmptySpell() {
         return {
-            id: crypto.randomUUID(),
+            id: createSpellId(),
             name: "",
             time: "",
             range: "",
@@ -680,7 +733,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         btnAddSpell.addEventListener("click", onAddSpell);
-        btnAddSpell.addEventListener("touchend", onAddSpell, { passive: false });
+
     }
 
     function bindDeleteSpell() {
@@ -707,9 +760,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!spell) return;
 
             const list = panelSpellsByLevel[currentLevel];
-            if (list.some(s => s.id === spell.id)) return; // schon drin
+            if (list.some(s => s.id === spell.id)) return;
 
-            list.push({ ...spell, id: spell.id });
+            list.push(spell);
             renderPanel(currentLevel);
             writeBackToCharacterData();
             markDirtyAndScheduleSave();
@@ -848,6 +901,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function startup() {
         bindSpellDetailsInputs();
+        bindSpellAttackInputs();
         bindTabs();
         bindSlotsCountInput();
         bindDescriptionClose();
