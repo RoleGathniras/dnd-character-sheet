@@ -1,4 +1,4 @@
-import {NAV} from "./nav_config.js";
+import { NAV } from "./nav_config.js";
 
 
 function setDisplay(el, value) {
@@ -6,7 +6,7 @@ function setDisplay(el, value) {
     el.style.display = value;
 }
 
-function makeSubButton({label, onClick}) {
+function makeSubButton({ label, onClick }) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "drawer__item drawer__sub";
@@ -40,8 +40,8 @@ function scrollToSection(id, closeNavDrawer) {
     history.replaceState(null, "", `#${encodeURIComponent(id)}`);
     const target = document.getElementById(id);
     if (!target) return;
-    target.scrollIntoView({behavior: "smooth", block: "start"});
-    target.focus?.({preventScroll: true});
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    target.focus?.({ preventScroll: true });
 }
 
 /**
@@ -49,12 +49,12 @@ function scrollToSection(id, closeNavDrawer) {
  * DOM-Scan ist optional: wenn aktiv, überschreibt er Labels aus NAV.
  */
 export function buildSheetNav({
-                                  navList,
-                                  btnNavOpen,
-                                  closeNavDrawer,
-                                  sheetRootEl,
-                                  enableDomScan = true, // <- optionaler Schalter
-                              }) {
+    navList,
+    btnNavOpen,
+    closeNavDrawer,
+    sheetRootEl,
+    enableDomScan = true,
+}) {
     if (!navList) return;
     navList.innerHTML = "";
 
@@ -62,35 +62,41 @@ export function buildSheetNav({
         const group = document.createElement("div");
         group.className = "navGroup";
 
+        const onThisPage = isCurrentPage(groupCfg.href);
+
         const titleBtn = document.createElement("button");
         titleBtn.type = "button";
         titleBtn.className = "drawer__item drawer__group";
+        titleBtn.setAttribute("aria-expanded", onThisPage ? "true" : "false");
         titleBtn.textContent = groupCfg.title;
+
+        const subList = document.createElement("div");
+        subList.className = "navSubList";
+        subList.hidden = !onThisPage;
+
         titleBtn.addEventListener("click", () => {
-            closeNavDrawer?.();
-            window.location.href = groupCfg.href;
+            const isOpen = titleBtn.getAttribute("aria-expanded") === "true";
+            titleBtn.setAttribute("aria-expanded", String(!isOpen));
+            subList.hidden = isOpen;
         });
 
         group.appendChild(titleBtn);
 
-        const subList = document.createElement("div");
-        subList.className = "navSubList";
+        let sections = groupCfg.sections.map(([id, label]) => ({ id, label }));
 
-        const onThisPage = isCurrentPage(groupCfg.href);
-
-        // Default: aus Config
-        let sections = groupCfg.sections.map(([id, label]) => ({id, label}));
-
-        // Optional: DOM-Scan nur wenn wir auf der Seite sind (und Root sinnvoll)
         if (enableDomScan && onThisPage) {
-            const scope =
-                groupCfg.key === "sheet"
-                    ? (sheetRootEl ?? document)
-                    : (document.querySelector("main.page--spells") ?? document);
+            let scope = document;
+
+            if (groupCfg.key === "sheet") {
+                scope = sheetRootEl ?? document;
+            } else if (groupCfg.key === "spells") {
+                scope = document.querySelector("main.page--spells") ?? document;
+            } else if (groupCfg.key === "inventory") {
+                scope = document.querySelector("main.page--inventory") ?? document;
+            }
 
             const domSections = collectSections(scope);
 
-            // Wenn DOM was liefert: Labels aus DOM nehmen, Reihenfolge wie NAV behalten (Fallback: NAV)
             if (domSections.length) {
                 const byId = new Map(domSections.map((s) => [s.id, s]));
                 sections = sections.map((s) => byId.get(s.id) ?? s);
@@ -103,7 +109,6 @@ export function buildSheetNav({
                     label: sec.label,
                     onClick: () => {
                         if (!onThisPage) {
-                            // Wenn wir NICHT auf der Seite sind: Seite + Hash laden
                             closeNavDrawer?.();
                             window.location.href = `${groupCfg.href}#${encodeURIComponent(sec.id)}`;
                             return;

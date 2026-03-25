@@ -3,7 +3,6 @@ export const NAV = [
     key: "sheet",
     title: "Charakterbogen",
     href: "/sheet.html",
-    // “Default”-Sections, falls DOM nicht geladen / nicht vorhanden
     sections: [
       ["sec-values", "Werte"],
       ["sec-abilities", "Attribute"],
@@ -24,6 +23,21 @@ export const NAV = [
       ["sec-spell-panel", "Zauberpanel"],
       ["sec-spellbook", "Zauberbuch"],
       ["sec-spell-details", "Zauber-Details"],
+    ],
+  },
+  {
+    key: "inventory",
+    title: "Inventar",
+    href: "/inventory.html",
+    sections: [
+      ["sec-money", "Geld"],
+      ["sec-weight", "Traglast"],
+      ["sec-add-item", "Gegenstand hinzufügen"],
+      ["sec-items-weapons", "Waffen"],
+      ["sec-items-armor", "Rüstung"],
+      ["sec-items-ingredients", "Zutaten"],
+      ["sec-items-quest", "Questgegenstände"],
+      ["sec-items-other", "Sonstiges"],
     ],
   },
 ];

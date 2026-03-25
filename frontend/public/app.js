@@ -1020,26 +1020,13 @@ import { buildSheetNav } from "/nav.js";
 
             const isSheetPage = location.pathname.endsWith("/sheet.html");
             const isSpellPage = location.pathname.endsWith("/spell.html");
+            const isInventoryPage = location.pathname.endsWith("/inventory.html");
 
-            // ===== Index / Landing =====
-            if (isSpellPage) {
-                buildSheetNav({ navList, btnNavOpen, closeNavDrawer, sheetRootEl });
-                scrollToHashWithRetry();
+            if (isIndexPage) {
                 setLoggedInUI(!!API.token);
-
-                const cid =
-                    localStorage.getItem("dnd_current_character_id") ||
-                    localStorage.getItem("selectedCharacterId");
-
-                console.log("[spell] current character id =", cid);
-
-                if (!cid) {
-                    setStatus?.("Kein Charakter gewählt – bitte erst im Sheet auswählen.");
-                }
                 return;
             }
 
-            // ===== Spells =====
             if (isSpellPage) {
                 buildSheetNav({ navList, btnNavOpen, closeNavDrawer, sheetRootEl });
                 scrollToHashWithRetry();
@@ -1047,7 +1034,13 @@ import { buildSheetNav } from "/nav.js";
                 return;
             }
 
-            // ===== Sheet =====
+            if (isInventoryPage) {
+                buildSheetNav({ navList, btnNavOpen, closeNavDrawer, sheetRootEl });
+                scrollToHashWithRetry();
+                setLoggedInUI(!!API.token);
+                return;
+            }
+
             if (isSheetPage) {
                 buildSheetNav({ navList, btnNavOpen, closeNavDrawer, sheetRootEl });
                 scrollToHashWithRetry();
@@ -1056,9 +1049,7 @@ import { buildSheetNav } from "/nav.js";
                 bindAttackAutoCalc();
                 sheetRootEl?.addEventListener("input", markDirty);
                 sheetRootEl?.addEventListener("change", markDirty);
-                // kein return -> danach gemeinsamer Auth-Flow
             } else {
-                // unbekannte Seite: defensiv
                 setLoggedInUI(!!API.token);
                 setStatus("Unbekannte Seite – keine Initialisierung.");
                 return;

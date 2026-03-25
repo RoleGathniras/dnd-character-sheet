@@ -1811,27 +1811,76 @@ body {
 }
 
 /* =========================================================
-   INVENTORY PAGE
+   INVENTORY PAGE – MOBILE FIRST CLEAN CARDS
    ========================================================= */
 
 .page--inventory {
+    width: 100%;
     max-width: 100%;
     margin: 0;
     padding: 12px;
     display: grid;
     gap: 14px;
+    overflow-x: hidden;
 }
+
+/* =========================================================
+   TOP GRIDS
+   ========================================================= */
 
 .moneyGrid,
 .weightGrid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+    width: 100%;
 }
 
 .moneyGrid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+
+.moneyGrid .field,
+.weightGrid .field {
+    min-width: 0;
+}
+
+.moneyGrid input,
+.weightGrid input {
+    width: 100%;
+    min-width: 0;
+}
+
+/* =========================================================
+   ADD ITEM FORM
+   ========================================================= */
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    width: 100%;
+}
+
+.formGrid .field {
+    min-width: 0;
+}
+
+.formGrid input,
+.formGrid select,
+.formGrid textarea {
+    width: 100%;
+    min-width: 0;
+}
+
+.formGrid textarea {
+    resize: vertical;
+    min-height: 140px;
+}
+
+/* =========================================================
+   INVENTORY TABLE WRAP
+   ========================================================= */
 
 .inventoryTableWrap {
     overflow: hidden;
@@ -1845,31 +1894,125 @@ body {
     border-collapse: collapse;
 }
 
-.table--inventory th,
-.table--inventory td {
-    padding: 12px 10px;
-    text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    vertical-align: top;
+.table--inventory thead {
+    display: none;
 }
 
-.table--inventory th {
-    color: var(--muted);
-    font-size: 0.85rem;
+.table--inventory,
+.table--inventory tbody,
+.table--inventory tr,
+.table--inventory td {
+    display: block;
+    width: 100%;
+}
+
+.table--inventory tbody {
+    width: 100%;
+}
+
+.rowHint td {
+    padding: 12px;
+}
+
+/* =========================================================
+   MOBILE CARD ROW
+   ========================================================= */
+
+.inventory-row td,
+.inventory-desc-row td {
+    padding: 0;
+    border: 0;
+}
+
+.inventory-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.inventory-row:last-of-type .inventory-card {
+    border-bottom: none;
+}
+
+/* obere Zeile */
+.inventory-card__top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 36px;
+    grid-template-areas:
+        "name delete"
+        "meta meta";
+    gap: 8px;
+    align-items: start;
+    width: 100%;
 }
 
 .inventory-item__name {
-    padding: 0;
-    background: transparent;
-    border: none;
+    grid-area: name;
+    min-width: 0;
+    width: 100%;
+    margin: 0;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
     color: var(--text);
     font: inherit;
     font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.25;
     text-align: left;
+    cursor: pointer;
+    word-break: break-word;
 }
 
 .inventory-item__name:hover {
     color: var(--accent);
+}
+
+.inventory-card__delete {
+    grid-area: delete;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inventory-card__meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+
+.inventory-card__meta span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    font-size: 0.78rem;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   DESCRIPTION / EDIT AREA
+   ========================================================= */
+
+.inventory-desc-row {
+    width: 100%;
 }
 
 .inventory-desc-row td {
@@ -1877,43 +2020,51 @@ body {
 }
 
 .inventory-desc-card {
-    padding: 10px 0 4px;
+    padding: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-@media (max-width: 700px) {
+.inventory-desc-card .formGrid {
+    gap: 10px;
+}
+
+.inventory-desc-card textarea {
+    min-height: 120px;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (min-width: 600px) {
     .moneyGrid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
     }
 
     .weightGrid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .table--inventory thead {
-        display: none;
+    .formGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .table--inventory,
-    .table--inventory tbody,
-    .table--inventory tr,
-    .table--inventory td {
-        display: block;
-        width: 100%;
+    .formGrid .field--full {
+        grid-column: 1 / -1;
     }
 
-    .table--inventory tr {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    .inventory-desc-card .formGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .table--inventory td {
-        border-bottom: none;
-        padding: 8px 10px;
-    }
-
-    .inventory-desc-row td {
-        padding-top: 0;
+    .inventory-desc-card .field--full {
+        grid-column: 1 / -1;
     }
 }
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
 
 @media (min-width: 900px) {
     .page--inventory {
@@ -1922,7 +2073,65 @@ body {
         padding: 20px;
     }
 
-    .weightGrid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .table--inventory {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .table--inventory thead {
+        display: table-header-group;
+    }
+
+    .table--inventory tbody {
+        display: table-row-group;
+    }
+
+    .table--inventory tr {
+        display: table-row;
+    }
+
+    .table--inventory td,
+    .table--inventory th {
+        display: table-cell;
+        width: auto;
+    }
+
+    .table--inventory thead th {
+        padding: 12px 10px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+    }
+
+    .inventory-row td {
+        padding: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .inventory-desc-row td {
+        padding: 0 12px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .inventory-card {
+        padding: 14px 16px;
+        border-bottom: none;
+    }
+
+    .inventory-card__top {
+        grid-template-columns: minmax(220px, 2fr) 36px;
+        grid-template-areas:
+            "name delete"
+            "meta meta";
+    }
+
+    .inventory-desc-card {
+        margin: 0;
+        padding: 12px 0 4px;
+        border-top: none;
+        background: transparent;
     }
 }

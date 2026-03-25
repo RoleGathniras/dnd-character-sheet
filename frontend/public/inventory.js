@@ -257,31 +257,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================================================
-    // Character / Constitution / Carry
+    // Character / Strength / Carry
     // =========================================================
-    function getConstitutionScore(character) {
-        const data = character?.data ?? {};
-
-        const candidates = [
-            data?.attributes?.con,
-            data?.attributes?.constitution,
-            data?.stats?.con,
-            data?.stats?.constitution,
-            data?.abilities?.con,
-            data?.abilities?.constitution,
-            data?.sheet?.attributes?.con,
-            data?.sheet?.attributes?.constitution,
-        ];
-
-        for (const c of candidates) {
-            const n = Number(c);
-            if (Number.isFinite(n) && n > 0) return n;
-        }
-
-        return 0;
+    function getStrengthScore(character) {
+        const n = Number(character?.data?.str);
+        if (!Number.isFinite(n) || n <= 0) return 0;
+        return n;
     }
 
-    function calculateCarryCapacityFromCon(score) {
+    function calculateCarryCapacityFromStrength(score) {
         // Aktuell nach deiner Vorgabe: aus Konstitutionswert berechnen.
         // Falls du später doch STR oder eine andere Hausregel willst:
         // nur diese Funktion anpassen.
@@ -304,8 +288,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderCarryStats() {
         currentCarryWeight.value = String(getCurrentTotalWeight());
 
-        const conScore = getConstitutionScore(currentCharacter);
-        const carry = calculateCarryCapacityFromCon(conScore);
+        const strScore = getStrengthScore(currentCharacter);
+        const carry = calculateCarryCapacityFromStrength(strScore);
         maxCarryWeight.value = String(carry);
     }
 
@@ -421,10 +405,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!items.length) {
             tbody.innerHTML = `
-                <tr class="rowHint">
-                    <td colspan="4" class="muted small">${escapeHtml(getEmptyTextForType(type))}</td>
-                </tr>
-            `;
+            <tr class="rowHint">
+                <td colspan="4" class="muted small">${escapeHtml(getEmptyTextForType(type))}</td>
+            </tr>
+        `;
             return;
         }
 
@@ -437,17 +421,31 @@ document.addEventListener("DOMContentLoaded", () => {
             row.dataset.index = String(index);
 
             row.innerHTML = `
-                <td>
-                    <button type="button" class="inventory-item__name btn btn--ghost" data-action="toggle-desc">
-                        ${escapeHtml(item.name || "-")}
-                    </button>
-                </td>
-                <td>${escapeHtml(item.count)}</td>
-                <td>${escapeHtml(totalItemWeight)}</td>
-                <td>
-                    <button type="button" class="btn btn--ghost btn--mini" data-action="delete-item" aria-label="Gegenstand löschen">✕</button>
-                </td>
-            `;
+            <td colspan="4">
+                <div class="inventory-card">
+                    <div class="inventory-card__top">
+                        <button type="button" class="inventory-item__name" data-action="toggle-desc">
+                            ${escapeHtml(item.name || "-")}
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn--ghost btn--mini inventory-card__delete"
+                            data-action="delete-item"
+                            aria-label="Gegenstand löschen"
+                        >
+                            ✕
+                        </button>
+
+                        <div class="inventory-card__meta">
+                            <span>Anzahl: ${escapeHtml(item.count)}</span>
+                            <span>Gewicht: ${escapeHtml(totalItemWeight)}</span>
+                            <span>Art: ${escapeHtml(item.type)}</span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        `;
             tbody.appendChild(row);
 
             const descRow = document.createElement("tr");
@@ -457,43 +455,56 @@ document.addEventListener("DOMContentLoaded", () => {
             descRow.hidden = !item.isExpanded;
 
             descRow.innerHTML = `
-                <td colspan="4">
-                    <div class="inventory-desc-card">
-                        <div class="formGrid">
-                            <label class="field">
-                                <span class="label">Name</span>
-                                <input type="text" data-edit="name" value="${escapeHtml(item.name)}" />
-                            </label>
+            <td colspan="4">
+                <div class="inventory-desc-card">
+                    <div class="formGrid">
+                        <label class="field">
+                            <span class="label">Name</span>
+                            <input type="text" data-edit="name" value="${escapeHtml(item.name)}" />
+                        </label>
 
-                            <label class="field">
-                                <span class="label">Anzahl</span>
-                                <input type="number" min="1" inputmode="numeric" data-edit="count" value="${escapeHtml(item.count)}" />
-                            </label>
+                        <label class="field">
+                            <span class="label">Anzahl</span>
+                            <input
+                                type="number"
+                                min="1"
+                                inputmode="numeric"
+                                data-edit="count"
+                                value="${escapeHtml(item.count)}"
+                            />
+                        </label>
 
-                            <label class="field">
-                                <span class="label">Art</span>
-                                <select data-edit="type">
-                                    <option value="waffe" ${item.type === "waffe" ? "selected" : ""}>Waffe</option>
-                                    <option value="ruestung" ${item.type === "ruestung" ? "selected" : ""}>Rüstung</option>
-                                    <option value="zutat" ${item.type === "zutat" ? "selected" : ""}>Zutat</option>
-                                    <option value="quest" ${item.type === "quest" ? "selected" : ""}>Questgegenstand</option>
-                                    <option value="sonstiges" ${item.type === "sonstiges" ? "selected" : ""}>Sonstiges</option>
-                                </select>
-                            </label>
+                        <label class="field">
+                            <span class="label">Art</span>
+                            <select data-edit="type">
+                                <option value="waffe" ${item.type === "waffe" ? "selected" : ""}>Waffe</option>
+                                <option value="ruestung" ${item.type === "ruestung" ? "selected" : ""}>Rüstung</option>
+                                <option value="zutat" ${item.type === "zutat" ? "selected" : ""}>Zutat</option>
+                                <option value="quest" ${item.type === "quest" ? "selected" : ""}>Questgegenstand</option>
+                                <option value="sonstiges" ${item.type === "sonstiges" ? "selected" : ""}>Sonstiges</option>
+                            </select>
+                        </label>
 
-                            <label class="field">
-                                <span class="label">Gewicht</span>
-                                <input type="number" min="0" step="0.01" inputmode="decimal" data-edit="weight" value="${escapeHtml(item.weight)}" />
-                            </label>
+                        <label class="field">
+                            <span class="label">Gewicht</span>
+                            <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                inputmode="decimal"
+                                data-edit="weight"
+                                value="${escapeHtml(item.weight)}"
+                            />
+                        </label>
 
-                            <label class="field field--full">
-                                <span class="label">Beschreibung</span>
-                                <textarea rows="5" data-edit="desc">${escapeHtml(item.desc)}</textarea>
-                            </label>
-                        </div>
+                        <label class="field field--full">
+                            <span class="label">Beschreibung</span>
+                            <textarea rows="5" data-edit="desc">${escapeHtml(item.desc)}</textarea>
+                        </label>
                     </div>
-                </td>
-            `;
+                </div>
+            </td>
+        `;
             tbody.appendChild(descRow);
         });
     }
