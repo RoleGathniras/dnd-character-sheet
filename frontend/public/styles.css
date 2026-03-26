@@ -1811,7 +1811,7 @@ body {
 }
 
 /* =========================================================
-   INVENTORY PAGE – MOBILE FIRST CLEAN CARDS
+   INVENTORY PAGE – MOBILE FIRST / SPELL STYLE
    ========================================================= */
 
 .page--inventory {
@@ -1824,14 +1824,100 @@ body {
     overflow-x: hidden;
 }
 
+.page--inventory section[id] {
+    scroll-margin-top: 84px;
+}
+
+.page--inventory .card {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+}
+
+.page--inventory .card__header {
+    padding: 14px 16px 8px;
+}
+
+.page--inventory .card__body {
+    padding: 0 16px 16px;
+}
+
+.page--inventory .h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.page--inventory .muted.small {
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
 /* =========================================================
-   TOP GRIDS
+   INPUT LOOK
+   ========================================================= */
+
+.page--inventory .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.page--inventory .label {
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.page--inventory input,
+.page--inventory select,
+.page--inventory textarea {
+    width: 100%;
+    min-width: 0;
+    appearance: none;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    font: inherit;
+    padding: 10px 12px;
+    outline: none;
+    box-shadow: none;
+}
+
+.page--inventory input::placeholder,
+.page--inventory textarea::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+
+.page--inventory textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.page--inventory input[readonly] {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+}
+
+.page--inventory input:focus,
+.page--inventory select:focus,
+.page--inventory textarea:focus {
+    border-color: rgba(120, 160, 255, 0.8);
+    box-shadow: 0 0 0 3px rgba(120, 160, 255, 0.14);
+}
+
+/* =========================================================
+   MONEY / WEIGHT
    ========================================================= */
 
 .moneyGrid,
-.weightGrid {
+.weightGrid,
+.formGrid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
     width: 100%;
 }
@@ -1840,46 +1926,81 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.moneyGrid .field,
-.weightGrid .field {
-    min-width: 0;
+.moneyGrid .field--full-mobile {
+    grid-column: 1 / -1;
 }
 
-.moneyGrid input,
-.weightGrid input {
-    width: 100%;
-    min-width: 0;
+.weightGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-
-/* =========================================================
-   ADD ITEM FORM
-   ========================================================= */
 
 .formGrid {
-    display: grid;
     grid-template-columns: 1fr;
-    gap: 10px;
-    width: 100%;
 }
 
-.formGrid .field {
-    min-width: 0;
-}
-
-.formGrid input,
-.formGrid select,
-.formGrid textarea {
-    width: 100%;
-    min-width: 0;
-}
-
-.formGrid textarea {
-    resize: vertical;
-    min-height: 140px;
+.formGrid .field--full {
+    grid-column: 1 / -1;
 }
 
 /* =========================================================
-   INVENTORY TABLE WRAP
+   COLLAPSIBLE ADD FORM
+   ========================================================= */
+
+.collapsibleCard__toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px 10px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.collapsibleCard__toggle .left {
+    min-width: 0;
+}
+
+.collapsibleCard__toggle .h2 {
+    margin: 0;
+}
+
+.collapsibleCard__toggle .muted.small {
+    margin-top: 4px;
+}
+
+.collapsibleCard__icon {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 0.95rem;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.collapsibleCard.is-open .collapsibleCard__icon {
+    transform: rotate(180deg);
+}
+
+.collapsibleCard__body {
+    padding: 0 16px 16px;
+}
+
+.collapsibleCard__body[hidden] {
+    display: none;
+}
+
+/* =========================================================
+   INVENTORY TABLE / CARDS
    ========================================================= */
 
 .inventoryTableWrap {
@@ -1914,10 +2035,6 @@ body {
     padding: 12px;
 }
 
-/* =========================================================
-   MOBILE CARD ROW
-   ========================================================= */
-
 .inventory-row td,
 .inventory-desc-row td {
     padding: 0;
@@ -1939,7 +2056,6 @@ body {
     border-bottom: none;
 }
 
-/* obere Zeile */
 .inventory-card__top {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 36px;
@@ -2007,10 +2123,6 @@ body {
     white-space: nowrap;
 }
 
-/* =========================================================
-   DESCRIPTION / EDIT AREA
-   ========================================================= */
-
 .inventory-desc-row {
     width: 100%;
 }
@@ -2024,12 +2136,16 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.inventory-desc-card .formGrid {
-    gap: 10px;
-}
-
 .inventory-desc-card textarea {
     min-height: 120px;
+}
+
+.inventorySectionBody {
+    padding: 0 16px 16px;
+}
+
+.inventorySectionBody[hidden] {
+    display: none;
 }
 
 /* =========================================================
@@ -2038,7 +2154,11 @@ body {
 
 @media (min-width: 600px) {
     .moneyGrid {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .moneyGrid .field--full-mobile {
+        grid-column: auto;
     }
 
     .weightGrid {
@@ -2071,6 +2191,10 @@ body {
         max-width: 1200px;
         margin: 0 auto;
         padding: 20px;
+    }
+
+    .moneyGrid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
     }
 
     .table--inventory {
@@ -2119,13 +2243,6 @@ body {
     .inventory-card {
         padding: 14px 16px;
         border-bottom: none;
-    }
-
-    .inventory-card__top {
-        grid-template-columns: minmax(220px, 2fr) 36px;
-        grid-template-areas:
-            "name delete"
-            "meta meta";
     }
 
     .inventory-desc-card {

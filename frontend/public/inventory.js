@@ -25,6 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const inventoryIngredientsRows = document.getElementById("inventoryIngredientsRows");
     const inventoryQuestRows = document.getElementById("inventoryQuestRows");
     const inventoryOtherRows = document.getElementById("inventoryOtherRows");
+    const addItemCard = document.getElementById("addItemCard");
+    const btnToggleAddItem = document.getElementById("btnToggleAddItem");
+    const addItemBody = document.getElementById("addItemBody");
 
     const btnMenu = document.getElementById("btnMenu");
     const drawer = document.getElementById("drawer");
@@ -33,12 +36,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const listMine = document.getElementById("listMine");
     const listNpcs = document.getElementById("listNpcs");
 
+
     if (
         !money_pm || !money_gm || !money_sm || !money_em || !money_km ||
         !currentCarryWeight || !maxCarryWeight ||
         !item_name || !item_count || !item_type || !item_weight || !item_desc || !btnAddItem ||
         !inventoryWeaponsRows || !inventoryArmorRows || !inventoryIngredientsRows || !inventoryQuestRows || !inventoryOtherRows ||
-        !btnMenu || !drawer || !backdrop || !btnCloseDrawer || !listMine || !listNpcs
+        !btnMenu || !drawer || !backdrop || !btnCloseDrawer || !listMine || !listNpcs || !addItemCard || !btnToggleAddItem || !addItemBody
     ) {
         console.warn("[inventory.js] Missing required DOM elements. Script skipped.");
         return;
@@ -361,6 +365,14 @@ document.addEventListener("DOMContentLoaded", () => {
             markDirtyAndScheduleSave();
         });
     }
+    function bindAddItemCollapse() {
+        btnToggleAddItem.addEventListener("click", () => {
+            const isOpen = btnToggleAddItem.getAttribute("aria-expanded") === "true";
+            btnToggleAddItem.setAttribute("aria-expanded", String(!isOpen));
+            addItemBody.hidden = isOpen;
+            addItemCard.classList.toggle("is-open", !isOpen);
+        });
+    }
 
     // =========================================================
     // Inventory Rendering
@@ -525,6 +537,21 @@ document.addEventListener("DOMContentLoaded", () => {
         item.type = toType;
         item.isExpanded = true;
         inventoryState.items[toType].push(item);
+    }
+    function toggleCollapsible(toggleBtn) {
+        if (!toggleBtn) return;
+
+        const card = toggleBtn.closest(".collapsibleCard");
+        if (!card) return;
+
+        const body = card.querySelector(".collapsibleCard__body, .inventorySectionBody");
+        if (!body) return;
+
+        const isOpen = toggleBtn.getAttribute("aria-expanded") === "true";
+
+        toggleBtn.setAttribute("aria-expanded", String(!isOpen));
+        body.hidden = isOpen;
+        card.classList.toggle("is-open", !isOpen);
     }
 
     function bindInventoryTableEvents() {
@@ -722,6 +749,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function startup() {
         bindMoneyInputs();
         bindAddItem();
+        bindCollapsibleSections();
         bindInventoryTableEvents();
 
         btnMenu.addEventListener("click", openDrawer);

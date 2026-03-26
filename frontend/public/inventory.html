@@ -98,7 +98,7 @@
                             <input id="money_em" type="number" min="0" inputmode="numeric" />
                         </label>
 
-                        <label class="field field--mini">
+                        <label class="field field--mini field--full-mobile">
                             <span class="label">KM</span>
                             <input id="money_km" type="number" min="0" inputmode="numeric" />
                         </label>
@@ -113,15 +113,13 @@
                 <div class="card__header">
                     <div>
                         <div class="h2">Ausrüstungsgewicht & Traglast</div>
-                        <div class="muted small">Aktuelles Gewicht wird automatisch summiert. Traglast wird aus dem
-                            Konstitutionswert berechnet.</div>
                     </div>
                 </div>
 
                 <div class="card__body">
                     <div class="weightGrid">
                         <label class="field field--mini">
-                            <span class="label">Aktuelles Ausrüstungsgewicht</span>
+                            <span class="label">Ausrüstungsgewicht</span>
                             <input id="currentCarryWeight" type="number" value="0" readonly />
                         </label>
 
@@ -136,16 +134,15 @@
 
         <!-- Gegenstand hinzufügen -->
         <section id="sec-add-item" data-nav-label="Gegenstand hinzufügen">
-            <section class="card">
-                <div class="card__header">
-                    <div>
+            <section class="card collapsibleCard is-open" id="addItemCard">
+                <button type="button" class="collapsibleCard__toggle" id="btnToggleAddItem" aria-expanded="false">
+                    <div class="left">
                         <div class="h2">Gegenstand hinzufügen</div>
-                        <div class="muted small">Neuen Gegenstand eintragen und automatisch in die passende Kategorie
-                            einsortieren.</div>
                     </div>
-                </div>
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
 
-                <div class="card__body">
+                <div class="collapsibleCard__body" id="addItemBody" hidden>
                     <div class="formGrid">
                         <label class="field">
                             <span class="label">Name</span>
@@ -189,16 +186,14 @@
 
         <!-- Waffen -->
         <section id="sec-items-weapons" data-nav-label="Waffen">
-            <section class="card">
-                <div class="card__header">
-                    <div>
+            <section class="card collapsibleCard is-open">
+                <button type="button" class="collapsibleCard__toggle inventorySectionToggle" aria-expanded="false">
+                    <div class="left">
                         <div class="h2">Waffen</div>
-                        <div class="muted small">Klick auf einen Gegenstand öffnet die Beschreibung und Bearbeitung.
-                        </div>
                     </div>
-                </div>
-
-                <div class="card__body">
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+                <div class="collapsibleCard__body inventorySectionBody" hidden>
                     <div class="inventoryTableWrap">
                         <table class="table table--inventory" aria-label="Waffen">
                             <thead>
@@ -222,15 +217,14 @@
 
         <!-- Rüstung -->
         <section id="sec-items-armor" data-nav-label="Rüstung">
-            <section class="card">
-                <div class="card__header">
-                    <div>
+            <section class="card collapsibleCard is-open">
+                <button type="button" class="collapsibleCard__toggle inventorySectionToggle" aria-expanded="false">
+                    <div class="left">
                         <div class="h2">Rüstung</div>
-                        <div class="muted small">Hier landen alle eingetragenen Rüstungsgegenstände.</div>
                     </div>
-                </div>
-
-                <div class="card__body">
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+                <div class="collapsibleCard__body inventorySectionBody" hidden>
                     <div class="inventoryTableWrap">
                         <table class="table table--inventory" aria-label="Rüstung">
                             <thead>
@@ -243,7 +237,7 @@
                             </thead>
                             <tbody id="inventoryArmorRows">
                                 <tr class="rowHint">
-                                    <td colspan="4" class="muted small">Noch keine Rüstungen eingetragen.</td>
+                                    <td colspan="4" class="muted small">Noch keine Rüstung eingetragen.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -254,15 +248,14 @@
 
         <!-- Zutaten -->
         <section id="sec-items-ingredients" data-nav-label="Zutaten">
-            <section class="card">
-                <div class="card__header">
-                    <div>
+            <section class="card collapsibleCard is-open">
+                <button type="button" class="collapsibleCard__toggle inventorySectionToggle" aria-expanded="false">
+                    <div class="left">
                         <div class="h2">Zutaten</div>
-                        <div class="muted small">Komponenten, Materialien und sonstige alchemistische Freude.</div>
                     </div>
-                </div>
-
-                <div class="card__body">
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+                <div class="collapsibleCard__body inventorySectionBody" hidden>
                     <div class="inventoryTableWrap">
                         <table class="table table--inventory" aria-label="Zutaten">
                             <thead>
@@ -286,16 +279,14 @@
 
         <!-- Questgegenstände -->
         <section id="sec-items-quest" data-nav-label="Questgegenstände">
-            <section class="card">
-                <div class="card__header">
-                    <div>
+            <section class="card collapsibleCard is-open">
+                <button type="button" class="collapsibleCard__toggle inventorySectionToggle" aria-expanded="false">
+                    <div class="left">
                         <div class="h2">Questgegenstände</div>
-                        <div class="muted small">Dinge, die man auf keinen Fall aus Versehen verkaufen sollte. Wäre
-                            peinlich.</div>
                     </div>
-                </div>
-
-                <div class="card__body">
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+                <div class="collapsibleCard__body inventorySectionBody" hidden>
                     <div class="inventoryTableWrap">
                         <table class="table table--inventory" aria-label="Questgegenstände">
                             <thead>
@@ -319,16 +310,14 @@
 
         <!-- Sonstiges -->
         <section id="sec-items-other" data-nav-label="Sonstiges">
-            <section class="card">
-                <div class="card__header">
-                    <div>
+            <section class="card collapsibleCard is-open">
+                <button type="button" class="collapsibleCard__toggle inventorySectionToggle" aria-expanded="false">
+                    <div class="left">
                         <div class="h2">Sonstiges</div>
-                        <div class="muted small">Alles, was sonst nirgends reinpasst. Also fast immer die Hälfte des
-                            Inventars.</div>
                     </div>
-                </div>
-
-                <div class="card__body">
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+                <div class="collapsibleCard__body inventorySectionBody" hidden>
                     <div class="inventoryTableWrap">
                         <table class="table table--inventory" aria-label="Sonstiges">
                             <thead>
