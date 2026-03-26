@@ -196,11 +196,12 @@
                     <div class="card__header">
                         <div>
                             <div class="h2">Zauberbuch</div>
-                            <div class="muted small">Liste nach Grad. Klick → Details bearbeiten. (UI-Mock)</div>
                         </div>
 
                         <div class="row gap">
                             <button class="btn" id="btnAddSpell" type="button">+ Zauber hinzufügen</button>
+                            <button class="btn btn--ghost" id="btnUseInPanel" type="button">Im Panel verwenden</button>
+                            <button class="btn btn--danger" id="btnDeleteSpell" type="button">Löschen</button>
                         </div>
                     </div>
 
@@ -208,7 +209,7 @@
                         <div id="spellbookList" class="spellbook">
                             <!-- UI-Placeholder -->
                             <div class="spellbook__empty muted small">
-                                Keine Zauber im aktuellen Grad. (Ja, trag welche ein. 😉)
+                                Keine Zauber im aktuellen Grad.
                             </div>
                         </div>
                     </div>
@@ -217,20 +218,19 @@
 
             <!-- Detail Editor -->
             <section id="sec-spell-details" data-nav-label="Zauber-Details">
-                <section class="card">
-                    <div class="card__header">
+                <section class="card spellDetailsCard is-collapsed">
+                    <div class="card__header spellDetailsCard__header">
                         <div>
                             <div class="h2">Zauber-Details</div>
-                            <div class="muted small">Hier wird der Zauber im Zauberbuch gepflegt.</div>
-                        </div>
-
-                        <div class="row gap">
-                            <button class="btn btn--ghost" id="btnUseInPanel" type="button">Im Panel verwenden</button>
-                            <button class="btn btn--danger" id="btnDeleteSpell" type="button">Löschen</button>
                         </div>
                     </div>
 
-                    <div class="card__body">
+                    <div class="row gap">
+                        <button class="btn btn--ghost" id="btnCloseSpellDetails" type="button">Schließen</button>
+                    </div>
+                    </div>
+
+                    <div class="card__body spellDetailsCard__body">
                         <div class="formGrid">
                             <label class="field">
                                 <span class="label">Name</span>
@@ -239,7 +239,7 @@
 
                             <label class="field">
                                 <span class="label">Zeit/Dauer</span>
-                                <input id="sb_time" type="text" placeholder="z.B. 1 Aktion/ Stunden / Bonusaktion" />
+                                <input id="sb_time" type="text" placeholder="z.B. 1 Aktion / Bonusaktion / 1 Stunde" />
                             </label>
 
                             <label class="field">
@@ -251,13 +251,15 @@
                                 <span class="label">Trefferwert</span>
                                 <input id="sb_hit" type="text" placeholder="z.B. +7 / Rettungswurf" />
                             </label>
-                            <label>
-                                <span>Art</span>
-                                <input id="sb_kind" type="text" placeholder="z.B. brennend" />
+
+                            <label class="field">
+                                <span class="label">Art</span>
+                                <input id="sb_kind" type="text" placeholder="z.B. Feuer, Heilung, Kontrolle" />
                             </label>
+
                             <label class="field field--full">
                                 <span class="label">Komponenten</span>
-                                <input id="sb_effect" type="text" placeholder="z.B. V,S,M" />
+                                <input id="sb_effect" type="text" placeholder="z.B. V, S, M" />
                             </label>
 
                             <label class="field field--full">
@@ -265,7 +267,6 @@
                                 <textarea id="sb_desc" rows="10" placeholder="Voller Text des Zaubers…"></textarea>
                             </label>
                         </div>
-
                     </div>
                 </section>
             </section>

@@ -1500,7 +1500,208 @@ body {
 }
 
 /* =========================================================
-   SPELL PANEL – MOBILE FIRST CLEAN CARDS
+   SPELL PAGE – MOBILE FIRST (REWORKED)
+   ========================================================= */
+
+/* ===== BASE ===== */
+
+.page--spells {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 12px;
+    display: grid;
+    gap: 14px;
+    overflow-x: hidden;
+}
+
+/* ===== CARDS ===== */
+
+.page--spells .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.page--spells .card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+}
+
+.page--spells .card__body {
+    padding: 12px;
+}
+
+/* ===== TYPO ===== */
+
+.page--spells .h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.page--spells .h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.page--spells .small {
+    font-size: 0.8rem;
+}
+
+/* =========================================================
+   SPELL ATTACKS
+   ========================================================= */
+
+#sec-spell-attacks .row.gap {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+#sec-spell-attacks .field {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    height: 70px;
+}
+
+#sec-spell-attacks .label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1;
+}
+
+#sec-spell-attacks input,
+#sec-spell-attacks select {
+    align-self: end;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    padding: 0;
+}
+
+#sec-spell-attacks .field:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(122, 162, 255, 0.2);
+}
+
+#sec-spell-attacks input:focus,
+#sec-spell-attacks select:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+#sec-spell-attacks .field:hover {
+    border-color: var(--borderStrong);
+}
+
+/* =========================================================
+   SPELL LEVEL TABS
+   ========================================================= */
+
+#sec-spell-slots .card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#sec-spell-slots .h3,
+#sec-spell-slots .label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0;
+}
+
+.tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.tab {
+    min-height: 52px;
+    padding: 10px 8px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .12s ease, background .12s ease, transform .06s ease;
+}
+
+.tab:hover {
+    border-color: var(--borderStrong);
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.tab:active {
+    transform: translateY(1px);
+}
+
+.tab:focus-visible {
+    outline: none;
+    box-shadow: none;
+    border-color: var(--accent);
+}
+
+.tab.is-active {
+    border-color: rgba(122, 162, 255, .55);
+    background: rgba(122, 162, 255, .15);
+    box-shadow: 0 0 0 2px rgba(122, 162, 255, .15) inset;
+}
+
+@media (max-width: 599px) {
+    .tabs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 600px) {
+    .tabs {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 900px) {
+    .tabs {
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+    }
+}
+
+/* =========================================================
+   SLOT BAR
+   ========================================================= */
+
+.slotsBar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.slotsBar__right {
+    justify-content: flex-start;
+}
+
+.slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* =========================================================
+   SPELL PANEL
    ========================================================= */
 
 .tableWrap {
@@ -1547,7 +1748,6 @@ body {
     border-bottom: none;
 }
 
-/* obere Zeile */
 .panelSpell__top {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 36px;
@@ -1576,10 +1776,13 @@ body {
     text-align: left;
     cursor: pointer;
     word-break: break-word;
+    transition: border-color .12s ease, background .12s ease, color .12s ease;
 }
 
 .panelSpell__name:hover {
     color: var(--accent);
+    border-color: var(--borderStrong);
+    background: rgba(255, 255, 255, 0.07);
 }
 
 .panelSpell__delete {
@@ -1616,7 +1819,6 @@ body {
     white-space: nowrap;
 }
 
-/* unterer Bereich */
 .panelSpell__bottom {
     display: flex;
     flex-wrap: wrap;
@@ -1629,16 +1831,12 @@ body {
     align-items: center;
     min-height: 28px;
     padding: 4px 8px;
-
     border: 1px solid var(--border);
     border-radius: 999px;
-
     background: rgba(255, 255, 255, 0.06);
     color: var(--text);
-
     font-size: 0.78rem;
     line-height: 1.2;
-
     white-space: nowrap;
     max-width: 140px;
     overflow: hidden;
@@ -1651,22 +1849,15 @@ body {
     gap: 6px;
 }
 
-/* =========================================================
-   DESKTOP
-   ========================================================= */
-
 @media (min-width: 900px) {
     .table--spells {
         table-layout: fixed;
+        display: table;
+        width: 100%;
     }
 
     .table--spells thead {
         display: table-header-group;
-    }
-
-    .table--spells {
-        display: table;
-        width: 100%;
     }
 
     .table--spells tbody {
@@ -1751,15 +1942,88 @@ body {
     gap: 8px;
 }
 
+.spellbook__item {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    font-weight: 600;
+    transition: border-color .12s ease, background .12s ease, transform .06s ease, color .12s ease;
+}
+
+.spellbook__item:hover {
+    border-color: var(--borderStrong);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.spellbook__item.is-active {
+    border-color: rgba(122, 162, 255, .55);
+    background: rgba(122, 162, 255, .14);
+    box-shadow: 0 0 0 1px rgba(122, 162, 255, .18) inset;
+}
+
 .formGrid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 10px;
 }
 
+.formGrid .field {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.formGrid .label {
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
 .formGrid input,
 .formGrid textarea {
     width: 100%;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.18);
+    color: var(--text);
+    padding: 10px 12px;
+}
+
+.formGrid textarea {
+    min-height: 180px;
+    resize: vertical;
+}
+
+.formGrid .field:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(122, 162, 255, 0.16);
+}
+
+.formGrid input:focus,
+.formGrid textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: none;
+}
+
+/* =========================================================
+   SPELL DETAILS COLLAPSIBLE
+   ========================================================= */
+
+.spellDetailsCard.is-collapsed .spellDetailsCard__body {
+    display: none;
+}
+
+.spellDetailsCard__header {
+    align-items: flex-start;
 }
 
 /* =========================================================
@@ -1767,7 +2031,6 @@ body {
    ========================================================= */
 
 @media (min-width: 600px) {
-
     #sec-spell-attacks .row.gap {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -1776,6 +2039,9 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
 
+    .formGrid .field--full {
+        grid-column: 1 / -1;
+    }
 }
 
 /* =========================================================
@@ -1783,7 +2049,6 @@ body {
    ========================================================= */
 
 @media (min-width: 900px) {
-
     .page--spells {
         max-width: 1200px;
         margin: 0 auto;
@@ -1800,14 +2065,12 @@ body {
         padding: 12px;
     }
 
-    /* Versteckte Spalten wieder anzeigen */
     .table--spells th:nth-child(3),
     .table--spells td:nth-child(3),
     .table--spells th:nth-child(4),
     .table--spells td:nth-child(4) {
         display: table-cell;
     }
-
 }
 
 /* =========================================================

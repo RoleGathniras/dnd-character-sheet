@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const sb_kind = document.getElementById("sb_kind");
     const sb_effect = document.getElementById("sb_effect");
     const sb_desc = document.getElementById("sb_desc");
+    const spellDetailsCard = document.querySelector(".spellDetailsCard");
+    const btnCloseSpellDetails = document.getElementById("btnCloseSpellDetails");
 
     // Charakter Drawer
     const btnMenu = document.getElementById("btnMenu");
@@ -62,6 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
         !spellSaveDc ||
         !spellAtkBonus ||
         !spellAbility ||
+        !spellDetailsCard ||
+        !btnCloseSpellDetails ||
 
         !btnMenu ||
         !drawer ||
@@ -313,6 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderPanel(currentLevel);
             const selectedSpell = getSelectedSpell(currentLevel);
             fillSpellDetails(selectedSpell);
+            closeSpellDetails();
             fillSpellAttackStats();
             return;
         }
@@ -444,6 +449,36 @@ document.addEventListener("DOMContentLoaded", () => {
     function hideDesc() {
         descBox.classList.add("is-hidden");
     }
+    function openSpellDetails() {
+        spellDetailsCard.classList.remove("is-collapsed");
+    }
+
+    function closeSpellDetails() {
+        spellDetailsCard.classList.add("is-collapsed");
+    }
+
+    function syncPanelSpellById(level, spellId) {
+        const source = (spellsByLevel[level] ?? []).find((s) => s.id === spellId);
+        if (!source) return;
+
+        const panelList = panelSpellsByLevel[level] ?? [];
+        const panelSpell = panelList.find((s) => s.id === spellId);
+        if (!panelSpell) return;
+
+        panelSpell.name = source.name || "";
+        panelSpell.time = source.time || "";
+        panelSpell.range = source.range || "";
+        panelSpell.hit = source.hit || "";
+        panelSpell.kind = source.kind || "";
+        panelSpell.effect = source.effect || "";
+        panelSpell.desc = source.desc || "";
+    }
+
+    function removeSpellFromPanelById(level, spellId) {
+        const list = panelSpellsByLevel[level] ?? [];
+        const idx = list.findIndex((s) => s.id === spellId);
+        if (idx !== -1) list.splice(idx, 1);
+    }
 
     function showDescFromPanelSpell(spell) {
         spellDescTitle.textContent = spell?.name?.trim() || "Zauber";
@@ -535,6 +570,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 selectedSpellId = spell.id;
                 renderSpellbook(level);
                 fillSpellDetails(spell);
+                openSpellDetails();
             });
 
             spellbookList.appendChild(btn);
@@ -659,9 +695,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!spell) return;
 
             patchFn(spell);
+            syncPanelSpellById(currentLevel, spell.id);
 
-            // Liste aktualisieren (Name/active state sichtbar)
             renderSpellbook(currentLevel);
+            renderPanel(currentLevel);
             writeBackToCharacterData();
             markDirtyAndScheduleSave();
         }
@@ -728,6 +765,7 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedSpellId = spell.id;
             renderSpellbook(level);
             fillSpellDetails(spell);
+            openSpellDetails();
             writeBackToCharacterData();
             markDirtyAndScheduleSave();
         };
@@ -744,13 +782,27 @@ document.addEventListener("DOMContentLoaded", () => {
             const idx = list.findIndex((s) => s.id === selectedSpellId);
             if (idx === -1) return;
 
+            const deletedId = selectedSpellId;
+
             list.splice(idx, 1);
+            removeSpellFromPanelById(currentLevel, deletedId);
+
             selectedSpellId = null;
 
             renderSpellbook(currentLevel);
+            renderPanel(currentLevel);
             clearSpellDetails();
+            closeSpellDetails();
             writeBackToCharacterData();
             markDirtyAndScheduleSave();
+        });
+    }
+    function bindSpellDetailsClose() {
+        btnCloseSpellDetails.addEventListener("click", () => {
+            selectedSpellId = null;
+            renderSpellbook(currentLevel);
+            clearSpellDetails();
+            closeSpellDetails();
         });
     }
 
@@ -830,7 +882,12 @@ document.addEventListener("DOMContentLoaded", () => {
         hideDesc();
         renderSpellbook(level);
         renderPanel(level);
-        fillSpellDetails(getSelectedSpell(level));
+
+        const selected = getSelectedSpell(level);
+        fillSpellDetails(selected);
+
+        if (selected) openSpellDetails();
+        else closeSpellDetails();
     }
     function openDrawer() {
         drawer.classList.add("is-open");
@@ -907,6 +964,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bindDescriptionClose();
         bindAddSpell();
         bindDeleteSpell();
+        bindSpellDetailsClose();
         bindUseInPanel();
         bindPanelClick();
 
