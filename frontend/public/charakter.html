@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>D&D 5E – Charakterbeschreibung</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="app">
+    <!-- Topbar -->
+    <header class="appbar">
+        <div class="appbar__left"></div>
+
+        <div class="appbar__right">
+            <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
+            <button id="btnNavOpen" class="btn" aria-label="Charakterbeschreibung Navigation">Navigation ☰</button>
+        </div>
+    </header>
+
+    <!-- Charakter-Drawer -->
+    <div id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <strong id="drawerUserTitle">Charaktere</strong>
+            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+        </div>
+
+        <div class="drawer__content">
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
+                    Charaktere
+                </button>
+                <div id="listMine" class="drawer__list">
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
+            </div>
+
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
+                    NPCs
+                </button>
+                <div id="listNpcs" class="drawer__list" hidden>
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
+            </div>
+
+            <div class="drawer__section" id="drawerActionsSection" hidden>
+                <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
+                    Aktionen
+                </button>
+
+                <div id="actionsMenu" class="actionsMenu drawer__list" hidden>
+                    <button id="btnCreatePC" class="btn drawer__item" disabled hidden>Neuer Charakter</button>
+                    <button id="btnCreateNPC" class="btn drawer__item" disabled hidden>Neuer NPC</button>
+                    <button id="btnSave" class="btn btn--primary drawer__item" disabled hidden>Speichern</button>
+                    <button id="btnDelete" class="btn btn--danger drawer__item" disabled hidden>Charakter
+                        löschen</button>
+                </div>
+            </div>
+
+            <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
+        </div>
+    </div>
+
+    <div id="backdrop" class="backdrop" hidden></div>
+
+    <main class="page page--charakter">
+        <!-- Aussehen -->
+        <section id="sec-appearance" data-nav-label="Aussehen">
+            <section class="card collapsibleCard">
+                <button type="button" class="collapsibleCard__toggle characterSectionToggle" aria-expanded="false">
+                    <div class="left">
+                        <div class="h2">Aussehen</div>
+                        <div class="muted small">Grunddaten, Bild und genaue Beschreibung des Charakters.</div>
+                    </div>
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+
+                <div class="collapsibleCard__body characterSectionBody" hidden>
+                    <div class="characterImageCard">
+                        <div class="characterImagePreviewWrap">
+                            <img id="appearance_imagePreview" class="characterImagePreview" alt="Charakterbild Vorschau"
+                                hidden />
+                            <div id="appearance_imagePlaceholder" class="characterImagePlaceholder">
+                                Kein Bild ausgewählt
+                            </div>
+                        </div>
+
+                        <div class="row gap wrap">
+                            <label class="btn btn--ghost characterImageUpload">
+                                Bild auswählen
+                                <input id="appearance_imageFile" type="file" accept="image/*" hidden />
+                            </label>
+                            <button id="btnRemoveAppearanceImage" class="btn btn--ghost" type="button">
+                                Bild entfernen
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="characterMetaGrid">
+                        <label class="field">
+                            <span class="label">Alter</span>
+                            <input id="appearance_age" type="text" placeholder="z.B. 27" />
+                        </label>
+
+                        <label class="field">
+                            <span class="label">Größe</span>
+                            <input id="appearance_height" type="text" placeholder="z.B. 1,82 m" />
+                        </label>
+
+                        <label class="field">
+                            <span class="label">Gewicht</span>
+                            <input id="appearance_weight" type="text" placeholder="z.B. 78 kg" />
+                        </label>
+
+                        <label class="field">
+                            <span class="label">Augenfarbe</span>
+                            <input id="appearance_eyes" type="text" placeholder="z.B. Grün" />
+                        </label>
+
+                        <label class="field">
+                            <span class="label">Hautfarbe</span>
+                            <input id="appearance_skin" type="text" placeholder="z.B. Hell gebräunt" />
+                        </label>
+
+                        <label class="field">
+                            <span class="label">Haarfarbe</span>
+                            <input id="appearance_hair" type="text" placeholder="z.B. Schwarz" />
+                        </label>
+                    </div>
+
+                    <div class="formGrid">
+                        <label class="field field--full">
+                            <span class="label">Genauere Beschreibung</span>
+                            <textarea id="appearance_description" rows="7"
+                                placeholder="Beschreibe Kleidung, Haltung, Narben, besondere Merkmale, Ausrüstung am Körper usw."></textarea>
+                        </label>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Übungen und Sprache -->
+        <section id="sec-proficiencies-languages" data-nav-label="Übungen & Sprache">
+            <section class="card collapsibleCard">
+                <button type="button" class="collapsibleCard__toggle characterSectionToggle" aria-expanded="false">
+                    <div class="left">
+                        <div class="h2">Übungen und Sprache</div>
+                        <div class="muted small">Zusätzliche Kenntnisse, Fertigkeiten und bekannte Sprachen.</div>
+                    </div>
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+
+                <div class="collapsibleCard__body characterSectionBody" hidden>
+                    <div class="formGrid">
+                        <label class="field field--full">
+                            <span class="label">Übungen</span>
+                            <textarea id="prof_lang_proficiencies" rows="6"
+                                placeholder="z.B. Alchemistenbedarf, Schmiedewerkzeuge, Lautenspiel, Würfelspiel ..."></textarea>
+                        </label>
+
+                        <label class="field field--full">
+                            <span class="label">Sprachen</span>
+                            <textarea id="prof_lang_languages" rows="6"
+                                placeholder="z.B. Gemeinsprache, Elfisch, Zwergisch ..."></textarea>
+                        </label>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Persönlichkeit -->
+        <section id="sec-personality" data-nav-label="Persönlichkeit">
+            <section class="card collapsibleCard">
+                <button type="button" class="collapsibleCard__toggle characterSectionToggle" aria-expanded="false">
+                    <div class="left">
+                        <div class="h2">Persönlichkeit</div>
+                        <div class="muted small">Was den Charakter antreibt. Oder sabotiert. Meistens beides.</div>
+                    </div>
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+
+                <div class="collapsibleCard__body characterSectionBody" hidden>
+                    <div class="formGrid">
+                        <label class="field field--full">
+                            <span class="label">Merkmale</span>
+                            <textarea id="personality_traits" rows="5"
+                                placeholder="Charaktereigenschaften, Gewohnheiten, typische Verhaltensweisen ..."></textarea>
+                        </label>
+
+                        <label class="field field--full">
+                            <span class="label">Ideale</span>
+                            <textarea id="personality_ideals" rows="5"
+                                placeholder="Wofür steht dein Charakter?"></textarea>
+                        </label>
+
+                        <label class="field field--full">
+                            <span class="label">Bindung</span>
+                            <textarea id="personality_bonds" rows="5"
+                                placeholder="Wem oder was fühlt sich dein Charakter verbunden?"></textarea>
+                        </label>
+
+                        <label class="field field--full">
+                            <span class="label">Makel</span>
+                            <textarea id="personality_flaws" rows="5"
+                                placeholder="Schwächen, Fehler, problematische Muster ..."></textarea>
+                        </label>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <!-- Navigation Drawer -->
+    <div id="navBackdrop" class="backdrop" hidden></div>
+
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>Navigation</strong>
+            <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
+        </div>
+        <div id="navList" class="drawer__content">
+            <!-- Items kommen per JS -->
+        </div>
+    </aside>
+
+    <script type="module" src="/app.js"></script>
+    <script type="module" src="/charakter.js"></script>
+</body>
+
+</html>

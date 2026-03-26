@@ -40,4 +40,25 @@ export const NAV = [
       ["sec-items-other", "Sonstiges"],
     ],
   },
+  {
+    key: "charakter",
+    title: "Charakterbeschreibung",
+    href: "/charakter.html",
+    sections: [
+      ["sec-appearance", "Aussehen"],
+      ["sec-proficiencies-languages", "Übungen & Sprache"],
+      ["sec-personality", "Persönlichkeit"],
+    ],
+  },
+  {
+    key: "notes",
+    title: "Notizen",
+    href: "/notes.html",
+    sections: [
+      ["sec-notes-npcs", "NPCs"],
+      ["sec-notes-quests", "Quests"],
+      ["sec-notes-places", "Orte"],
+      ["sec-notes-story", "Story"],
+    ],
+  },
 ];

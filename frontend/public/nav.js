@@ -93,7 +93,12 @@ export function buildSheetNav({
                 scope = document.querySelector("main.page--spells") ?? document;
             } else if (groupCfg.key === "inventory") {
                 scope = document.querySelector("main.page--inventory") ?? document;
+            } else if (groupCfg.key === "charakter") {
+                scope = document.querySelector("main.page--charakter") ?? document;
+            } else if (groupCfg.key === "notes") {
+                scope = document.querySelector("main.page--notes") ?? document;
             }
+
 
             const domSections = collectSections(scope);
 

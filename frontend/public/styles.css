@@ -2252,3 +2252,391 @@ body {
         background: transparent;
     }
 }
+
+/* =========================================================
+   CHARAKTER PAGE – MOBILE FIRST / INVENTORY-SPELL STYLE
+   ========================================================= */
+
+.page--charakter {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 12px;
+    display: grid;
+    gap: 14px;
+    overflow-x: hidden;
+}
+
+.page--charakter section[id] {
+    scroll-margin-top: 84px;
+}
+
+.page--charakter .card {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+}
+
+.page--charakter .card__header {
+    padding: 14px 16px 8px;
+}
+
+.page--charakter .card__body {
+    padding: 0 16px 16px;
+}
+
+.page--charakter .h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.page--charakter .muted.small {
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* =========================================================
+   INPUT LOOK
+   ========================================================= */
+
+.page--charakter .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.page--charakter .label {
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.page--charakter input,
+.page--charakter select,
+.page--charakter textarea {
+    width: 100%;
+    min-width: 0;
+    appearance: none;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    font: inherit;
+    padding: 10px 12px;
+    outline: none;
+    box-shadow: none;
+}
+
+.page--charakter input::placeholder,
+.page--charakter textarea::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+
+.page--charakter textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.page--charakter input:focus,
+.page--charakter select:focus,
+.page--charakter textarea:focus {
+    border-color: rgba(120, 160, 255, 0.8);
+    box-shadow: 0 0 0 3px rgba(120, 160, 255, 0.14);
+}
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+
+.characterMetaGrid,
+.page--charakter .formGrid {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+}
+
+.characterMetaGrid {
+    grid-template-columns: 1fr;
+    margin-top: 14px;
+}
+
+.page--charakter .formGrid {
+    grid-template-columns: 1fr;
+    margin-top: 14px;
+}
+
+.page--charakter .formGrid .field--full {
+    grid-column: 1 / -1;
+}
+
+/* =========================================================
+   COLLAPSIBLE
+   ========================================================= */
+
+.page--charakter .collapsibleCard__toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px 10px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.page--charakter .collapsibleCard__toggle .left {
+    min-width: 0;
+}
+
+.page--charakter .collapsibleCard__toggle .h2 {
+    margin: 0;
+}
+
+.page--charakter .collapsibleCard__icon {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 0.95rem;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.page--charakter .collapsibleCard.is-open .collapsibleCard__icon {
+    transform: rotate(180deg);
+}
+
+.page--charakter .collapsibleCard__body {
+    padding: 0 16px 16px;
+}
+
+.page--charakter .collapsibleCard__body[hidden] {
+    display: none;
+}
+
+/* =========================================================
+   IMAGE
+   ========================================================= */
+
+.characterImageCard {
+    display: grid;
+    gap: 12px;
+}
+
+.characterImagePreviewWrap {
+    position: relative;
+    width: 100%;
+    min-height: 220px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.characterImagePreview {
+    display: block;
+    width: 100%;
+    max-height: 360px;
+    object-fit: cover;
+}
+
+.characterImagePlaceholder {
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.characterImageUpload {
+    position: relative;
+    overflow: hidden;
+}
+
+.row.wrap {
+    flex-wrap: wrap;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (min-width: 600px) {
+    .characterMetaGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .page--charakter .formGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .page--charakter .formGrid .field--full {
+        grid-column: 1 / -1;
+    }
+}
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
+@media (min-width: 900px) {
+    .page--charakter {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .characterMetaGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .characterImagePreviewWrap {
+        max-width: 560px;
+    }
+}
+
+/* =========================================================
+   NOTES PAGE – MOBILE FIRST / APP STYLE
+   ========================================================= */
+
+.page--notes {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 12px;
+    display: grid;
+    gap: 14px;
+    overflow-x: hidden;
+}
+
+.page--notes section[id] {
+    scroll-margin-top: 84px;
+}
+
+.page--notes .card {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+}
+
+.page--notes .h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.page--notes .muted.small {
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+.page--notes .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.page--notes .label {
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.page--notes textarea {
+    width: 100%;
+    min-width: 0;
+    appearance: none;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    font: inherit;
+    padding: 12px;
+    outline: none;
+    box-shadow: none;
+    resize: vertical;
+    min-height: 220px;
+}
+
+.page--notes textarea::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+
+.page--notes textarea:focus {
+    border-color: rgba(120, 160, 255, 0.8);
+    box-shadow: 0 0 0 3px rgba(120, 160, 255, 0.14);
+}
+
+.page--notes .collapsibleCard__toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px 10px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.page--notes .collapsibleCard__toggle .left {
+    min-width: 0;
+}
+
+.page--notes .collapsibleCard__icon {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 0.95rem;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.page--notes .collapsibleCard.is-open .collapsibleCard__icon {
+    transform: rotate(180deg);
+}
+
+.page--notes .collapsibleCard__body {
+    padding: 0 16px 16px;
+}
+
+.page--notes .collapsibleCard__body[hidden] {
+    display: none;
+}
+
+@media (min-width: 900px) {
+    .page--notes {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .page--notes textarea {
+        min-height: 260px;
+    }
+}

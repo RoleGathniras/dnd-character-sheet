@@ -553,6 +553,14 @@ document.addEventListener("DOMContentLoaded", () => {
         body.hidden = isOpen;
         card.classList.toggle("is-open", !isOpen);
     }
+    function bindCollapsibleSections() {
+        document.addEventListener("click", (e) => {
+            const toggleBtn = e.target.closest(".collapsibleCard__toggle");
+            if (!toggleBtn) return;
+
+            toggleCollapsible(toggleBtn);
+        });
+    }
 
     function bindInventoryTableEvents() {
         const allBodies = [

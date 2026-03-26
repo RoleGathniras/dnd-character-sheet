@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>D&D 5E – Notizen</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="app">
+    <!-- Topbar -->
+    <header class="appbar">
+        <div class="appbar__left"></div>
+
+        <div class="appbar__right">
+            <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
+            <button id="btnNavOpen" class="btn" aria-label="Notizen Navigation">Navigation ☰</button>
+        </div>
+    </header>
+
+    <!-- Charakter-Drawer -->
+    <div id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <strong id="drawerUserTitle">Charaktere</strong>
+            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+        </div>
+
+        <div class="drawer__content">
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
+                    Charaktere
+                </button>
+                <div id="listMine" class="drawer__list">
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
+            </div>
+
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
+                    NPCs
+                </button>
+                <div id="listNpcs" class="drawer__list" hidden>
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
+            </div>
+
+            <div class="drawer__section" id="drawerActionsSection" hidden>
+                <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
+                    Aktionen
+                </button>
+
+                <div id="actionsMenu" class="actionsMenu drawer__list" hidden>
+                    <button id="btnCreatePC" class="btn drawer__item" disabled hidden>Neuer Charakter</button>
+                    <button id="btnCreateNPC" class="btn drawer__item" disabled hidden>Neuer NPC</button>
+                    <button id="btnSave" class="btn btn--primary drawer__item" disabled hidden>Speichern</button>
+                    <button id="btnDelete" class="btn btn--danger drawer__item" disabled hidden>Charakter
+                        löschen</button>
+                </div>
+            </div>
+
+            <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
+        </div>
+    </div>
+
+    <div id="backdrop" class="backdrop" hidden></div>
+
+    <main class="page page--notes">
+        <section id="sec-notes-npcs" data-nav-label="NPCs">
+            <section class="card collapsibleCard">
+                <button type="button" class="collapsibleCard__toggle notesSectionToggle" aria-expanded="false">
+                    <div class="left">
+                        <div class="h2">NPCs</div>
+                        <div class="muted small">Wichtige Personen, Kontakte, Feinde und zwielichtige Gestalten.</div>
+                    </div>
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+
+                <div class="collapsibleCard__body notesSectionBody" hidden>
+                    <label class="field field--full">
+                        <span class="label">NPC-Notizen</span>
+                        <textarea id="notes_npcs" rows="12"
+                            placeholder="Namen, Beziehungen, Hinweise, Verdachtsmomente, offene Fragen ..."></textarea>
+                    </label>
+                </div>
+            </section>
+        </section>
+
+        <section id="sec-notes-quests" data-nav-label="Quests">
+            <section class="card collapsibleCard">
+                <button type="button" class="collapsibleCard__toggle notesSectionToggle" aria-expanded="false">
+                    <div class="left">
+                        <div class="h2">Quests</div>
+                        <div class="muted small">Aktive Aufträge, Ziele, Belohnungen und lose Enden.</div>
+                    </div>
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+
+                <div class="collapsibleCard__body notesSectionBody" hidden>
+                    <label class="field field--full">
+                        <span class="label">Quest-Notizen</span>
+                        <textarea id="notes_quests" rows="12"
+                            placeholder="Questgeber, Ziel, Fortschritt, Fristen, Belohnungen ..."></textarea>
+                    </label>
+                </div>
+            </section>
+        </section>
+
+        <section id="sec-notes-places" data-nav-label="Orte">
+            <section class="card collapsibleCard">
+                <button type="button" class="collapsibleCard__toggle notesSectionToggle" aria-expanded="false">
+                    <div class="left">
+                        <div class="h2">Orte</div>
+                        <div class="muted small">Städte, Dungeons, Tavernen, Ruinen und alles dazwischen.</div>
+                    </div>
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+
+                <div class="collapsibleCard__body notesSectionBody" hidden>
+                    <label class="field field--full">
+                        <span class="label">Orts-Notizen</span>
+                        <textarea id="notes_places" rows="12"
+                            placeholder="Besuchte Orte, Besonderheiten, Gerüchte, Gefahren, Fundorte ..."></textarea>
+                    </label>
+                </div>
+            </section>
+        </section>
+
+        <section id="sec-notes-story" data-nav-label="Story">
+            <section class="card collapsibleCard">
+                <button type="button" class="collapsibleCard__toggle notesSectionToggle" aria-expanded="false">
+                    <div class="left">
+                        <div class="h2">Story</div>
+                        <div class="muted small">Wichtige Ereignisse, Zusammenhänge, Theorien und Kampagnenverlauf.
+                        </div>
+                    </div>
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+
+                <div class="collapsibleCard__body notesSectionBody" hidden>
+                    <label class="field field--full">
+                        <span class="label">Story-Notizen</span>
+                        <textarea id="notes_story" rows="12"
+                            placeholder="Was ist passiert, was hängt zusammen, was vermutest du als Nächstes ..."></textarea>
+                    </label>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <!-- Navigation Drawer -->
+    <div id="navBackdrop" class="backdrop" hidden></div>
+
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>Navigation</strong>
+            <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
+        </div>
+        <div id="navList" class="drawer__content">
+            <!-- Items kommen per JS -->
+        </div>
+    </aside>
+
+    <script type="module" src="/app.js"></script>
+    <script type="module" src="/notes.js"></script>
+</body>
+
+</html>

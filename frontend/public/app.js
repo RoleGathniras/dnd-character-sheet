@@ -1021,6 +1021,8 @@ import { buildSheetNav } from "/nav.js";
             const isSheetPage = location.pathname.endsWith("/sheet.html");
             const isSpellPage = location.pathname.endsWith("/spell.html");
             const isInventoryPage = location.pathname.endsWith("/inventory.html");
+            const isCharacterPage = location.pathname.endsWith("/charakter.html");
+            const isNotesPage = location.pathname.endsWith("/notes.html");
 
             if (isIndexPage) {
                 setLoggedInUI(!!API.token);
@@ -1035,6 +1037,20 @@ import { buildSheetNav } from "/nav.js";
             }
 
             if (isInventoryPage) {
+                buildSheetNav({ navList, btnNavOpen, closeNavDrawer, sheetRootEl });
+                scrollToHashWithRetry();
+                setLoggedInUI(!!API.token);
+                return;
+            }
+
+            if (isCharacterPage) {
+                buildSheetNav({ navList, btnNavOpen, closeNavDrawer, sheetRootEl });
+                scrollToHashWithRetry();
+                setLoggedInUI(!!API.token);
+                return;
+            }
+
+            if (isNotesPage) {
                 buildSheetNav({ navList, btnNavOpen, closeNavDrawer, sheetRootEl });
                 scrollToHashWithRetry();
                 setLoggedInUI(!!API.token);
