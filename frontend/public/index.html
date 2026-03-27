@@ -1,31 +1,28 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>DnD Character Sheet</title>
-    <link rel="stylesheet" href="/styles.css"/>
+    <link rel="stylesheet" href="/styles.css" />
 </head>
+
 <body>
-<!-- Appbar -->
-<div class="appbar">
-    <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
-
-    <div class="actions">
-        <button id="btnActions" class="btn" aria-label="Character" style="display:none">Erstellen</button>
+    <!-- Appbar -->
+    <div class="appbar">
+        <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
+        <button id="btnLogin" class="btn">Login</button>
+        <button id="btnLogout" class="btn" style="display:none">Logout</button>
+        <button id="btnRegister" class="btn">Registrieren</button>
     </div>
-
-    <button id="btnNavOpen" class="btn" aria-label="Sheet Navigation">Nav</button>
-    <button id="btnLogin" class="btn">Login</button>
-    <button id="btnLogout" class="btn" style="display:none">Logout</button>
-    <button id="btnRegister" class="btn">Registrieren</button>
 
     <div id="authPanel" class="panel authPanel" hidden>
         <div class="authRow">
-            <input id="authUsername" class="input" placeholder="Username" autocomplete="username"/>
+            <input id="authUsername" class="input" placeholder="Username" autocomplete="username" />
         </div>
         <div class="authRow">
-            <input id="authPassword" class="input" placeholder="Passwort" type="password" autocomplete="new-password"/>
+            <input id="authPassword" class="input" placeholder="Passwort" type="password" autocomplete="new-password" />
         </div>
         <div class="authActions">
             <button id="btnAuthDoRegister" class="btn btn--primary">Account erstellen</button>
@@ -33,76 +30,92 @@
         </div>
         <div class="authHint">Nach Erstellung muss ein Admin dich freischalten.</div>
     </div>
-</div>
 
-<!-- Drawer -->
-<div id="drawer" class="drawer" aria-hidden="true">
-    <div class="drawer__header">
-        <strong id="drawerUserTitle">Charaktere</strong>
-        <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
-    </div>
+    <!-- Drawer -->
+    <div id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <strong id="drawerUserTitle">Charaktere</strong>
+            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+        </div>
 
-    <div class="drawer__content">
-        <div class="drawer__section">
-            <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
-                Charaktere
-            </button>
-            <div id="listMine" class="drawer__list">
-                <button class="drawer__item" disabled>(noch keine Daten)</button>
+        <div class="drawer__content">
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
+                    Charaktere
+                </button>
+                <div id="listMine" class="drawer__list">
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
             </div>
-        </div>
 
-        <div class="drawer__section">
-            <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
-                NPCs
-            </button>
-            <div id="listNpcs" class="drawer__list" hidden>
-                <button class="drawer__item" disabled>(noch keine Daten)</button>
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
+                    NPCs
+                </button>
+                <div id="listNpcs" class="drawer__list" hidden>
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
             </div>
-        </div>
-        <div class="drawer__section" id="drawerActionsSection">
-            <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
-                Aktionen
-            </button>
 
-            <div id="actionsMenu" class="actionsMenu drawer__list">
-                <button id="btnCreatePC" class="btn" disabled>Neuer Charakter</button>
-                <button id="btnCreateNPC" class="btn" disabled>Neuer NPC</button>
-                <button id="btnSave" class="btn btn--primary" disabled>Speichern</button>
-                <button id="btnDelete" class="btn btn--danger" disabled>Charakter löschen</button>
+            <div class="drawer__section" id="drawerActionsSection">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
+                    Aktionen
+                </button>
+
+                <div id="actionsMenu" class="actionsMenu drawer__list">
+                    <button id="btnCreatePC" class="btn drawer__item" disabled>Neuer Charakter</button>
+                    <button id="btnCreateNPC" class="btn drawer__item" disabled>Neuer NPC</button>
+                    <button id="btnSave" class="btn btn--primary drawer__item" disabled
+                        style="display:none">Speichern</button>
+                    <button id="btnDelete" class="btn btn--danger drawer__item" disabled style="display:none">Charakter
+                        löschen</button>
+                </div>
             </div>
+
+            <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
         </div>
-
-        <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
     </div>
-</div>
-<div id="backdrop" class="backdrop" hidden></div>
+    <div id="backdrop" class="backdrop" hidden></div>
 
-<!-- Right nav drawer -->
-<div id="navBackdrop" class="backdrop" hidden></div>
-<aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
-    <div class="drawer__header">
-        <strong>Navigation</strong>
-        <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
-    </div>
-    <div id="navList" class="drawer__content"></div>
-</aside>
-
-<!-- Landing Content -->
-<main class="page--landing">
-    <section class="panel">
-        <h1>DnD Character Sheet</h1>
-    </section>
-
-    <section id="adminPanel" class="panel" hidden>
-        <div class="adminHeader">
-            <div class="adminTitle">Admin – User</div>
-            <button id="btnReloadUsers" class="btn">Neu laden</button>
+    <!-- Right nav drawer -->
+    <div id="navBackdrop" class="backdrop" hidden></div>
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>Navigation</strong>
+            <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
         </div>
-        <div id="adminUsers" class="adminUsers"></div>
-    </section>
-</main>
+        <div id="navList" class="drawer__content"></div>
+    </aside>
 
-<script type="module" src="/app.js"></script>
+    <!-- Content -->
+    <main class="page--landing">
+        <section class="panel landingHero">
+            <h1>DnD Character Sheet</h1>
+        </section>
+
+        <section class="panel">
+            <div class="landingSectionHead">
+                <h2>Deine Charaktere</h2>
+            </div>
+
+            <div id="characterEmptyState" class="emptyState">
+                Bitte einloggen, um deine Charaktere zu sehen.
+            </div>
+
+            <div id="characterGrid" class="characterGrid"></div>
+        </section>
+
+        <section id="adminPanel" class="panel" hidden>
+            <div class="adminHeader">
+                <div class="adminTitle">Admin – User</div>
+                <button id="btnReloadUsers" class="btn">Neu laden</button>
+            </div>
+            <div id="adminUsers" class="adminUsers"></div>
+        </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+    <script type="module" src="/index.js"></script>
 </body>
+
 </html>
