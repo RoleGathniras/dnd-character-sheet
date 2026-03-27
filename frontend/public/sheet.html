@@ -1,540 +1,547 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>DnD Character Sheet</title>
-    <link rel="stylesheet" href="/styles.css"/>
+    <link rel="stylesheet" href="/styles.css" />
 </head>
+
 <body>
-<!-- Appbar -->
-<div class="appbar">
-    <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
+    <!-- Appbar -->
+    <div class="appbar">
+        <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
 
-    <!-- Actions Dropdown -->
-    <div class="actions">
-        <button id="btnActions" class="btn" aria-label="Character" hidden style="display:none">Erstellen</button>
-    </div>
-
-    <button id="btnNavOpen" class="btn" aria-label="Sheet Navigation" style="display:none">Navigation ☰</button>
-    <button id="btnLogin" class="btn">Login</button>
-    <button id="btnLogout" class="btn" style="display:none">Logout</button>
-    <button id="btnRegister" class="btn">Registrieren</button>
-
-    <div id="authPanel" class="panel authPanel" hidden>
-        <div class="authRow">
-            <input id="authUsername" class="input" placeholder="Username" autocomplete="username"/>
+        <!-- Actions Dropdown -->
+        <div class="actions">
+            <button id="btnActions" class="btn" aria-label="Character" hidden style="display:none">Erstellen</button>
         </div>
-        <div class="authRow">
-            <input id="authPassword" class="input" placeholder="Passwort" type="password" autocomplete="new-password"/>
-        </div>
-        <div class="authActions">
-            <button id="btnAuthDoRegister" class="btn btn--primary">Account erstellen</button>
-            <button id="btnAuthCancel" class="btn">Abbrechen</button>
-        </div>
-        <div class="authHint">Nach Erstellung muss ein Admin dich freischalten.</div>
-    </div>
-</div>
 
-<!-- Drawer -->
-<div id="drawer" class="drawer" aria-hidden="true">
-    <div class="drawer__header">
-        <strong id="drawerUserTitle">Charaktere</strong>
-        <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
-    </div>
+        <button id="btnNavOpen" class="btn" aria-label="Sheet Navigation" style="display:none">Navigation</button>
+        <button id="btnLogin" class="btn">Login</button>
+        <button id="btnLogout" class="btn" style="display:none">Logout</button>
+        <button id="btnRegister" class="btn">Registrieren</button>
 
-    <div class="drawer__content">
-        <div class="drawer__section">
-            <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
-                Charaktere
-            </button>
-            <div id="listMine" class="drawer__list">
-                <button class="drawer__item" disabled>(noch keine Daten)</button>
+        <div id="authPanel" class="panel authPanel" hidden>
+            <div class="authRow">
+                <input id="authUsername" class="input" placeholder="Username" autocomplete="username" />
             </div>
-        </div>
-
-        <div class="drawer__section">
-            <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
-                NPCs
-            </button>
-            <div id="listNpcs" class="drawer__list" hidden>
-                <button class="drawer__item" disabled>(noch keine Daten)</button>
+            <div class="authRow">
+                <input id="authPassword" class="input" placeholder="Passwort" type="password"
+                    autocomplete="new-password" />
             </div>
-        </div>
-        <div class="drawer__section" id="drawerActionsSection">
-            <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
-                Aktionen
-            </button>
-
-            <div id="actionsMenu" class="actionsMenu drawer__list">
-                <button id="btnCreatePC" class="btn drawer__item" disabled>Neuer Charakter</button>
-                <button id="btnCreateNPC" class="btn drawer__item" disabled>Neuer NPC</button>
-                <button id="btnSave" class="btn btn--primary drawer__item" disabled>Speichern</button>
-                <button id="btnDelete" class="btn btn--danger drawer__item" disabled>Charakter löschen</button>
+            <div class="authActions">
+                <button id="btnAuthDoRegister" class="btn btn--primary">Account erstellen</button>
+                <button id="btnAuthCancel" class="btn">Abbrechen</button>
             </div>
+            <div class="authHint">Nach Erstellung muss ein Admin dich freischalten.</div>
         </div>
-
-        <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
     </div>
-</div>
-<div id="backdrop" class="backdrop" hidden></div>
 
-<!-- Right nav drawer -->
-<div id="navBackdrop" class="backdrop" hidden></div>
-<aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
-    <div class="drawer__header">
-        <strong>Navigation</strong>
-        <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
-    </div>
-    <div id="navList" class="drawer__content"></div>
-</aside>
+    <!-- Drawer -->
+    <div id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <strong id="drawerUserTitle">Charaktere</strong>
+            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+        </div>
 
-<!-- Content -->
-<main class="page--sheet">
-    <section class="sheet" id="sheetRoot">
-
-        <section id="sec-header" data-nav-label="Basis" tabindex="-1">
-            <h2 id="sheetTitle">Kein Charakter geladen</h2>
-
-            <div class="grid">
-                <label>Charaktername <input id="character_name"/></label>
-                <label>Klasse <input id="class"/></label>
-                <label>Volk <input id="race"/></label>
-                <label>Stufe <input id="level" type="number" min="1"/></label>
-            </div>
-        </section>
-
-        <section id="sec-values" data-nav-label="Werte" tabindex="-1">
-            <h3>Werte</h3>
-            <div class="sheetTopGrid">
-                <div class="topBlock topBlock--inspiration">
-                    <label class="inspirationField">
-                        Inspiration
-                        <div class="inspirationInner">
-                            <input id="inspiration" type="checkbox"/>
-                            <span>Extra Wurf</span>
-                        </div>
-                    </label>
+        <div class="drawer__content">
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
+                    Charaktere
+                </button>
+                <div id="listMine" class="drawer__list">
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
                 </div>
-
-                <label class="topField topField--pb">Übungsbonus
-                    <input id="proficiency_bonus" type="number"/>
-                </label>
-
-                <label class="topField topField--init">Initiative
-                    <input id="initiative" type="number"/>
-                </label>
-
-                <label class="topField topField--speed">Bewegungsrate
-                    <input id="speed" type="number"/>
-                </label>
-
-                <div class="topBlock topBlock--ac">
-                    <label class="topField">Rüstungsklasse
-                        <input id="ac" type="number"/>
-                    </label>
-                </div>
-
-                <label class="topField topField--hpmax">TP Maximum
-                    <input id="hp_max" type="number"/>
-                </label>
-
-                <label class="topField topField--hpcur">TP Aktuell
-                    <input id="hp_current" type="number"/>
-                </label>
-
-                <label class="topField topField--hptemp">TP Temporär
-                    <input id="hp_temp" type="number"/>
-                </label>
             </div>
-        </section>
 
-        <div class="sheetTwoCol">
-            <section id="sec-abilities" class="abilities" tabindex="-1">
-                <section id="sec-attributes" data-nav-label="Attribute" tabindex="-1">
-                    <h3>Attribute</h3>
-                    <!-- abilityCards ... -->
-                    <div class="abilityCard">
-                        <div class="abilityHead">Stärke</div>
-                        <input id="str" type="number"/>
-                        <div class="modBadge">
-                            <span class="modLabel">MOD</span>
-                            <input id="str_mod" type="number" readonly/>
-                        </div>
-                    </div>
-                    <div class="abilityCard">
-                        <div class="abilityHead">Geschicklichkeit</div>
-                        <input id="dex" type="number"/>
-                        <div class="modBadge">
-                            <span class="modLabel">MOD</span>
-                            <input id="dex_mod" type="number" readonly/>
-                        </div>
-                    </div>
-                    <div class="abilityCard">
-                        <div class="abilityHead">Konstitution</div>
-                        <input id="con" type="number"/>
-                        <div class="modBadge">
-                            <span class="modLabel">MOD</span>
-                            <input id="con_mod" type="number" readonly/>
-                        </div>
-                    </div>
-                    <div class="abilityCard">
-                        <div class="abilityHead">Intelligenz</div>
-                        <input id="int" type="number"/>
-                        <div class="modBadge">
-                            <span class="modLabel">MOD</span>
-                            <input id="int_mod" type="number" readonly/>
-                        </div>
-                    </div>
-                    <div class="abilityCard">
-                        <div class="abilityHead">Weisheit</div>
-                        <input id="wis" type="number"/>
-                        <div class="modBadge">
-                            <span class="modLabel">MOD</span>
-                            <input id="wis_mod" type="number" readonly/>
-                        </div>
-                    </div>
-                    <div class="abilityCard">
-                        <div class="abilityHead">Charisma</div>
-                        <input id="cha" type="number"/>
-                        <div class="modBadge">
-                            <span class="modLabel">MOD</span>
-                            <input id="cha_mod" type="number" readonly/>
-                        </div>
-                    </div>
-                </section>
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
+                    NPCs
+                </button>
+                <div id="listNpcs" class="drawer__list" hidden>
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
+            </div>
+            <div class="drawer__section" id="drawerActionsSection">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
+                    Aktionen
+                </button>
 
-                <section id="sec-saves" data-nav-label="Rettungswürfe" tabindex="-1">
-                    <h3>Rettungswürfe</h3>
-                    <div class="saveList">
-                        <div class="saveRow">
-                            <input id="save_str_prof" type="checkbox"/>
-                            <div class="saveName">Stärke</div>
-                            <input id="save_str" type="number" readonly/>
-                        </div>
+                <div id="actionsMenu" class="actionsMenu drawer__list">
+                    <button id="btnCreatePC" class="btn drawer__item" disabled>Neuer Charakter</button>
+                    <button id="btnCreateNPC" class="btn drawer__item" disabled>Neuer NPC</button>
+                    <button id="btnSave" class="btn btn--primary drawer__item" disabled>Speichern</button>
+                    <button id="btnDelete" class="btn btn--danger drawer__item" disabled>Charakter löschen</button>
+                </div>
+            </div>
 
-                        <div class="saveRow">
-                            <input id="save_dex_prof" type="checkbox"/>
-                            <div class="saveName">Geschicklichkeit</div>
-                            <input id="save_dex" type="number" readonly/>
-                        </div>
+            <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
+        </div>
+    </div>
+    <div id="backdrop" class="backdrop" hidden></div>
 
-                        <div class="saveRow">
-                            <input id="save_con_prof" type="checkbox"/>
-                            <div class="saveName">Konstitution</div>
-                            <input id="save_con" type="number" readonly/>
-                        </div>
+    <!-- Right nav drawer -->
+    <div id="navBackdrop" class="backdrop" hidden></div>
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>Navigation</strong>
+            <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
+        </div>
+        <div id="navList" class="drawer__content"></div>
+    </aside>
 
-                        <div class="saveRow">
-                            <input id="save_int_prof" type="checkbox"/>
-                            <div class="saveName">Intelligenz</div>
-                            <input id="save_int" type="number" readonly/>
-                        </div>
+    <!-- Content -->
+    <main class="page--sheet">
+        <section class="sheet" id="sheetRoot">
 
-                        <div class="saveRow">
-                            <input id="save_wis_prof" type="checkbox"/>
-                            <div class="saveName">Weisheit</div>
-                            <input id="save_wis" type="number" readonly/>
-                        </div>
+            <section id="sec-header" data-nav-label="Basis" tabindex="-1">
+                <h2 id="sheetTitle">Kein Charakter geladen</h2>
 
-                        <div class="saveRow">
-                            <input id="save_cha_prof" type="checkbox"/>
-                            <div class="saveName">Charisma</div>
-                            <input id="save_cha" type="number" readonly/>
-                        </div>
-                    </div>
-                    <h3>Vorteile / Nachteile</h3>
-                    <label>
-                        Notizen (z.B. Vorteil bei RW gegen Gift, Nachteil bei Weisheit etc.)
-                        <textarea id="notes_adv_dis" rows="4"></textarea>
-                    </label>
-                </section>
-
-                <section id="sec-passives" data-nav-label="Passive Werte" tabindex="-1">
-                    <h3>Passive Werte</h3>
-                    <div class="passiveList">
-                        <label>Passive Wahrnehmung
-                            <input id="passive_perception" type="number" readonly/>
-                        </label>
-
-                        <label>Passive Nachforschungen
-                            <input id="passive_investigation" type="number" readonly/>
-                        </label>
-
-                        <label>Passive Motiv erkennen
-                            <input id="passive_insight" type="number" readonly/>
-                        </label>
-                    </div>
-                </section>
+                <div class="grid">
+                    <label>Charaktername <input id="character_name" /></label>
+                    <label>Klasse <input id="class" /></label>
+                    <label>Volk <input id="race" /></label>
+                    <label>Stufe <input id="level" type="number" min="1" /></label>
+                </div>
             </section>
 
-            <section id="sec-skills" class="skills" data-nav-label="Fertigkeiten" tabindex="-1">
-                <h3>Fertigkeiten</h3>
-                <div class="skillGroup">
-                    <div class="skillGroupTitle">Stärke</div>
-                    <div class="skillRow">
-                        <input id="skill_athletics_prof" type="checkbox"/>
-                        <div class="skillName">Athletik</div>
-                        <input id="skill_athletics" type="number" readonly/>
+            <section id="sec-values" data-nav-label="Werte" tabindex="-1">
+                <h3>Werte</h3>
+                <div class="sheetTopGrid">
+                    <div class="topBlock topBlock--inspiration">
+                        <label class="inspirationField">
+                            Inspiration
+                            <div class="inspirationInner">
+                                <input id="inspiration" type="checkbox" />
+                                <span>Extra Wurf</span>
+                            </div>
+                        </label>
                     </div>
-                </div>
 
-                <div class="skillGroup">
-                    <div class="skillGroupTitle">Geschicklichkeit</div>
-                    <div class="skillRow">
-                        <input id="skill_acrobatics_prof" type="checkbox"/>
-                        <div class="skillName">Akrobatik</div>
-                        <input id="skill_acrobatics" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_sleight_of_hand_prof" type="checkbox"/>
-                        <div class="skillName">Fingerfertigkeit</div>
-                        <input id="skill_sleight_of_hand" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_stealth_prof" type="checkbox"/>
-                        <div class="skillName">Heimlichkeit</div>
-                        <input id="skill_stealth" type="number" readonly/>
-                    </div>
-                </div>
+                    <label class="topField topField--pb">Übungsbonus
+                        <input id="proficiency_bonus" type="number" />
+                    </label>
 
-                <div class="skillGroup">
-                    <div class="skillGroupTitle">Intelligenz</div>
-                    <div class="skillRow">
-                        <input id="skill_arcana_prof" type="checkbox"/>
-                        <div class="skillName">Arkane Kunde</div>
-                        <input id="skill_arcana" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_history_prof" type="checkbox"/>
-                        <div class="skillName">Geschichte</div>
-                        <input id="skill_history" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_investigation_prof" type="checkbox"/>
-                        <div class="skillName">Nachforschungen</div>
-                        <input id="skill_investigation" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_nature_prof" type="checkbox"/>
-                        <div class="skillName">Natur</div>
-                        <input id="skill_nature" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_religion_prof" type="checkbox"/>
-                        <div class="skillName">Religion</div>
-                        <input id="skill_religion" type="number" readonly/>
-                    </div>
-                </div>
+                    <label class="topField topField--init">Initiative
+                        <input id="initiative" type="number" />
+                    </label>
 
-                <div class="skillGroup">
-                    <div class="skillGroupTitle">Weisheit</div>
-                    <div class="skillRow">
-                        <input id="skill_animal_handling_prof" type="checkbox"/>
-                        <div class="skillName">Mit Tieren umgehen</div>
-                        <input id="skill_animal_handling" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_insight_prof" type="checkbox"/>
-                        <div class="skillName">Motiv erkennen</div>
-                        <input id="skill_insight" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_medicine_prof" type="checkbox"/>
-                        <div class="skillName">Heilkunde</div>
-                        <input id="skill_medicine" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_perception_prof" type="checkbox"/>
-                        <div class="skillName">Wahrnehmung</div>
-                        <input id="skill_perception" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_survival_prof" type="checkbox"/>
-                        <div class="skillName">Überlebenskunst</div>
-                        <input id="skill_survival" type="number" readonly/>
-                    </div>
-                </div>
+                    <label class="topField topField--speed">Bewegungsrate
+                        <input id="speed" type="number" />
+                    </label>
 
-                <div class="skillGroup">
-                    <div class="skillGroupTitle">Charisma</div>
-                    <div class="skillRow">
-                        <input id="skill_deception_prof" type="checkbox"/>
-                        <div class="skillName">Täuschung</div>
-                        <input id="skill_deception" type="number" readonly/>
+                    <div class="topBlock topBlock--ac">
+                        <label class="topField">Rüstungsklasse
+                            <input id="ac" type="number" />
+                        </label>
                     </div>
-                    <div class="skillRow">
-                        <input id="skill_intimidation_prof" type="checkbox"/>
-                        <div class="skillName">Einschüchtern</div>
-                        <input id="skill_intimidation" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_performance_prof" type="checkbox"/>
-                        <div class="skillName">Auftreten</div>
-                        <input id="skill_performance" type="number" readonly/>
-                    </div>
-                    <div class="skillRow">
-                        <input id="skill_persuasion_prof" type="checkbox"/>
-                        <div class="skillName">Überreden</div>
-                        <input id="skill_persuasion" type="number" readonly/>
-                    </div>
+
+                    <label class="topField topField--hpmax">TP Maximum
+                        <input id="hp_max" type="number" />
+                    </label>
+
+                    <label class="topField topField--hpcur">TP Aktuell
+                        <input id="hp_current" type="number" />
+                    </label>
+
+                    <label class="topField topField--hptemp">TP Temporär
+                        <input id="hp_temp" type="number" />
+                    </label>
                 </div>
             </section>
-        </div>
 
-        <section class="combatSection">
-            <div class="combatGrid">
-                <section id="sec-deathsaves" class="combatCard" data-nav-label="Deathsaves" tabindex="-1">
-                    <h4>Death Saves</h4>
-                    <div class="deathSaves">
-                        <div class="deathCol">
-                            <div class="deathLabel">Erfolge</div>
-                            <div class="deathRow">
-                                <label class="deathDot"><input id="death_success_1"
-                                                               type="checkbox"/><span>1</span></label>
-                                <label class="deathDot"><input id="death_success_2"
-                                                               type="checkbox"/><span>2</span></label>
-                                <label class="deathDot"><input id="death_success_3"
-                                                               type="checkbox"/><span>3</span></label>
+            <div class="sheetTwoCol">
+                <section id="sec-abilities" class="abilities" tabindex="-1">
+                    <section id="sec-attributes" data-nav-label="Attribute" tabindex="-1">
+                        <h3>Attribute</h3>
+                        <!-- abilityCards ... -->
+                        <div class="abilityCard">
+                            <div class="abilityHead">Stärke</div>
+                            <input id="str" type="number" />
+                            <div class="modBadge">
+                                <span class="modLabel">MOD</span>
+                                <input id="str_mod" type="number" readonly />
                             </div>
                         </div>
-
-                        <div class="deathCol">
-                            <div class="deathLabel">Fehlschläge</div>
-                            <div class="deathRow">
-                                <label class="deathDot"><input id="death_fail_1" type="checkbox"/><span>1</span></label>
-                                <label class="deathDot"><input id="death_fail_2" type="checkbox"/><span>2</span></label>
-                                <label class="deathDot"><input id="death_fail_3" type="checkbox"/><span>3</span></label>
+                        <div class="abilityCard">
+                            <div class="abilityHead">Geschicklichkeit</div>
+                            <input id="dex" type="number" />
+                            <div class="modBadge">
+                                <span class="modLabel">MOD</span>
+                                <input id="dex_mod" type="number" readonly />
                             </div>
                         </div>
-                    </div>
+                        <div class="abilityCard">
+                            <div class="abilityHead">Konstitution</div>
+                            <input id="con" type="number" />
+                            <div class="modBadge">
+                                <span class="modLabel">MOD</span>
+                                <input id="con_mod" type="number" readonly />
+                            </div>
+                        </div>
+                        <div class="abilityCard">
+                            <div class="abilityHead">Intelligenz</div>
+                            <input id="int" type="number" />
+                            <div class="modBadge">
+                                <span class="modLabel">MOD</span>
+                                <input id="int_mod" type="number" readonly />
+                            </div>
+                        </div>
+                        <div class="abilityCard">
+                            <div class="abilityHead">Weisheit</div>
+                            <input id="wis" type="number" />
+                            <div class="modBadge">
+                                <span class="modLabel">MOD</span>
+                                <input id="wis_mod" type="number" readonly />
+                            </div>
+                        </div>
+                        <div class="abilityCard">
+                            <div class="abilityHead">Charisma</div>
+                            <input id="cha" type="number" />
+                            <div class="modBadge">
+                                <span class="modLabel">MOD</span>
+                                <input id="cha_mod" type="number" readonly />
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="sec-saves" data-nav-label="Rettungswürfe" tabindex="-1">
+                        <h3>Rettungswürfe</h3>
+                        <div class="saveList">
+                            <div class="saveRow">
+                                <input id="save_str_prof" type="checkbox" />
+                                <div class="saveName">Stärke</div>
+                                <input id="save_str" type="number" readonly />
+                            </div>
+
+                            <div class="saveRow">
+                                <input id="save_dex_prof" type="checkbox" />
+                                <div class="saveName">Geschicklichkeit</div>
+                                <input id="save_dex" type="number" readonly />
+                            </div>
+
+                            <div class="saveRow">
+                                <input id="save_con_prof" type="checkbox" />
+                                <div class="saveName">Konstitution</div>
+                                <input id="save_con" type="number" readonly />
+                            </div>
+
+                            <div class="saveRow">
+                                <input id="save_int_prof" type="checkbox" />
+                                <div class="saveName">Intelligenz</div>
+                                <input id="save_int" type="number" readonly />
+                            </div>
+
+                            <div class="saveRow">
+                                <input id="save_wis_prof" type="checkbox" />
+                                <div class="saveName">Weisheit</div>
+                                <input id="save_wis" type="number" readonly />
+                            </div>
+
+                            <div class="saveRow">
+                                <input id="save_cha_prof" type="checkbox" />
+                                <div class="saveName">Charisma</div>
+                                <input id="save_cha" type="number" readonly />
+                            </div>
+                        </div>
+                        <h3>Vorteile / Nachteile</h3>
+                        <label>
+                            Notizen (z.B. Vorteil bei RW gegen Gift, Nachteil bei Weisheit etc.)
+                            <textarea id="notes_adv_dis" rows="4"></textarea>
+                        </label>
+                    </section>
+
+                    <section id="sec-passives" data-nav-label="Passive Werte" tabindex="-1">
+                        <h3>Passive Werte</h3>
+                        <div class="passiveList">
+                            <label>Passive Wahrnehmung
+                                <input id="passive_perception" type="number" readonly />
+                            </label>
+
+                            <label>Passive Nachforschungen
+                                <input id="passive_investigation" type="number" readonly />
+                            </label>
+
+                            <label>Passive Motiv erkennen
+                                <input id="passive_insight" type="number" readonly />
+                            </label>
+                        </div>
+                    </section>
                 </section>
 
-                <section id="sec-combat" class="combatCard" data-nav-label="Kampf" tabindex="-1">
-                    <h4>Angriffe</h4>
-                    <div class="attacksRow attacksRowGrid">
-                        <input id="attack_1_type" placeholder="Angriffsart (z.B. Langschwert)"/>
-                        <select id="attack_1_abil">
-                            <option value="">Attr</option>
-                            <option value="str">STR</option>
-                            <option value="dex">DEX</option>
-                            <option value="con">CON</option>
-                            <option value="int">INT</option>
-                            <option value="wis">WIS</option>
-                            <option value="cha">CHA</option>
-                        </select>
-                        <label class="atkProf">
-                            <input id="attack_1_prof" type="checkbox"/>
-                            <span class="switch" aria-hidden="true"></span>
-                            <span>geübt</span>
-                        </label>
-                        <input id="attack_1_misc" type="number" placeholder="Bonus"/>
-                        <input id="attack_1_bonus" type="number" readonly placeholder="ATK"/>
-                        <input id="attack_1_range" placeholder="Reichweite"/>
-                        <input id="attack_1_damage" placeholder="Schaden / Typ"/>
+                <section id="sec-skills" class="skills" data-nav-label="Fertigkeiten" tabindex="-1">
+                    <h3>Fertigkeiten</h3>
+                    <div class="skillGroup">
+                        <div class="skillGroupTitle">Stärke</div>
+                        <div class="skillRow">
+                            <input id="skill_athletics_prof" type="checkbox" />
+                            <div class="skillName">Athletik</div>
+                            <input id="skill_athletics" type="number" readonly />
+                        </div>
                     </div>
 
-                    <div class="attacksRow attacksRowGrid">
-                        <input id="attack_2_type" placeholder="Angriffsart (z.B. Langschwert)"/>
-                        <select id="attack_2_abil">
-                            <option value="">Attr</option>
-                            <option value="str">STR</option>
-                            <option value="dex">DEX</option>
-                            <option value="con">CON</option>
-                            <option value="int">INT</option>
-                            <option value="wis">WIS</option>
-                            <option value="cha">CHA</option>
-                        </select>
-                        <label class="atkProf">
-                            <input id="attack_2_prof" type="checkbox"/>
-                            <span class="switch" aria-hidden="true"></span>
-                            <span>geübt</span>
-                        </label>
-                        <input id="attack_2_misc" type="number" placeholder="Bonus"/>
-                        <input id="attack_2_bonus" type="number" readonly placeholder="ATK"/>
-                        <input id="attack_2_range" placeholder="Reichweite"/>
-                        <input id="attack_2_damage" placeholder="Schaden / Typ"/>
+                    <div class="skillGroup">
+                        <div class="skillGroupTitle">Geschicklichkeit</div>
+                        <div class="skillRow">
+                            <input id="skill_acrobatics_prof" type="checkbox" />
+                            <div class="skillName">Akrobatik</div>
+                            <input id="skill_acrobatics" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_sleight_of_hand_prof" type="checkbox" />
+                            <div class="skillName">Fingerfertigkeit</div>
+                            <input id="skill_sleight_of_hand" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_stealth_prof" type="checkbox" />
+                            <div class="skillName">Heimlichkeit</div>
+                            <input id="skill_stealth" type="number" readonly />
+                        </div>
                     </div>
 
-                    <div class="attacksRow attacksRowGrid">
-                        <input id="attack_3_type" placeholder="Angriffsart (z.B. Langschwert)"/>
-                        <select id="attack_3_abil">
-                            <option value="">Attr</option>
-                            <option value="str">STR</option>
-                            <option value="dex">DEX</option>
-                            <option value="con">CON</option>
-                            <option value="int">INT</option>
-                            <option value="wis">WIS</option>
-                            <option value="cha">CHA</option>
-                        </select>
-                        <label class="atkProf">
-                            <input id="attack_3_prof" type="checkbox"/>
-                            <span class="switch" aria-hidden="true"></span>
-                            <span>geübt</span>
-                        </label>
-                        <input id="attack_3_misc" type="number" placeholder="Bonus"/>
-                        <input id="attack_3_bonus" type="number" readonly placeholder="ATK"/>
-                        <input id="attack_3_range" placeholder="Reichweite"/>
-                        <input id="attack_3_damage" placeholder="Schaden / Typ"/>
+                    <div class="skillGroup">
+                        <div class="skillGroupTitle">Intelligenz</div>
+                        <div class="skillRow">
+                            <input id="skill_arcana_prof" type="checkbox" />
+                            <div class="skillName">Arkane Kunde</div>
+                            <input id="skill_arcana" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_history_prof" type="checkbox" />
+                            <div class="skillName">Geschichte</div>
+                            <input id="skill_history" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_investigation_prof" type="checkbox" />
+                            <div class="skillName">Nachforschungen</div>
+                            <input id="skill_investigation" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_nature_prof" type="checkbox" />
+                            <div class="skillName">Natur</div>
+                            <input id="skill_nature" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_religion_prof" type="checkbox" />
+                            <div class="skillName">Religion</div>
+                            <input id="skill_religion" type="number" readonly />
+                        </div>
                     </div>
 
-                    <div class="attacksRow attacksRowGrid">
-                        <input id="attack_4_type" placeholder="Angriffsart (z.B. Langschwert)"/>
-                        <select id="attack_4_abil">
-                            <option value="">Attr</option>
-                            <option value="str">STR</option>
-                            <option value="dex">DEX</option>
-                            <option value="con">CON</option>
-                            <option value="int">INT</option>
-                            <option value="wis">WIS</option>
-                            <option value="cha">CHA</option>
-                        </select>
-                        <label class="atkProf">
-                            <input id="attack_4_prof" type="checkbox"/>
-                            <span class="switch" aria-hidden="true"></span>
-                            <span>geübt</span>
-                        </label>
-                        <input id="attack_4_misc" type="number" placeholder="Bonus"/>
-                        <input id="attack_4_bonus" type="number" readonly placeholder="ATK"/>
-                        <input id="attack_4_range" placeholder="Reichweite"/>
-                        <input id="attack_4_damage" placeholder="Schaden / Typ"/>
+                    <div class="skillGroup">
+                        <div class="skillGroupTitle">Weisheit</div>
+                        <div class="skillRow">
+                            <input id="skill_animal_handling_prof" type="checkbox" />
+                            <div class="skillName">Mit Tieren umgehen</div>
+                            <input id="skill_animal_handling" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_insight_prof" type="checkbox" />
+                            <div class="skillName">Motiv erkennen</div>
+                            <input id="skill_insight" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_medicine_prof" type="checkbox" />
+                            <div class="skillName">Heilkunde</div>
+                            <input id="skill_medicine" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_perception_prof" type="checkbox" />
+                            <div class="skillName">Wahrnehmung</div>
+                            <input id="skill_perception" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_survival_prof" type="checkbox" />
+                            <div class="skillName">Überlebenskunst</div>
+                            <input id="skill_survival" type="number" readonly />
+                        </div>
                     </div>
 
-                    <div class="attacksRow attacksRowGrid">
-                        <input id="attack_5_type" placeholder="Angriffsart (z.B. Langschwert)"/>
-                        <select id="attack_5_abil">
-                            <option value="">Attr</option>
-                            <option value="str">STR</option>
-                            <option value="dex">DEX</option>
-                            <option value="con">CON</option>
-                            <option value="int">INT</option>
-                            <option value="wis">WIS</option>
-                            <option value="cha">CHA</option>
-                        </select>
-                        <label class="atkProf">
-                            <input id="attack_5_prof" type="checkbox"/>
-                            <span class="switch" aria-hidden="true"></span>
-                            <span>geübt</span>
-                        </label>
-                        <input id="attack_5_misc" type="number" placeholder="Bonus"/>
-                        <input id="attack_5_bonus" type="number" readonly placeholder="ATK"/>
-                        <input id="attack_5_range" placeholder="Reichweite"/>
-                        <input id="attack_5_damage" placeholder="Schaden / Typ"/>
+                    <div class="skillGroup">
+                        <div class="skillGroupTitle">Charisma</div>
+                        <div class="skillRow">
+                            <input id="skill_deception_prof" type="checkbox" />
+                            <div class="skillName">Täuschung</div>
+                            <input id="skill_deception" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_intimidation_prof" type="checkbox" />
+                            <div class="skillName">Einschüchtern</div>
+                            <input id="skill_intimidation" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_performance_prof" type="checkbox" />
+                            <div class="skillName">Auftreten</div>
+                            <input id="skill_performance" type="number" readonly />
+                        </div>
+                        <div class="skillRow">
+                            <input id="skill_persuasion_prof" type="checkbox" />
+                            <div class="skillName">Überreden</div>
+                            <input id="skill_persuasion" type="number" readonly />
+                        </div>
                     </div>
                 </section>
             </div>
-        </section>
-    </section>
-    <section id="adminPanel" class="panel" hidden>
-        <div class="adminHeader">
-            <div class="adminTitle">Admin – User</div>
-            <button id="btnReloadUsers" class="btn">Neu laden</button>
-        </div>
-        <div id="adminUsers" class="adminUsers"></div>
-    </section>
-</main>
 
-<script type="module" src="/sheet.js"></script>
-<script type="module" src="/app.js"></script>
+            <section class="combatSection">
+                <div class="combatGrid">
+                    <section id="sec-deathsaves" class="combatCard" data-nav-label="Deathsaves" tabindex="-1">
+                        <h4>Death Saves</h4>
+                        <div class="deathSaves">
+                            <div class="deathCol">
+                                <div class="deathLabel">Erfolge</div>
+                                <div class="deathRow">
+                                    <label class="deathDot"><input id="death_success_1"
+                                            type="checkbox" /><span>1</span></label>
+                                    <label class="deathDot"><input id="death_success_2"
+                                            type="checkbox" /><span>2</span></label>
+                                    <label class="deathDot"><input id="death_success_3"
+                                            type="checkbox" /><span>3</span></label>
+                                </div>
+                            </div>
+
+                            <div class="deathCol">
+                                <div class="deathLabel">Fehlschläge</div>
+                                <div class="deathRow">
+                                    <label class="deathDot"><input id="death_fail_1"
+                                            type="checkbox" /><span>1</span></label>
+                                    <label class="deathDot"><input id="death_fail_2"
+                                            type="checkbox" /><span>2</span></label>
+                                    <label class="deathDot"><input id="death_fail_3"
+                                            type="checkbox" /><span>3</span></label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="sec-combat" class="combatCard" data-nav-label="Kampf" tabindex="-1">
+                        <h4>Angriffe</h4>
+                        <div class="attacksRow attacksRowGrid">
+                            <input id="attack_1_type" placeholder="Angriffsart (z.B. Langschwert)" />
+                            <select id="attack_1_abil">
+                                <option value="">Attr</option>
+                                <option value="str">STR</option>
+                                <option value="dex">DEX</option>
+                                <option value="con">CON</option>
+                                <option value="int">INT</option>
+                                <option value="wis">WIS</option>
+                                <option value="cha">CHA</option>
+                            </select>
+                            <label class="atkProf">
+                                <input id="attack_1_prof" type="checkbox" />
+                                <span class="switch" aria-hidden="true"></span>
+                                <span>geübt</span>
+                            </label>
+                            <input id="attack_1_misc" type="number" placeholder="Bonus" />
+                            <input id="attack_1_bonus" type="number" readonly placeholder="ATK" />
+                            <input id="attack_1_range" placeholder="Reichweite" />
+                            <input id="attack_1_damage" placeholder="Schaden / Typ" />
+                        </div>
+
+                        <div class="attacksRow attacksRowGrid">
+                            <input id="attack_2_type" placeholder="Angriffsart (z.B. Langschwert)" />
+                            <select id="attack_2_abil">
+                                <option value="">Attr</option>
+                                <option value="str">STR</option>
+                                <option value="dex">DEX</option>
+                                <option value="con">CON</option>
+                                <option value="int">INT</option>
+                                <option value="wis">WIS</option>
+                                <option value="cha">CHA</option>
+                            </select>
+                            <label class="atkProf">
+                                <input id="attack_2_prof" type="checkbox" />
+                                <span class="switch" aria-hidden="true"></span>
+                                <span>geübt</span>
+                            </label>
+                            <input id="attack_2_misc" type="number" placeholder="Bonus" />
+                            <input id="attack_2_bonus" type="number" readonly placeholder="ATK" />
+                            <input id="attack_2_range" placeholder="Reichweite" />
+                            <input id="attack_2_damage" placeholder="Schaden / Typ" />
+                        </div>
+
+                        <div class="attacksRow attacksRowGrid">
+                            <input id="attack_3_type" placeholder="Angriffsart (z.B. Langschwert)" />
+                            <select id="attack_3_abil">
+                                <option value="">Attr</option>
+                                <option value="str">STR</option>
+                                <option value="dex">DEX</option>
+                                <option value="con">CON</option>
+                                <option value="int">INT</option>
+                                <option value="wis">WIS</option>
+                                <option value="cha">CHA</option>
+                            </select>
+                            <label class="atkProf">
+                                <input id="attack_3_prof" type="checkbox" />
+                                <span class="switch" aria-hidden="true"></span>
+                                <span>geübt</span>
+                            </label>
+                            <input id="attack_3_misc" type="number" placeholder="Bonus" />
+                            <input id="attack_3_bonus" type="number" readonly placeholder="ATK" />
+                            <input id="attack_3_range" placeholder="Reichweite" />
+                            <input id="attack_3_damage" placeholder="Schaden / Typ" />
+                        </div>
+
+                        <div class="attacksRow attacksRowGrid">
+                            <input id="attack_4_type" placeholder="Angriffsart (z.B. Langschwert)" />
+                            <select id="attack_4_abil">
+                                <option value="">Attr</option>
+                                <option value="str">STR</option>
+                                <option value="dex">DEX</option>
+                                <option value="con">CON</option>
+                                <option value="int">INT</option>
+                                <option value="wis">WIS</option>
+                                <option value="cha">CHA</option>
+                            </select>
+                            <label class="atkProf">
+                                <input id="attack_4_prof" type="checkbox" />
+                                <span class="switch" aria-hidden="true"></span>
+                                <span>geübt</span>
+                            </label>
+                            <input id="attack_4_misc" type="number" placeholder="Bonus" />
+                            <input id="attack_4_bonus" type="number" readonly placeholder="ATK" />
+                            <input id="attack_4_range" placeholder="Reichweite" />
+                            <input id="attack_4_damage" placeholder="Schaden / Typ" />
+                        </div>
+
+                        <div class="attacksRow attacksRowGrid">
+                            <input id="attack_5_type" placeholder="Angriffsart (z.B. Langschwert)" />
+                            <select id="attack_5_abil">
+                                <option value="">Attr</option>
+                                <option value="str">STR</option>
+                                <option value="dex">DEX</option>
+                                <option value="con">CON</option>
+                                <option value="int">INT</option>
+                                <option value="wis">WIS</option>
+                                <option value="cha">CHA</option>
+                            </select>
+                            <label class="atkProf">
+                                <input id="attack_5_prof" type="checkbox" />
+                                <span class="switch" aria-hidden="true"></span>
+                                <span>geübt</span>
+                            </label>
+                            <input id="attack_5_misc" type="number" placeholder="Bonus" />
+                            <input id="attack_5_bonus" type="number" readonly placeholder="ATK" />
+                            <input id="attack_5_range" placeholder="Reichweite" />
+                            <input id="attack_5_damage" placeholder="Schaden / Typ" />
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </section>
+        <section id="adminPanel" class="panel" hidden>
+            <div class="adminHeader">
+                <div class="adminTitle">Admin – User</div>
+                <button id="btnReloadUsers" class="btn">Neu laden</button>
+            </div>
+            <div id="adminUsers" class="adminUsers"></div>
+        </section>
+    </main>
+
+    <script type="module" src="/sheet.js"></script>
+    <script type="module" src="/app.js"></script>
 </body>
+
 </html>

@@ -44,6 +44,9 @@ const authUsername = document.getElementById("authUsername");
 const authPassword = document.getElementById("authPassword");
 const btnAuthDoRegister = document.getElementById("btnAuthDoRegister");
 const btnAuthCancel = document.getElementById("btnAuthCancel");
+const charactersPanel = document.getElementById("charactersPanel");
+const landingHero = document.getElementById("landingHero");
+
 
 const navDrawer = document.getElementById("navDrawer");
 const navBackdrop = document.getElementById("navBackdrop");
@@ -495,6 +498,7 @@ async function doLogin() {
             location.pathname.endsWith("/index.html");
 
         if (isIndexPage) {
+            updateLandingAuthState(true);
             window.dispatchEvent(new CustomEvent("auth:login"));
             setStatus("Eingeloggt ✅");
             return;
@@ -516,8 +520,19 @@ async function doLogin() {
 function doLogout() {
     API.token = null;
     setCurrentCharacter(null);
+    updateLandingAuthState(false);
     window.dispatchEvent(new CustomEvent("auth:logout"));
     window.location.href = "/index.html";
+}
+
+function updateLandingAuthState(isLoggedIn) {
+    if (charactersPanel) {
+        charactersPanel.hidden = !isLoggedIn;
+    }
+
+    if (landingHero) {
+        landingHero.hidden = isLoggedIn;
+    }
 }
 
 async function doRegister() {
@@ -589,6 +604,7 @@ window.addEventListener("hashchange", () => {
 // ============================================================
 
 (function startup() {
+
     const isIndexPage =
         location.pathname === "/" ||
         location.pathname.endsWith("/index") ||
