@@ -101,39 +101,44 @@
                     <div class="characterMetaGrid">
                         <label class="field">
                             <span class="label">Alter</span>
-                            <input id="appearance_age" type="text" placeholder="z.B. 27" />
+                            <input id="appearance_age" type="text" maxlength="30" placeholder="z. B. 27"
+                                autocomplete="off" />
                         </label>
 
                         <label class="field">
                             <span class="label">Größe</span>
-                            <input id="appearance_height" type="text" placeholder="z.B. 1,82 m" />
+                            <input id="appearance_height" type="text" maxlength="20" placeholder="z. B. 1,82 m"
+                                autocomplete="off" />
                         </label>
-
                         <label class="field">
                             <span class="label">Gewicht</span>
-                            <input id="appearance_weight" type="text" placeholder="z.B. 78 kg" />
+                            <input id="appearance_weight" type="text" maxlength="20" placeholder="z. B. 78 kg"
+                                autocomplete="off" />
                         </label>
 
                         <label class="field">
                             <span class="label">Augenfarbe</span>
-                            <input id="appearance_eyes" type="text" placeholder="z.B. Grün" />
+                            <input id="appearance_eyes" type="text" maxlength="30" placeholder="z. B. Grün"
+                                autocomplete="off" />
                         </label>
 
                         <label class="field">
                             <span class="label">Hautfarbe</span>
-                            <input id="appearance_skin" type="text" placeholder="z.B. Hell gebräunt" />
+                            <input id="appearance_skin" type="text" maxlength="40" placeholder="z. B. Hell gebräunt"
+                                autocomplete="off" />
                         </label>
 
                         <label class="field">
                             <span class="label">Haarfarbe</span>
-                            <input id="appearance_hair" type="text" placeholder="z.B. Schwarz" />
+                            <input id="appearance_hair" type="text" maxlength="30" placeholder="z. B. Schwarz"
+                                autocomplete="off" />
                         </label>
                     </div>
 
                     <div class="formGrid">
                         <label class="field field--full">
                             <span class="label">Genauere Beschreibung</span>
-                            <textarea id="appearance_description" rows="7"
+                            <textarea id="appearance_description" rows="7" maxlength="2000"
                                 placeholder="Beschreibe Kleidung, Haltung, Narben, besondere Merkmale, Ausrüstung am Körper usw."></textarea>
                         </label>
                     </div>
@@ -156,14 +161,14 @@
                     <div class="formGrid">
                         <label class="field field--full">
                             <span class="label">Übungen</span>
-                            <textarea id="prof_lang_proficiencies" rows="6"
-                                placeholder="z.B. Alchemistenbedarf, Schmiedewerkzeuge, Lautenspiel, Würfelspiel ..."></textarea>
+                            <textarea id="prof_lang_proficiencies" rows="6" maxlength="1000"
+                                placeholder="z. B. Alchemistenbedarf, Schmiedewerkzeuge, Lautenspiel, Würfelspiel ..."></textarea>
                         </label>
 
                         <label class="field field--full">
                             <span class="label">Sprachen</span>
-                            <textarea id="prof_lang_languages" rows="6"
-                                placeholder="z.B. Gemeinsprache, Elfisch, Zwergisch ..."></textarea>
+                            <textarea id="prof_lang_languages" rows="6" maxlength="500"
+                                placeholder="z. B. Gemeinsprache, Elfisch, Zwergisch ..."></textarea>
                         </label>
                     </div>
                 </div>
@@ -185,25 +190,25 @@
                     <div class="formGrid">
                         <label class="field field--full">
                             <span class="label">Merkmale</span>
-                            <textarea id="personality_traits" rows="5"
+                            <textarea id="personality_traits" rows="5" maxlength="1000"
                                 placeholder="Charaktereigenschaften, Gewohnheiten, typische Verhaltensweisen ..."></textarea>
                         </label>
 
                         <label class="field field--full">
                             <span class="label">Ideale</span>
-                            <textarea id="personality_ideals" rows="5"
+                            <textarea id="personality_ideals" rows="5" maxlength="1000"
                                 placeholder="Wofür steht dein Charakter?"></textarea>
                         </label>
 
                         <label class="field field--full">
                             <span class="label">Bindung</span>
-                            <textarea id="personality_bonds" rows="5"
+                            <textarea id="personality_bonds" rows="5" maxlength="1000"
                                 placeholder="Wem oder was fühlt sich dein Charakter verbunden?"></textarea>
                         </label>
 
                         <label class="field field--full">
                             <span class="label">Makel</span>
-                            <textarea id="personality_flaws" rows="5"
+                            <textarea id="personality_flaws" rows="5" maxlength="1000"
                                 placeholder="Schwächen, Fehler, problematische Muster ..."></textarea>
                         </label>
                     </div>

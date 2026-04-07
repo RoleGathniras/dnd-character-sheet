@@ -29,10 +29,22 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
     function getNum(id, fallback = 0) {
         const el = document.getElementById(id);
         if (!el) return fallback;
-        const v = Number(el.value);
-        return Number.isFinite(v) ? v : fallback;
-    }
 
+        let v = Number(el.value);
+        if (!Number.isFinite(v)) return fallback;
+
+        const hasMin = el.min !== "";
+        const hasMax = el.max !== "";
+
+        if (hasMin) v = Math.max(v, Number(el.min));
+        if (hasMax) v = Math.min(v, Number(el.max));
+
+        if (String(v) !== el.value) {
+            el.value = String(v);
+        }
+
+        return v;
+    }
     function setDerivedVal(id, value) {
         const el = document.getElementById(id);
         if (!el) return;
@@ -174,6 +186,23 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
 
         for (const [ability, score] of Object.entries(scores)) {
             setDerivedVal(`${ability}_mod`, abilityMod(score));
+        }
+    }
+    function clampInput(el) {
+        if (!el || el.type !== "number") return;
+
+        const min = el.min !== "" ? Number(el.min) : null;
+        const max = el.max !== "" ? Number(el.max) : null;
+
+        let val = Number(el.value);
+
+        if (!Number.isFinite(val)) return;
+
+        if (min !== null && val < min) val = min;
+        if (max !== null && val > max) val = max;
+
+        if (val !== Number(el.value)) {
+            el.value = val;
         }
     }
 
@@ -363,8 +392,15 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
         bindSkillAutoCalc();
         bindAttackAutoCalc();
 
-        sheetRootEl?.addEventListener("input", markDirty);
-        sheetRootEl?.addEventListener("change", markDirty);
+        sheetRootEl?.addEventListener("input", (e) => {
+            clampInput(e.target);
+            markDirty();
+        });
+
+        sheetRootEl?.addEventListener("change", (e) => {
+            clampInput(e.target);
+            markDirty();
+        });
 
         if (API.token) {
             try {

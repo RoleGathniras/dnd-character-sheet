@@ -100,10 +100,21 @@
                 <h2 id="sheetTitle">Kein Charakter geladen</h2>
 
                 <div class="grid">
-                    <label>Charaktername <input id="character_name" /></label>
-                    <label>Klasse <input id="class" /></label>
-                    <label>Volk <input id="race" /></label>
-                    <label>Stufe <input id="level" type="number" min="1" /></label>
+                    <label>Charaktername
+                        <input id="character_name" type="text" maxlength="60" placeholder="z. B. Elira Morgenwind"
+                            autocomplete="off" />
+                    </label>
+                    <label>Klasse
+                        <input id="class" type="text" maxlength="80" placeholder="z. B. Fighter 5 / Wizard 3"
+                            autocomplete="off" />
+                    </label>
+                    <label>Volk
+                        <input id="race" type="text" maxlength="40" placeholder="z. B. Halb-Elf (Drow)"
+                            autocomplete="off" />
+                    </label>
+                    <label>Stufe
+                        <input id="level" type="number" min="1" max="20" step="1" />
+                    </label>
                 </div>
             </section>
 
@@ -121,33 +132,31 @@
                     </div>
 
                     <label class="topField topField--pb">Übungsbonus
-                        <input id="proficiency_bonus" type="number" />
+                        <input id="proficiency_bonus" type="number" min="2" max="6" step="1" />
                     </label>
 
                     <label class="topField topField--init">Initiative
-                        <input id="initiative" type="number" />
+                        <input id="initiative" type="number" min="-10" max="20" step="1" />
                     </label>
 
-                    <label class="topField topField--speed">Bewegungsrate
-                        <input id="speed" type="number" />
+                    <label class="topField topField--speed">Bewegungsrate (m)
+                        <input id="speed" type="number" min="0" max="40" step="1.5" />
                     </label>
 
-                    <div class="topBlock topBlock--ac">
-                        <label class="topField">Rüstungsklasse
-                            <input id="ac" type="number" />
-                        </label>
-                    </div>
+                    <label class="topField">Rüstungsklasse
+                        <input id="ac" type="number" min="0" max="40" step="1" />
+                    </label>
 
                     <label class="topField topField--hpmax">TP Maximum
-                        <input id="hp_max" type="number" />
+                        <input id="hp_max" type="number" min="0" max="999" step="1" />
                     </label>
 
                     <label class="topField topField--hpcur">TP Aktuell
-                        <input id="hp_current" type="number" />
+                        <input id="hp_current" type="number" min="0" max="999" step="1" />
                     </label>
 
                     <label class="topField topField--hptemp">TP Temporär
-                        <input id="hp_temp" type="number" />
+                        <input id="hp_temp" type="number" min="0" max="999" step="1" />
                     </label>
                 </div>
             </section>
@@ -159,7 +168,7 @@
                         <!-- abilityCards ... -->
                         <div class="abilityCard">
                             <div class="abilityHead">Stärke</div>
-                            <input id="str" type="number" />
+                            <input id="str" type="number" min="1" max="30" step="1" />
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="str_mod" type="number" readonly />
@@ -167,7 +176,7 @@
                         </div>
                         <div class="abilityCard">
                             <div class="abilityHead">Geschicklichkeit</div>
-                            <input id="dex" type="number" />
+                            <input id="dex" type="number" min="1" max="30" step="1" />
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="dex_mod" type="number" readonly />
@@ -175,7 +184,7 @@
                         </div>
                         <div class="abilityCard">
                             <div class="abilityHead">Konstitution</div>
-                            <input id="con" type="number" />
+                            <input id="con" type="number" min="1" max="30" step="1" />
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="con_mod" type="number" readonly />
@@ -183,7 +192,7 @@
                         </div>
                         <div class="abilityCard">
                             <div class="abilityHead">Intelligenz</div>
-                            <input id="int" type="number" />
+                            <input id="int" type="number" min="1" max="30" step="1" />
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="int_mod" type="number" readonly />
@@ -191,7 +200,7 @@
                         </div>
                         <div class="abilityCard">
                             <div class="abilityHead">Weisheit</div>
-                            <input id="wis" type="number" />
+                            <input id="wis" type="number" min="1" max="30" step="1" />
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="wis_mod" type="number" readonly />
@@ -199,7 +208,7 @@
                         </div>
                         <div class="abilityCard">
                             <div class="abilityHead">Charisma</div>
-                            <input id="cha" type="number" />
+                            <input id="cha" type="number" min="1" max="30" step="1" />
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="cha_mod" type="number" readonly />
@@ -249,7 +258,8 @@
                         <h3>Vorteile / Nachteile</h3>
                         <label>
                             Notizen (z.B. Vorteil bei RW gegen Gift, Nachteil bei Weisheit etc.)
-                            <textarea id="notes_adv_dis" rows="4"></textarea>
+                            <textarea id="notes_adv_dis" rows="4" maxlength="300"
+                                placeholder="z. B. Vorteil bei RW gegen Gift, Nachteil bei Wahrnehmung im Dunkeln"></textarea>
                         </label>
                     </section>
 
@@ -419,7 +429,7 @@
                     <section id="sec-combat" class="combatCard" data-nav-label="Kampf" tabindex="-1">
                         <h4>Angriffe</h4>
                         <div class="attacksRow attacksRowGrid">
-                            <input id="attack_1_type" placeholder="Angriffsart (z.B. Langschwert)" />
+                            <input id="attack_1_type" maxlength="50" placeholder="Langschwert" />
                             <select id="attack_1_abil">
                                 <option value="">Attr</option>
                                 <option value="str">STR</option>
@@ -434,14 +444,14 @@
                                 <span class="switch" aria-hidden="true"></span>
                                 <span>geübt</span>
                             </label>
-                            <input id="attack_1_misc" type="number" placeholder="Bonus" />
-                            <input id="attack_1_bonus" type="number" readonly placeholder="ATK" />
-                            <input id="attack_1_range" placeholder="Reichweite" />
-                            <input id="attack_1_damage" placeholder="Schaden / Typ" />
+                            <input id="attack_1_misc" type="number" min="-10" max="20" step="1" placeholder="Bonus" />
+                            <input id="attack_1_bonus" type="number" min="-10" max="30" readonly placeholder="ATK" />
+                            <input id="attack_1_range" maxlength="20" placeholder="Reichweite" />
+                            <input id="attack_1_damage" maxlength="40" placeholder="1d8 + 3 Hieb" />
                         </div>
 
                         <div class="attacksRow attacksRowGrid">
-                            <input id="attack_2_type" placeholder="Angriffsart (z.B. Langschwert)" />
+                            <input id="attack_2_type" maxlength="50" placeholder="Langschwert" />
                             <select id="attack_2_abil">
                                 <option value="">Attr</option>
                                 <option value="str">STR</option>
@@ -456,14 +466,14 @@
                                 <span class="switch" aria-hidden="true"></span>
                                 <span>geübt</span>
                             </label>
-                            <input id="attack_2_misc" type="number" placeholder="Bonus" />
-                            <input id="attack_2_bonus" type="number" readonly placeholder="ATK" />
-                            <input id="attack_2_range" placeholder="Reichweite" />
-                            <input id="attack_2_damage" placeholder="Schaden / Typ" />
+                            <input id="attack_2_misc" type="number" min="-10" max="20" step="1" placeholder="Bonus" />
+                            <input id="attack_2_bonus" type="number" min="-10" max="30" readonly placeholder="ATK" />
+                            <input id="attack_2_range" maxlength="20" placeholder="Reichweite" />
+                            <input id="attack_2_damage" maxlength="40" placeholder="1d8 + 3 Hieb" />
                         </div>
 
                         <div class="attacksRow attacksRowGrid">
-                            <input id="attack_3_type" placeholder="Angriffsart (z.B. Langschwert)" />
+                            <input id="attack_3_type" maxlength="50" placeholder="Langschwert" />
                             <select id="attack_3_abil">
                                 <option value="">Attr</option>
                                 <option value="str">STR</option>
@@ -478,14 +488,14 @@
                                 <span class="switch" aria-hidden="true"></span>
                                 <span>geübt</span>
                             </label>
-                            <input id="attack_3_misc" type="number" placeholder="Bonus" />
-                            <input id="attack_3_bonus" type="number" readonly placeholder="ATK" />
-                            <input id="attack_3_range" placeholder="Reichweite" />
-                            <input id="attack_3_damage" placeholder="Schaden / Typ" />
+                            <input id="attack_3_misc" type="number" min="-10" max="20" step="1" placeholder="Bonus" />
+                            <input id="attack_3_bonus" type="number" min="-10" max="30" readonly placeholder="ATK" />
+                            <input id="attack_3_range" maxlength="20" placeholder="Reichweite" />
+                            <input id="attack_3_damage" maxlength="40" placeholder="1d8 + 3 Hieb" />
                         </div>
 
                         <div class="attacksRow attacksRowGrid">
-                            <input id="attack_4_type" placeholder="Angriffsart (z.B. Langschwert)" />
+                            <input id="attack_4_type" maxlength="50" placeholder="Langschwert" />
                             <select id="attack_4_abil">
                                 <option value="">Attr</option>
                                 <option value="str">STR</option>
@@ -500,14 +510,14 @@
                                 <span class="switch" aria-hidden="true"></span>
                                 <span>geübt</span>
                             </label>
-                            <input id="attack_4_misc" type="number" placeholder="Bonus" />
-                            <input id="attack_4_bonus" type="number" readonly placeholder="ATK" />
-                            <input id="attack_4_range" placeholder="Reichweite" />
-                            <input id="attack_4_damage" placeholder="Schaden / Typ" />
+                            <input id="attack_4_misc" type="number" min="-10" max="20" step="1" placeholder="Bonus" />
+                            <input id="attack_4_bonus" type="number" min="-10" max="30" readonly placeholder="ATK" />
+                            <input id="attack_4_range" maxlength="20" placeholder="Reichweite" />
+                            <input id="attack_4_damage" maxlength="40" placeholder="1d8 + 3 Hieb" />
                         </div>
 
                         <div class="attacksRow attacksRowGrid">
-                            <input id="attack_5_type" placeholder="Angriffsart (z.B. Langschwert)" />
+                            <input id="attack_5_type" maxlength="50" placeholder="Langschwert" />
                             <select id="attack_5_abil">
                                 <option value="">Attr</option>
                                 <option value="str">STR</option>
@@ -522,10 +532,10 @@
                                 <span class="switch" aria-hidden="true"></span>
                                 <span>geübt</span>
                             </label>
-                            <input id="attack_5_misc" type="number" placeholder="Bonus" />
-                            <input id="attack_5_bonus" type="number" readonly placeholder="ATK" />
-                            <input id="attack_5_range" placeholder="Reichweite" />
-                            <input id="attack_5_damage" placeholder="Schaden / Typ" />
+                            <input id="attack_5_misc" type="number" min="-10" max="20" step="1" placeholder="Bonus" />
+                            <input id="attack_5_bonus" type="number" min="-10" max="30" readonly placeholder="ATK" />
+                            <input id="attack_5_range" maxlength="20" placeholder="Reichweite" />
+                            <input id="attack_5_damage" maxlength="40" placeholder="1d8 + 3 Hieb" />
                         </div>
                     </section>
                 </div>
