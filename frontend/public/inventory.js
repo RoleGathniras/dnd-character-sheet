@@ -36,7 +36,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const listMine = document.getElementById("listMine");
     const listNpcs = document.getElementById("listNpcs");
 
-
+    const MAX_MONEY_VALUE = 99999999;
+    const MAX_ITEM_NAME_LENGTH = 80;
+    const MAX_ITEM_DESC_LENGTH = 1000;
+    const MAX_ITEM_COUNT = 9999;
+    const MAX_ITEM_WEIGHT = 9999.99;
+    const MAX_INVENTORY_ITEMS_TOTAL = 500;
     if (
         !money_pm || !money_gm || !money_sm || !money_em || !money_km ||
         !currentCarryWeight || !maxCarryWeight ||
@@ -94,10 +99,14 @@ document.addEventListener("DOMContentLoaded", () => {
         inventoryState.money.em = toNonNegativeNumber(p.money?.em);
         inventoryState.money.km = toNonNegativeNumber(p.money?.km);
 
+        let remaining = MAX_INVENTORY_ITEMS_TOTAL;
+
         for (const type of ITEM_TYPES) {
-            inventoryState.items[type] = Array.isArray(p.items?.[type])
-                ? p.items[type].map(normalizeItem)
-                : [];
+            const rawItems = Array.isArray(p.items?.[type]) ? p.items[type] : [];
+            const normalizedItems = rawItems.map(normalizeItem).slice(0, remaining);
+
+            inventoryState.items[type] = normalizedItems;
+            remaining -= normalizedItems.length;
         }
     }
 
@@ -123,11 +132,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function normalizeItem(raw) {
         return {
             id: String(raw?.id || createItemId()),
-            name: String(raw?.name || "").trim(),
-            count: toPositiveInteger(raw?.count, 1),
+            name: limitText(raw?.name, MAX_ITEM_NAME_LENGTH),
+            count: toItemCount(raw?.count, 1),
             type: ITEM_TYPES.includes(raw?.type) ? raw.type : "sonstiges",
-            weight: toNonNegativeNumber(raw?.weight),
-            desc: String(raw?.desc || ""),
+            weight: toItemWeight(raw?.weight),
+            desc: String(raw?.desc || "").slice(0, MAX_ITEM_DESC_LENGTH),
             isExpanded: false,
         };
     }
@@ -259,6 +268,25 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     }
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    function limitText(value, maxLength) {
+        return String(value ?? "").trim().slice(0, maxLength);
+    }
+
+    function toItemCount(value, fallback = 1) {
+        const n = Math.floor(Number(value));
+        if (!Number.isFinite(n)) return fallback;
+        return clamp(n, 1, MAX_ITEM_COUNT);
+    }
+
+    function toItemWeight(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n) || n < 0) return 0;
+        return Math.min(n, MAX_ITEM_WEIGHT);
+    }
 
     // =========================================================
     // Character / Strength / Carry
@@ -300,6 +328,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================
     // Money
     // =========================================================
+    function toMoneyValue(value) {
+        const n = Math.floor(Number(value));
+        if (!Number.isFinite(n) || n < 0) return 0;
+        return Math.min(n, MAX_MONEY_VALUE);
+    }
     function fillMoneyInputs() {
         money_pm.value = inventoryState.money.pm || "";
         money_gm.value = inventoryState.money.gm || "";
@@ -310,11 +343,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function bindMoneyInputs() {
         function saveMoney() {
-            inventoryState.money.pm = toNonNegativeNumber(money_pm.value);
-            inventoryState.money.gm = toNonNegativeNumber(money_gm.value);
-            inventoryState.money.sm = toNonNegativeNumber(money_sm.value);
-            inventoryState.money.em = toNonNegativeNumber(money_em.value);
-            inventoryState.money.km = toNonNegativeNumber(money_km.value);
+            inventoryState.money.pm = toMoneyValue(money_pm.value);
+            inventoryState.money.gm = toMoneyValue(money_gm.value);
+            inventoryState.money.sm = toMoneyValue(money_sm.value);
+            inventoryState.money.em = toMoneyValue(money_em.value);
+            inventoryState.money.km = toMoneyValue(money_km.value);
+
+            money_pm.value = inventoryState.money.pm || "";
+            money_gm.value = inventoryState.money.gm || "";
+            money_sm.value = inventoryState.money.sm || "";
+            money_em.value = inventoryState.money.em || "";
+            money_km.value = inventoryState.money.km || "";
 
             markDirtyAndScheduleSave();
         }
@@ -356,6 +395,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 item_name.focus();
                 return;
             }
+            if (getTotalInventoryItemCount() >= MAX_INVENTORY_ITEMS_TOTAL) {
+                alert(`Maximal ${MAX_INVENTORY_ITEMS_TOTAL} Inventar-Einträge erlaubt.`);
+                return;
+            }
 
             inventoryState.items[item.type].push(item);
 
@@ -365,14 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
             markDirtyAndScheduleSave();
         });
     }
-    function bindAddItemCollapse() {
-        btnToggleAddItem.addEventListener("click", () => {
-            const isOpen = btnToggleAddItem.getAttribute("aria-expanded") === "true";
-            btnToggleAddItem.setAttribute("aria-expanded", String(!isOpen));
-            addItemBody.hidden = isOpen;
-            addItemCard.classList.toggle("is-open", !isOpen);
-        });
-    }
+
 
     // =========================================================
     // Inventory Rendering
@@ -472,7 +508,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="formGrid">
                         <label class="field">
                             <span class="label">Name</span>
-                            <input type="text" data-edit="name" value="${escapeHtml(item.name)}" />
+                            <input type="text" maxlength="80" data-edit="name" value="${escapeHtml(item.name)}" />
                         </label>
 
                         <label class="field">
@@ -480,6 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <input
                                 type="number"
                                 min="1"
+                                max="9999"
                                 inputmode="numeric"
                                 data-edit="count"
                                 value="${escapeHtml(item.count)}"
@@ -502,6 +539,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <input
                                 type="number"
                                 min="0"
+                                max="9999.99"
                                 step="0.01"
                                 inputmode="decimal"
                                 data-edit="weight"
@@ -511,7 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         <label class="field field--full">
                             <span class="label">Beschreibung</span>
-                            <textarea rows="5" data-edit="desc">${escapeHtml(item.desc)}</textarea>
+                            <textarea rows="5" maxlength="1000" data-edit="desc">${escapeHtml(item.desc)}</textarea>
                         </label>
                     </div>
                 </div>
@@ -614,10 +652,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const editKey = field.dataset.edit;
 
-                if (editKey === "name") item.name = field.value;
-                if (editKey === "count") item.count = toPositiveInteger(field.value, 1);
-                if (editKey === "weight") item.weight = toNonNegativeNumber(field.value);
-                if (editKey === "desc") item.desc = field.value;
+                if (editKey === "name") {
+                    item.name = limitText(field.value, MAX_ITEM_NAME_LENGTH);
+                    field.value = item.name;
+                }
+
+                if (editKey === "count") {
+                    item.count = toItemCount(field.value, 1);
+                    field.value = String(item.count);
+                }
+
+                if (editKey === "weight") {
+                    item.weight = toItemWeight(field.value);
+                    field.value = String(item.weight);
+                }
+
+                if (editKey === "desc") {
+                    item.desc = String(field.value ?? "").slice(0, MAX_ITEM_DESC_LENGTH);
+                    field.value = item.desc;
+                }
 
                 renderAllInventoryTables();
                 renderCarryStats();
@@ -648,6 +701,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 markDirtyAndScheduleSave();
             });
         });
+    }
+    function getTotalInventoryItemCount() {
+        let total = 0;
+        for (const type of ITEM_TYPES) {
+            total += inventoryState.items[type]?.length ?? 0;
+        }
+        return total;
     }
 
     // =========================================================

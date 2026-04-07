@@ -80,12 +80,12 @@
                     <div class="row gap">
                         <label class="field field--mini">
                             <span class="label">Zauber-RW</span>
-                            <input id="spellSaveDc" type="number" inputmode="numeric" />
+                            <input id="spellSaveDc" type="number" min="0" max="99" inputmode="numeric" />
                         </label>
 
                         <label class="field field--mini">
                             <span class="label">ATK-Boni</span>
-                            <input id="spellAtkBonus" type="number" inputmode="numeric" />
+                            <input id="spellAtkBonus" type="number" min="-99" max="99" inputmode="numeric" />
                         </label>
 
                         <label class="field field--mini">
@@ -130,7 +130,8 @@
                     <div class="slotsConfig">
                         <label class="field field--mini">
                             <span class="label">Zauberslots festlegen</span>
-                            <input id="spellSlotsCountInput" type="number" min="0" inputmode="numeric" value="0" />
+                            <input id="spellSlotsCountInput" type="number" min="0" max="20" inputmode="numeric"
+                                value="0" />
                         </label>
                     </div>
                     <div class="slotsView">
@@ -181,7 +182,7 @@
                             <button class="btn btn--ghost" id="btnCloseSpellDesc" type="button">Schließen</button>
                         </div>
                         <div class="spellDesc__body">
-                            <textarea id="spellDescText" rows="8"
+                            <textarea id="spellDescText" rows="8" maxlength="3000" readonly
                                 placeholder="Beschreibung kommt später aus dem Zauberbuch…"></textarea>
                         </div>
                     </div>
@@ -235,37 +236,40 @@
                         <div class="formGrid">
                             <label class="field">
                                 <span class="label">Name</span>
-                                <input id="sb_name" type="text" placeholder="z.B. Magic Missile" />
+                                <input id="sb_name" type="text" maxlength="80" placeholder="z.B. Magic Missile" />
                             </label>
 
                             <label class="field">
                                 <span class="label">Zeit/Dauer</span>
-                                <input id="sb_time" type="text" placeholder="z.B. 1 Aktion / Bonusaktion / 1 Stunde" />
+                                <input id="sb_time" type="text" maxlength="50"
+                                    placeholder="z.B. 1 Aktion / Bonusaktion / 1 Stunde" />
                             </label>
 
                             <label class="field">
                                 <span class="label">Reichweite</span>
-                                <input id="sb_range" type="text" placeholder="z.B. 36m" />
+                                <input id="sb_range" type="text" maxlength="50" placeholder="z.B. 36m" />
                             </label>
 
                             <label class="field">
                                 <span class="label">Trefferwert</span>
-                                <input id="sb_hit" type="text" placeholder="z.B. +7 / Rettungswurf" />
+                                <input id="sb_hit" type="text" maxlength="50" placeholder="z.B. +7 / Rettungswurf" />
                             </label>
 
                             <label class="field">
                                 <span class="label">Art</span>
-                                <input id="sb_kind" type="text" placeholder="z.B. Feuer, Heilung, Kontrolle" />
+                                <input id="sb_kind" type="text" maxlength="50"
+                                    placeholder="z.B. Feuer, Heilung, Kontrolle" />
                             </label>
 
                             <label class="field field--full">
                                 <span class="label">Komponenten</span>
-                                <input id="sb_effect" type="text" placeholder="z.B. V, S, M" />
+                                <input id="sb_effect" type="text" maxlength="100" placeholder="z.B. V, S, M" />
                             </label>
 
                             <label class="field field--full">
                                 <span class="label">Beschreibung (lang)</span>
-                                <textarea id="sb_desc" rows="10" placeholder="Voller Text des Zaubers…"></textarea>
+                                <textarea id="sb_desc" rows="10" maxlength="3000"
+                                    placeholder="Voller Text des Zaubers…"></textarea>
                             </label>
                         </div>
                     </div>

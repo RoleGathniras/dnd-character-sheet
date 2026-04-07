@@ -80,31 +80,31 @@
                     <div class="moneyGrid">
                         <label class="field field--mini">
                             <span class="label">PM</span>
-                            <input id="money_pm" type="number" min="0" inputmode="numeric" />
+                            <input id="money_pm" type="number" min="0" max="99999999" inputmode="numeric" />
                         </label>
 
                         <label class="field field--mini">
                             <span class="label">GM</span>
-                            <input id="money_gm" type="number" min="0" inputmode="numeric" />
+                            <input id="money_gm" type="number" min="0" max="99999999" inputmode="numeric" />
                         </label>
 
                         <label class="field field--mini">
                             <span class="label">SM</span>
-                            <input id="money_sm" type="number" min="0" inputmode="numeric" />
+                            <input id="money_sm" type="number" min="0" max="99999999" inputmode="numeric" />
                         </label>
 
                         <label class="field field--mini">
                             <span class="label">EM</span>
-                            <input id="money_em" type="number" min="0" inputmode="numeric" />
+                            <input id="money_em" type="number" min="0" max="99999999" inputmode="numeric" />
                         </label>
 
                         <label class="field field--mini field--full-mobile">
                             <span class="label">KM</span>
-                            <input id="money_km" type="number" min="0" inputmode="numeric" />
+                            <input id="money_km" type="number" min="0" max="99999999" inputmode="numeric" />
                         </label>
                     </div>
                 </div>
-            </section>
+            </section>0,9
         </section>
 
         <!-- Traglast -->
@@ -146,12 +146,12 @@
                     <div class="formGrid">
                         <label class="field">
                             <span class="label">Name</span>
-                            <input id="item_name" type="text" placeholder="z.B. Langschwert" />
+                            <input id="item_name" type="text" maxlength="80" placeholder="z.B. Langschwert" />
                         </label>
 
                         <label class="field">
                             <span class="label">Anzahl</span>
-                            <input id="item_count" type="number" min="1" value="1" inputmode="numeric" />
+                            <input id="item_count" type="number" min="1" max="9999" value="1" inputmode="numeric" />
                         </label>
 
                         <label class="field">
@@ -167,13 +167,14 @@
 
                         <label class="field">
                             <span class="label">Gewicht</span>
-                            <input id="item_weight" type="number" min="0" step="0.01" inputmode="decimal"
+                            <input id="item_weight" type="number" min="0" max="9999.99" step="0.01" inputmode="decimal"
                                 placeholder="z.B. 1.5" />
                         </label>
 
                         <label class="field field--full">
                             <span class="label">Beschreibung</span>
-                            <textarea id="item_desc" rows="6" placeholder="Beschreibung des Gegenstandes…"></textarea>
+                            <textarea id="item_desc" rows="6" maxlength="1000"
+                                placeholder="Beschreibung des Gegenstandes…"></textarea>
                         </label>
                     </div>
 

@@ -90,6 +90,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // ----------------------------
 
     const LEVELS = ["cantrip", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    const MAX_SPELL_SLOTS = 20;
+    const MAX_SPELL_SAVE_DC = 99;
+    const MIN_SPELL_ATK_BONUS = -99;
+    const MAX_SPELL_ATK_BONUS = 99;
+
+    const MAX_SB_NAME_LENGTH = 80;
+    const MAX_SB_TIME_LENGTH = 50;
+    const MAX_SB_RANGE_LENGTH = 50;
+    const MAX_SB_HIT_LENGTH = 50;
+    const MAX_SB_KIND_LENGTH = 50;
+    const MAX_SB_EFFECT_LENGTH = 100;
+    const MAX_SB_DESC_LENGTH = 3000;
+
+    const MAX_SPELLS_TOTAL = 150;
+    const MAX_SPELLS_PER_LEVEL = 40;
 
     function emptyPersistSpells() {
         const slotCounts = {};
@@ -176,14 +191,29 @@ document.addEventListener("DOMContentLoaded", () => {
     function applyPersist(persist) {
         const p = persist && typeof persist === "object" ? persist : emptyPersistSpells();
 
+        let remainingSpellCapacity = MAX_SPELLS_TOTAL;
+
         for (const lvl of LEVELS) {
-            slotCountsByLevel[lvl] = Math.max(0, Number(p.slotCountsByLevel?.[lvl] ?? 0));
+            slotCountsByLevel[lvl] = toNonNegativeInteger(p.slotCountsByLevel?.[lvl] ?? 0, MAX_SPELL_SLOTS);
 
             const usedArr = Array.isArray(p.slotUsedByLevel?.[lvl]) ? p.slotUsedByLevel[lvl] : [];
-            slotUsedByLevel[lvl] = new Set(usedArr.map(Number).filter(Number.isFinite));
+            slotUsedByLevel[lvl] = new Set(
+                usedArr
+                    .map(Number)
+                    .filter((n) => Number.isFinite(n) && n >= 1 && n <= slotCountsByLevel[lvl])
+            );
 
-            spellsByLevel[lvl] = Array.isArray(p.spellsByLevel?.[lvl]) ? p.spellsByLevel[lvl] : [];
-            panelSpellsByLevel[lvl] = Array.isArray(p.panelSpellsByLevel?.[lvl]) ? p.panelSpellsByLevel[lvl] : [];
+            const rawSpells = Array.isArray(p.spellsByLevel?.[lvl]) ? p.spellsByLevel[lvl] : [];
+            const allowedForLevel = Math.min(MAX_SPELLS_PER_LEVEL, remainingSpellCapacity);
+            const normalizedSpells = rawSpells.map(normalizeSpell).slice(0, allowedForLevel);
+
+            spellsByLevel[lvl] = normalizedSpells;
+            remainingSpellCapacity -= normalizedSpells.length;
+
+            const rawPanelSpells = Array.isArray(p.panelSpellsByLevel?.[lvl]) ? p.panelSpellsByLevel[lvl] : [];
+            panelSpellsByLevel[lvl] = rawPanelSpells
+                .map(normalizeSpell)
+                .filter((panelSpell) => normalizedSpells.some((spell) => spell.id === panelSpell.id));
         }
     }
 
@@ -274,9 +304,17 @@ document.addEventListener("DOMContentLoaded", () => {
     function fillSpellAttackStats() {
         const stats = getSpellStatsFromCharacter();
 
-        spellSaveDc.value = stats.saveDc ?? "";
-        spellAtkBonus.value = stats.atkBonus ?? "";
-        spellAbility.value = stats.ability ?? "";
+        const safeSaveDc = String(toBoundedInteger(stats.saveDc, 0, MAX_SPELL_SAVE_DC, 0));
+        const safeAtkBonus = String(toBoundedInteger(stats.atkBonus, MIN_SPELL_ATK_BONUS, MAX_SPELL_ATK_BONUS, 0));
+        const safeAbility = ["", "int", "wis", "cha"].includes(stats.ability) ? stats.ability : "";
+
+        stats.saveDc = safeSaveDc;
+        stats.atkBonus = safeAtkBonus;
+        stats.ability = safeAbility;
+
+        spellSaveDc.value = safeSaveDc;
+        spellAtkBonus.value = safeAtkBonus;
+        spellAbility.value = safeAbility;
     }
     function markDirtyAndScheduleSave() {
         writeStateIntoCharacter();
@@ -294,9 +332,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const stats = getSpellStatsFromCharacter();
             if (!stats) return;
 
-            stats.saveDc = spellSaveDc.value;
-            stats.atkBonus = spellAtkBonus.value;
-            stats.ability = spellAbility.value;
+            stats.saveDc = String(toBoundedInteger(spellSaveDc.value, 0, MAX_SPELL_SAVE_DC, 0));
+            stats.atkBonus = String(toBoundedInteger(spellAtkBonus.value, MIN_SPELL_ATK_BONUS, MAX_SPELL_ATK_BONUS, 0));
+            stats.ability = ["", "int", "wis", "cha"].includes(spellAbility.value) ? spellAbility.value : "";
+
+            spellSaveDc.value = stats.saveDc;
+            spellAtkBonus.value = stats.atkBonus;
+            spellAbility.value = stats.ability;
 
             markDirtyAndScheduleSave();
         }
@@ -305,6 +347,7 @@ document.addEventListener("DOMContentLoaded", () => {
         spellAtkBonus.addEventListener("input", saveSpellStats);
         spellAbility.addEventListener("change", saveSpellStats);
     }
+
     async function loadCharacterAndHydrate() {
         const id = getSelectedCharacterId();
         console.log("[spells.js] loadCharacterAndHydrate -> selectedCharacterId =", id);
@@ -406,6 +449,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return "spell-" + Date.now() + "-" + Math.random().toString(16).slice(2);
     }
+    function getTotalSpellCount() {
+        let total = 0;
+        for (const lvl of LEVELS) {
+            total += spellsByLevel[lvl]?.length ?? 0;
+        }
+        return total;
+    }
 
     // 2 UI/Helper: Reine Anzeige/kleine Tools
     function createEmptySpell() {
@@ -419,6 +469,38 @@ document.addEventListener("DOMContentLoaded", () => {
             effect: "",
             desc: "",
         };
+    }
+    function normalizeSpell(raw) {
+        return {
+            id: String(raw?.id || createSpellId()),
+            name: limitText(raw?.name, MAX_SB_NAME_LENGTH),
+            time: limitText(raw?.time, MAX_SB_TIME_LENGTH),
+            range: limitText(raw?.range, MAX_SB_RANGE_LENGTH),
+            hit: limitText(raw?.hit, MAX_SB_HIT_LENGTH),
+            kind: limitText(raw?.kind, MAX_SB_KIND_LENGTH),
+            effect: limitText(raw?.effect, MAX_SB_EFFECT_LENGTH),
+            desc: String(raw?.desc ?? "").slice(0, MAX_SB_DESC_LENGTH),
+        };
+    }
+
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    function limitText(value, maxLength) {
+        return String(value ?? "").trim().slice(0, maxLength);
+    }
+
+    function toNonNegativeInteger(value, max = Number.MAX_SAFE_INTEGER) {
+        const n = Math.floor(Number(value));
+        if (!Number.isFinite(n) || n < 0) return 0;
+        return Math.min(n, max);
+    }
+
+    function toBoundedInteger(value, min, max, fallback = 0) {
+        const n = Math.floor(Number(value));
+        if (!Number.isFinite(n)) return fallback;
+        return clamp(n, min, max);
     }
 
     function getSpellsFor(level) {
@@ -436,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setCountFor(level, n) {
-        const val = Math.max(0, Number(n || 0));
+        const val = toNonNegativeInteger(n || 0, MAX_SPELL_SLOTS);
         slotCountsByLevel[level] = val;
 
         // Wenn Count kleiner wird: "used" Set auf gültige Slots trimmen
@@ -703,13 +785,54 @@ document.addEventListener("DOMContentLoaded", () => {
             markDirtyAndScheduleSave();
         }
 
-        sb_name.addEventListener("input", () => applyPatch((s) => (s.name = sb_name.value)));
-        sb_time.addEventListener("input", () => applyPatch((s) => (s.time = sb_time.value)));
-        sb_range.addEventListener("input", () => applyPatch((s) => (s.range = sb_range.value)));
-        sb_hit.addEventListener("input", () => applyPatch((s) => (s.hit = sb_hit.value)));
-        sb_kind.addEventListener("input", () => applyPatch((s) => (s.kind = sb_kind.value)));
-        sb_effect.addEventListener("input", () => applyPatch((s) => (s.effect = sb_effect.value)));
-        sb_desc.addEventListener("input", () => applyPatch((s) => (s.desc = sb_desc.value)));
+        sb_name.addEventListener("input", () =>
+            applyPatch((s) => {
+                s.name = limitText(sb_name.value, MAX_SB_NAME_LENGTH);
+                sb_name.value = s.name;
+            })
+        );
+
+        sb_time.addEventListener("input", () =>
+            applyPatch((s) => {
+                s.time = limitText(sb_time.value, MAX_SB_TIME_LENGTH);
+                sb_time.value = s.time;
+            })
+        );
+
+        sb_range.addEventListener("input", () =>
+            applyPatch((s) => {
+                s.range = limitText(sb_range.value, MAX_SB_RANGE_LENGTH);
+                sb_range.value = s.range;
+            })
+        );
+
+        sb_hit.addEventListener("input", () =>
+            applyPatch((s) => {
+                s.hit = limitText(sb_hit.value, MAX_SB_HIT_LENGTH);
+                sb_hit.value = s.hit;
+            })
+        );
+
+        sb_kind.addEventListener("input", () =>
+            applyPatch((s) => {
+                s.kind = limitText(sb_kind.value, MAX_SB_KIND_LENGTH);
+                sb_kind.value = s.kind;
+            })
+        );
+
+        sb_effect.addEventListener("input", () =>
+            applyPatch((s) => {
+                s.effect = limitText(sb_effect.value, MAX_SB_EFFECT_LENGTH);
+                sb_effect.value = s.effect;
+            })
+        );
+
+        sb_desc.addEventListener("input", () =>
+            applyPatch((s) => {
+                s.desc = String(sb_desc.value ?? "").slice(0, MAX_SB_DESC_LENGTH);
+                sb_desc.value = s.desc;
+            })
+        );
     }
 
     function bindTabs() {
@@ -759,8 +882,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
             currentLevel = level;
 
-            const spell = createEmptySpell();
-            getSpellsFor(level).push(spell);
+            const levelList = getSpellsFor(level);
+
+            if (getTotalSpellCount() >= MAX_SPELLS_TOTAL) {
+                alert(`Maximal ${MAX_SPELLS_TOTAL} Zauber pro Charakter erlaubt.`);
+                return;
+            }
+
+            if (levelList.length >= MAX_SPELLS_PER_LEVEL) {
+                alert(`Maximal ${MAX_SPELLS_PER_LEVEL} Zauber auf Grad ${level} erlaubt.`);
+                return;
+            }
+            const spell = normalizeSpell(createEmptySpell());
+            levelList.push(spell);
 
             selectedSpellId = spell.id;
             renderSpellbook(level);
