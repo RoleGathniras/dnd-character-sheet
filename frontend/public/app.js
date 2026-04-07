@@ -368,7 +368,7 @@ async function handleCreate(kind) {
             return;
         }
         console.error(err);
-        alert("Konnte Charakter nicht erstellen.");
+        alert(err?.message || "Du kannst max 10 Charaktere ersellen.");
     }
 }
 
@@ -579,9 +579,6 @@ btnAuthDoRegister?.addEventListener("click", doRegister);
 
 btnCreatePC?.addEventListener("click", () => handleCreate("pc"));
 btnCreateNPC?.addEventListener("click", () => handleCreate("npc"));
-
-toggleMine?.addEventListener("click", () => toggleSection(toggleMine, listMine));
-toggleNpcs?.addEventListener("click", () => toggleSection(toggleNpcs, listNpcs));
 
 bindSectionToggle(toggleMine, listMine, true);
 bindSectionToggle(toggleNpcs, listNpcs, false);

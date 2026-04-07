@@ -1,11 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select
-from app.deps import get_current_user, get_session
-from app.models import Character, User, Role
-from app.schemas import CharacterCreate, CharacterUpdate, CharacterOut
 from datetime import datetime, timezone
 
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
+from sqlmodel import Session, select
+
+from app.deps import get_current_user, get_session
+from app.models import Character, Role, User
+from app.schemas import CharacterCreate, CharacterOut, CharacterUpdate
+
 router = APIRouter(prefix="/characters", tags=["characters"])
+
+MAX_PLAYER_PCS = 10
+
+MAX_DM_PCS = 20
+MAX_DM_NPCS = 50
 
 
 def can_read_character(user: User, character: Character) -> bool:
@@ -23,7 +31,6 @@ def can_read_character(user: User, character: Character) -> bool:
 def can_write_character(user: User, character: Character) -> bool:
     if user.role == Role.admin:
         return True
-    return character.owner_id == user.id
     if user.role == Role.dm:
         # DM darf nur eigene NPCs ändern/löschen
         return character.kind != "pc" and character.owner_id == user.id
@@ -33,10 +40,12 @@ def can_write_character(user: User, character: Character) -> bool:
 
 @router.get("", response_model=list[CharacterOut])
 def list_characters(
-        session: Session = Depends(get_session),
-        current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    stmt = select(Character, User.username).join(User, Character.owner_id == User.id, isouter=True)
+    stmt = select(Character, User.username).join(
+        User, Character.owner_id == User.id, isouter=True
+    )
 
     if current_user.role == Role.admin:
         rows = session.exec(stmt).all()
@@ -69,20 +78,49 @@ def list_characters(
 
 @router.post("")
 def create_character(
-        payload: CharacterCreate,
-        session: Session = Depends(get_session),
-        current_user: User = Depends(get_current_user),
+    payload: CharacterCreate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     is_dm_or_admin = current_user.role in (Role.dm, Role.admin)
+
+    # Nur DM/Admin dürfen NPCs anlegen
     if (not is_dm_or_admin) and payload.kind != "pc":
         raise HTTPException(status_code=403, detail="Only DM/Admin can create NPCs")
 
-    owner_id = current_user.id
+    limit = None
+
+    if payload.kind == "pc":
+        if current_user.role == Role.player:
+            limit = MAX_PLAYER_PCS
+        elif current_user.role == Role.dm:
+            limit = MAX_DM_PCS
+
+    elif payload.kind == "npc":
+        if current_user.role == Role.dm:
+            limit = MAX_DM_NPCS
+
+    if limit is not None:
+        existing_count = session.exec(
+            select(func.count())
+            .select_from(Character)
+            .where(
+                Character.owner_id == current_user.id,
+                Character.kind == payload.kind,
+            )
+        ).one()
+
+        if existing_count >= limit:
+            kind_label = "NPCs" if payload.kind == "npc" else "Charaktere"
+            raise HTTPException(
+                status_code=400,
+                detail=f"Du kannst maximal {limit} {kind_label} anlegen.",
+            )
 
     character = Character(
         name=payload.name,
         kind=payload.kind,
-        owner_id=owner_id,
+        owner_id=current_user.id,
         data=payload.data,
     )
     session.add(character)
@@ -93,9 +131,9 @@ def create_character(
 
 @router.get("/{character_id}")
 def get_character(
-        character_id: int,
-        session: Session = Depends(get_session),
-        current_user: User = Depends(get_current_user),
+    character_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     character = session.get(Character, character_id)
     if not character or not can_read_character(current_user, character):
@@ -111,16 +149,14 @@ def utcnow():
 
 @router.patch("/{character_id}")
 def update_character(
-        character_id: int,
-        payload: CharacterUpdate,
-        session: Session = Depends(get_session),
-        current_user: User = Depends(get_current_user),
+    character_id: int,
+    payload: CharacterUpdate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     character = session.get(Character, character_id)
     if not character:
         raise HTTPException(status_code=404, detail="Character not found")
-    #if current_user.role == Role.dm and character.kind != "pc" and character.owner_id is None:
-        character.owner_id = current_user.id
 
     if not can_write_character(current_user, character):
         # 404 statt 403, damit keine IDs geleakt werden
@@ -163,9 +199,9 @@ def update_character(
 
 @router.delete("/{character_id}")
 def delete_character(
-        character_id: int,
-        session: Session = Depends(get_session),
-        current_user: User = Depends(get_current_user),
+    character_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
     character = session.get(Character, character_id)
     if not character:
