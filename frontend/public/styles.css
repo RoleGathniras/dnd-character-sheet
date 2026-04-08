@@ -26,6 +26,9 @@
     --pad-y: 10px;
 
     --appbar-height: 72px;
+
+    --character-card-image-ratio: 4 / 5;
+    --character-card-preview-max-w: 420px;
 }
 
 [data-nav-label][id] {
@@ -2870,7 +2873,6 @@ body.no-scroll {
 /* =========================================================
    IMAGE
    ========================================================= */
-
 .characterImageCard {
     display: grid;
     gap: 12px;
@@ -2879,28 +2881,39 @@ body.no-scroll {
 .characterImagePreviewWrap {
     position: relative;
     width: 100%;
-    min-height: 220px;
+    aspect-ratio: var(--character-card-image-ratio);
+    max-width: var(--character-card-preview-max-w);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 18px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.03);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .02));
+    box-shadow: var(--shadow);
 }
 
 .characterImagePreview {
     display: block;
     width: 100%;
-    max-height: 360px;
+    height: 100%;
     object-fit: cover;
+    object-position: center;
 }
 
 .characterImagePlaceholder {
-    min-height: 220px;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 16px;
     color: var(--muted);
     text-align: center;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    background:
+        radial-gradient(circle at top, rgba(122, 162, 255, .10), transparent 45%),
+        rgba(255, 255, 255, .03);
 }
 
 .characterImageUpload {
@@ -2946,7 +2959,124 @@ body.no-scroll {
     }
 
     .characterImagePreviewWrap {
-        max-width: 560px;
+        max-width: 420px;
+    }
+}
+
+/* =========================================================
+   INDEX / LANDING CHARACTER CARDS
+   ========================================================= */
+
+.page--landing {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px;
+}
+
+.landingSectionHead h2 {
+    margin: 0 0 12px;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.characterGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+
+.characterCard {
+    display: grid;
+    gap: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    text-align: left;
+    transition: transform .12s ease, border-color .12s ease, background .12s ease;
+}
+
+.characterCard:hover {
+    transform: translateY(-2px);
+    border-color: var(--borderStrong);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.characterCard:focus-visible {
+    outline: none;
+    box-shadow:
+        var(--shadow),
+        0 0 0 3px rgba(122, 162, 255, .22);
+    border-color: rgba(122, 162, 255, .55);
+}
+
+.characterCard__imageWrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--character-card-image-ratio);
+    overflow: hidden;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .015));
+}
+
+.characterCard__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.characterCard__imagePlaceholder {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: rgba(241, 241, 241, 0.9);
+    background:
+        radial-gradient(circle at top, rgba(122, 162, 255, .12), transparent 45%),
+        rgba(255, 255, 255, .03);
+}
+
+.characterCard__body {
+    padding: 12px 14px 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.characterCard__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+.emptyState {
+    color: var(--muted);
+    padding: 8px 2px 16px;
+}
+
+@media (min-width: 600px) {
+    .characterGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 900px) {
+    .page--landing {
+        padding: 20px;
+    }
+
+    .characterGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
     }
 }
 

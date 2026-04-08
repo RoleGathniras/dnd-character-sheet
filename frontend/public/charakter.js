@@ -32,6 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const personality_bonds = document.getElementById("personality_bonds");
     const personality_flaws = document.getElementById("personality_flaws");
 
+    const currentCharacterAvatar = document.getElementById("currentCharacterAvatar");
+    const currentCharacterAvatarImg = document.getElementById("currentCharacterAvatarImg");
+    const currentCharacterAvatarFallback = document.getElementById("currentCharacterAvatarFallback");
+
     const required = [
         btnMenu, drawer, backdrop, btnCloseDrawer, listMine, listNpcs,
         appearance_age, appearance_height, appearance_weight, appearance_eyes,
@@ -62,9 +66,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // =========================================================
     function emptyPersistDescription() {
         return {
-            v: 1,
+            v: 2,
             appearance: {
                 imageDataUrl: "",
+                imageCrop: {
+                    x: 50,
+                    y: 50,
+                    zoom: 1
+                },
                 age: "",
                 height: "",
                 weight: "",
@@ -94,6 +103,12 @@ document.addEventListener("DOMContentLoaded", () => {
             : emptyPersistDescription();
 
         descriptionState.appearance.imageDataUrl = String(p.appearance?.imageDataUrl || "");
+        descriptionState.appearance.imageCrop = {
+            x: Number(p.appearance?.imageCrop?.x ?? 50),
+            y: Number(p.appearance?.imageCrop?.y ?? 50),
+            zoom: Number(p.appearance?.imageCrop?.zoom ?? 1),
+        };
+
         descriptionState.appearance.age = String(p.appearance?.age || "");
         descriptionState.appearance.height = String(p.appearance?.height || "");
         descriptionState.appearance.weight = String(p.appearance?.weight || "");
@@ -139,6 +154,9 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.removeItem("selectedCharacterId");
         }
     }
+    function syncTopbarAvatarFromCurrentCharacter() {
+        renderTopbarCharacterAvatar(currentCharacter);
+    }
 
     function getHttpStatus(err) {
         return (
@@ -175,6 +193,62 @@ document.addEventListener("DOMContentLoaded", () => {
             .replaceAll("<", "&lt;")
             .replaceAll(">", "&gt;")
             .replaceAll('"', "&quot;");
+    }
+    function getCharacterImageDataUrl(character) {
+        return (
+            character?.data?.description?.appearance?.imageDataUrl ||
+            character?.data?.character_description?.appearance?.imageDataUrl ||
+            character?.data?.appearance?.imageDataUrl ||
+            ""
+        );
+    }
+
+    function getCharacterImageCrop(character) {
+        const crop =
+            character?.data?.description?.appearance?.imageCrop ||
+            character?.data?.character_description?.appearance?.imageCrop ||
+            character?.data?.appearance?.imageCrop ||
+            null;
+
+        return {
+            x: Number(crop?.x ?? 50),
+            y: Number(crop?.y ?? 50),
+            zoom: Number(crop?.zoom ?? 1),
+        };
+    }
+
+    function renderTopbarCharacterAvatar(character) {
+        if (!currentCharacterAvatar || !currentCharacterAvatarImg || !currentCharacterAvatarFallback) {
+            return;
+        }
+
+        currentCharacterAvatar.hidden = false;
+
+        if (!character) {
+            currentCharacterAvatarImg.removeAttribute("src");
+            currentCharacterAvatarImg.hidden = true;
+            currentCharacterAvatarFallback.hidden = false;
+            currentCharacterAvatarFallback.textContent = "?";
+            return;
+        }
+
+        const imageDataUrl = getCharacterImageDataUrl(character);
+        const crop = getCharacterImageCrop(character);
+        const name = String(character?.name || "Charakter").trim();
+        const fallbackLetter = name ? name.charAt(0).toUpperCase() : "?";
+
+        if (imageDataUrl) {
+            currentCharacterAvatarImg.src = imageDataUrl;
+            currentCharacterAvatarImg.alt = name;
+            currentCharacterAvatarImg.style.objectPosition = `${crop.x}% ${crop.y}%`;
+            currentCharacterAvatarImg.hidden = false;
+            currentCharacterAvatarFallback.hidden = true;
+        } else {
+            currentCharacterAvatarImg.removeAttribute("src");
+            currentCharacterAvatarImg.hidden = true;
+            currentCharacterAvatarFallback.hidden = false;
+            currentCharacterAvatarFallback.textContent = fallbackLetter;
+        }
     }
 
     function markDirtyAndScheduleSave() {
@@ -215,6 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             currentCharacter = await API.patchCharacter(id, payload);
             console.log("[charakter.js] PATCH response", structuredClone(currentCharacter));
+            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             if (isConflict409(e)) {
                 try {
@@ -230,6 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     };
 
                     currentCharacter = await API.patchCharacter(id, payload2);
+                    syncTopbarAvatarFromCurrentCharacter();
                 } catch (e2) {
                     console.error("[charakter.js] Save failed after 409 retry.", e2);
                 }
@@ -244,6 +320,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 saveTimer = setTimeout(() => void saveNow(), 650);
             }
         }
+    }
+    function applyImageCropToElement(imgEl) {
+        const crop = descriptionState.appearance.imageCrop || { x: 50, y: 50, zoom: 1 };
+        const x = Number.isFinite(crop.x) ? crop.x : 50;
+        const y = Number.isFinite(crop.y) ? crop.y : 50;
+
+        imgEl.style.objectPosition = `${x}% ${y}%`;
     }
 
     // =========================================================
@@ -275,9 +358,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderImagePreview() {
         const src = descriptionState.appearance.imageDataUrl.trim();
+        const crop = descriptionState.appearance.imageCrop || { x: 50, y: 50, zoom: 1 };
 
         if (src) {
             appearance_imagePreview.src = src;
+            appearance_imagePreview.style.objectPosition = `${crop.x}% ${crop.y}%`;
             appearance_imagePreview.hidden = false;
             appearance_imagePlaceholder.hidden = true;
         } else {
@@ -321,6 +406,7 @@ document.addEventListener("DOMContentLoaded", () => {
         appearance_imageFile.addEventListener("change", async () => {
             const file = appearance_imageFile.files?.[0];
             if (!file) return;
+
             if (file.size > 10 * 1024 * 1024) {
                 console.warn("[charakter.js] Image file too large.");
                 appearance_imageFile.value = "";
@@ -335,13 +421,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 const dataUrl = await resizeImageFile(file, {
-                    maxWidth: 512,
-                    maxHeight: 512,
-                    quality: 0.82,
+                    maxWidth: 900,
+                    maxHeight: 900,
+                    quality: 0.86,
                 });
 
                 descriptionState.appearance.imageDataUrl = dataUrl;
+                descriptionState.appearance.imageCrop = {
+                    x: 50,
+                    y: 50,
+                    zoom: 1,
+                };
+
                 renderImagePreview();
+                writeStateIntoCharacter();
+                renderTopbarCharacterAvatar(currentCharacter);
                 markDirtyAndScheduleSave();
             } catch (e) {
                 console.error("[charakter.js] Failed to process image file.", e);
@@ -352,11 +446,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         btnRemoveAppearanceImage.addEventListener("click", () => {
             descriptionState.appearance.imageDataUrl = "";
+            descriptionState.appearance.imageCrop = {
+                x: 50,
+                y: 50,
+                zoom: 1,
+            };
+
             renderImagePreview();
+            writeStateIntoCharacter();
+            renderTopbarCharacterAvatar(currentCharacter);
             markDirtyAndScheduleSave();
         });
     }
-    function resizeImageFile(file, { maxWidth = 512, maxHeight = 512, quality = 0.82 } = {}) {
+    function resizeImageFile(file, { maxWidth = 900, maxHeight = 900, quality = 0.86 } = {}) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
 
@@ -364,7 +466,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const img = new Image();
 
                 img.onload = () => {
-                    let { width, height } = img;
+                    let width = img.width;
+                    let height = img.height;
 
                     if (!width || !height) {
                         reject(new Error("Ungültige Bildgröße."));
@@ -387,68 +490,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
-                    const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
-                    resolve(compressedDataUrl);
-                };
-
-                img.onerror = () => reject(new Error("Bild konnte nicht geladen werden."));
-                img.src = String(reader.result || "");
-            };
-
-            reader.onerror = () => {
-                reject(reader.error || new Error("Datei konnte nicht gelesen werden."));
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-
-
-    function resizeImageFile(file, { maxWidth = 512, maxHeight = 512, quality = 0.82 } = {}) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-
-            reader.onload = () => {
-                const img = new Image();
-
-                img.onload = () => {
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (!width || !height) {
-                        reject(new Error("Ungültige Bildgröße."));
-                        return;
-                    }
-
-                    const scale = Math.min(
-                        1,
-                        maxWidth / width,
-                        maxHeight / height
-                    );
-
-                    const targetWidth = Math.max(1, Math.round(width * scale));
-                    const targetHeight = Math.max(1, Math.round(height * scale));
-
-                    const canvas = document.createElement("canvas");
-                    canvas.width = targetWidth;
-                    canvas.height = targetHeight;
-
-                    const ctx = canvas.getContext("2d");
-                    if (!ctx) {
-                        reject(new Error("Canvas-Kontext konnte nicht erstellt werden."));
-                        return;
-                    }
-
-                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-
                     const dataUrl = canvas.toDataURL("image/jpeg", quality);
                     resolve(dataUrl);
                 };
 
-                img.onerror = () => {
-                    reject(new Error("Bild konnte nicht geladen werden."));
-                };
-
+                img.onerror = () => reject(new Error("Bild konnte nicht geladen werden."));
                 img.src = String(reader.result || "");
             };
 
@@ -540,6 +586,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setSelectedCharacterId(c.id);
                 closeDrawer();
                 await loadCharacterAndHydrate();
+                syncTopbarAvatarFromCurrentCharacter();
                 await loadCharactersForDrawer();
             });
 
@@ -562,6 +609,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fillAppearanceInputs();
             fillProficienciesAndLanguages();
             fillPersonalityInputs();
+            syncTopbarAvatarFromCurrentCharacter();
             return;
         }
 
@@ -576,6 +624,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fillAppearanceInputs();
             fillProficienciesAndLanguages();
             fillPersonalityInputs();
+            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             console.error("[charakter.js] Failed to load character. Running in-memory only.", e);
 
@@ -586,6 +635,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fillAppearanceInputs();
             fillProficienciesAndLanguages();
             fillPersonalityInputs();
+            syncTopbarAvatarFromCurrentCharacter();
         }
     }
 
@@ -605,6 +655,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     startup().then(() => {
+        syncTopbarAvatarFromCurrentCharacter();
         loadCharactersForDrawer();
     });
 });

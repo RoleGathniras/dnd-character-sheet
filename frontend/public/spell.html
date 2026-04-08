@@ -11,12 +11,17 @@
 <body class="app">
     <!-- Topbar -->
     <header class="appbar">
+        <div id="currentCharacterAvatar" class="topbarCharacterAvatar" hidden
+            aria-label="Aktuell ausgewählter Charakter">
+            <img id="currentCharacterAvatarImg" class="topbarCharacterAvatar__img" alt="Charakterbild" hidden />
+            <div id="currentCharacterAvatarFallback" class="topbarCharacterAvatar__fallback">?</div>
+        </div>
         <div class="appbar__left">
+            <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
         </div>
 
         <div class="appbar__right">
-            <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
-            <button id="btnNavOpen" class="btn" aria-label="Sheet Navigation">Navigation</button>
+            <button id="btnNavOpen" class="btn" aria-label="Charakterbeschreibung Navigation">Navigation</button>
             <button id="btnLogout" class="btn" style="display:none">Logout</button>
         </div>
     </header>

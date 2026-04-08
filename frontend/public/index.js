@@ -58,11 +58,35 @@ import {
 
         return image;
     }
+    function getCharacterImageCrop(character) {
+        const crop =
+            character?.data?.description?.appearance?.imageCrop ||
+            character?.data?.character_description?.appearance?.imageCrop ||
+            character?.data?.appearance?.imageCrop ||
+            null;
+
+        return {
+            x: Number(crop?.x ?? 50),
+            y: Number(crop?.y ?? 50),
+            zoom: Number(crop?.zoom ?? 1),
+        };
+    }
+
+    function isPlayableCharacter(character) {
+        return String(character?.kind || "").toLowerCase() !== "npc";
+    }
+
+    function getCharacterPlaceholderName(name) {
+        const safe = String(name || "Charakter").trim();
+        return safe ? safe.charAt(0).toUpperCase() : "?";
+    }
 
     function renderTopbarCharacterAvatar(character) {
         if (!currentCharacterAvatar || !currentCharacterAvatarImg || !currentCharacterAvatarFallback) {
             return;
         }
+
+        currentCharacterAvatar.hidden = false;
 
         if (!character) {
             currentCharacterAvatarImg.removeAttribute("src");
@@ -73,12 +97,14 @@ import {
         }
 
         const imageDataUrl = getCharacterImageDataUrl(character);
+        const crop = getCharacterImageCrop(character);
         const name = String(character?.name || "Charakter").trim();
         const fallbackLetter = name ? name.charAt(0).toUpperCase() : "?";
 
         if (imageDataUrl) {
             currentCharacterAvatarImg.src = imageDataUrl;
             currentCharacterAvatarImg.alt = name;
+            currentCharacterAvatarImg.style.objectPosition = `${crop.x}% ${crop.y}%`;
             currentCharacterAvatarImg.hidden = false;
             currentCharacterAvatarFallback.hidden = true;
         } else {
@@ -105,19 +131,22 @@ import {
         try {
             const chars = await API.characters();
             console.log("[index.js] API.characters()", structuredClone(chars));
+
+            const playableChars = chars.filter(isPlayableCharacter);
             const selectedId = Number(getSelectedCharacterId() || 0);
-            const selectedCharacter = chars.find((c) => Number(c.id) === selectedId) || null;
+            const selectedCharacter =
+                playableChars.find((c) => Number(c.id) === selectedId) || null;
 
             characterGrid.innerHTML = "";
 
-            if (!chars.length) {
+            if (!playableChars.length) {
                 if (emptyState) {
                     emptyState.hidden = false;
-                    emptyState.textContent = "Noch keine Charaktere vorhanden.";
+                    emptyState.textContent = "Noch keine spielbaren Charaktere vorhanden.";
                 }
 
                 renderTopbarCharacterAvatar(null);
-                setStatus("Keine Charaktere vorhanden.");
+                setStatus("Keine spielbaren Charaktere vorhanden.");
                 return;
             }
 
@@ -125,23 +154,14 @@ import {
 
             renderTopbarCharacterAvatar(selectedCharacter);
 
-            for (const c of chars) {
-                console.log("[index.js] char image path", {
-                    id: c.id,
-                    name: c.name,
-                    descriptionImage: c?.data?.description?.appearance?.imageDataUrl,
-                    characterDescriptionImage: c?.data?.character_description?.appearance?.imageDataUrl,
-                    rawData: c?.data,
-                });
-
+            for (const c of playableChars) {
                 const card = document.createElement("button");
                 card.type = "button";
                 card.className = "characterCard";
 
                 const imageDataUrl = getCharacterImageDataUrl(c);
+                const crop = getCharacterImageCrop(c);
                 const safeName = String(c.name ?? "Unbenannt");
-                const safeKind = String((c.kind ?? "pc").toUpperCase());
-                const safeOwner = c.owner_username ? String(c.owner_username) : "";
 
                 const imageWrap = document.createElement("div");
                 imageWrap.className = "characterCard__imageWrap";
@@ -153,6 +173,7 @@ import {
                     img.loading = "lazy";
                     img.decoding = "async";
                     img.src = imageDataUrl;
+                    img.style.objectPosition = `${crop.x}% ${crop.y}%`;
 
                     img.addEventListener("error", () => {
                         console.error("[index.js] image render failed", {
@@ -160,13 +181,19 @@ import {
                             name: c.name,
                             srcPrefix: imageDataUrl.slice(0, 80),
                         });
+
+                        imageWrap.innerHTML = "";
+                        const fallback = document.createElement("div");
+                        fallback.className = "characterCard__imagePlaceholder";
+                        fallback.textContent = getCharacterPlaceholderName(safeName);
+                        imageWrap.appendChild(fallback);
                     });
 
                     imageWrap.appendChild(img);
                 } else {
                     const placeholder = document.createElement("div");
                     placeholder.className = "characterCard__imagePlaceholder";
-                    placeholder.textContent = "Kein Bild";
+                    placeholder.textContent = getCharacterPlaceholderName(safeName);
                     imageWrap.appendChild(placeholder);
                 }
 
@@ -177,22 +204,7 @@ import {
                 title.className = "characterCard__title";
                 title.textContent = safeName;
 
-                const meta = document.createElement("div");
-                meta.className = "characterCard__meta";
-
-                const badge = document.createElement("span");
-                badge.className = "characterCard__badge";
-                badge.textContent = safeKind;
-                meta.appendChild(badge);
-
-                if (safeOwner) {
-                    const owner = document.createElement("span");
-                    owner.className = "characterCard__owner";
-                    owner.textContent = safeOwner;
-                    meta.appendChild(owner);
-                }
-
-                body.append(title, meta);
+                body.appendChild(title);
                 card.append(imageWrap, body);
 
                 card.addEventListener("click", () => {
@@ -204,7 +216,7 @@ import {
                 characterGrid.appendChild(card);
             }
 
-            setStatus(`Charaktere geladen: ${chars.length}`);
+            setStatus(`Charaktere geladen: ${playableChars.length}`);
         } catch (e) {
             console.error("[index.js] Fehler beim Laden der Charakterkarten", e);
             characterGrid.innerHTML = "";
