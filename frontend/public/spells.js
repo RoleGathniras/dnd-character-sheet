@@ -1,7 +1,7 @@
 // frontend/public/spells.js
 // UI-only: Spell Tabs + Slots + Spellbook + Panel + Description (In-Memory)
 import { API } from "./api.js";
-
+import { renderTopbarCharacterAvatar } from "./app.js";
 document.addEventListener("DOMContentLoaded", () => {
     // 0 DOM: Welche HTML-Elemente benutzt werden
     const tabs = [...document.querySelectorAll(".tab[data-spell-level]")];
@@ -239,7 +239,9 @@ document.addEventListener("DOMContentLoaded", () => {
             ""
         );
     }
-
+    function syncTopbarAvatarFromCurrentCharacter() {
+        renderTopbarCharacterAvatar(currentCharacter);
+    }
 
     // Character cache for optimistic locking
     let currentCharacter = null; // { id, data, updated_at, ... }
@@ -353,6 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("[spells.js] loadCharacterAndHydrate -> selectedCharacterId =", id);
         if (!id) {
             boundCharacterId = null;
+            currentCharacter = null;
             console.warn("[spells.js] No selected character id in localStorage. Running in-memory only.");
             applyPersist(emptyPersistSpells());
             renderSlots(getCountFor(currentLevel));
@@ -362,6 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fillSpellDetails(selectedSpell);
             closeSpellDetails();
             fillSpellAttackStats();
+            syncTopbarAvatarFromCurrentCharacter();
             return;
         }
 
@@ -378,8 +382,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const selectedSpell = getSelectedSpell(currentLevel);
             fillSpellDetails(selectedSpell);
             fillSpellAttackStats();
+            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             boundCharacterId = null;
+            currentCharacter = null;
             console.error("[spells.js] Failed to load character. Running in-memory only.", e);
             applyPersist(emptyPersistSpells());
             renderSlots(getCountFor(currentLevel));
@@ -388,6 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const selectedSpell = getSelectedSpell();
             fillSpellDetails(selectedSpell);
             fillSpellAttackStats();
+            syncTopbarAvatarFromCurrentCharacter();
         }
     }
 
@@ -416,6 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
             };
 
             currentCharacter = await API.patchCharacter(id, payload);
+            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             if (isConflict409(e)) {
                 try {
@@ -427,6 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const payload2 = { data: latest.data, updated_at: latest.updated_at };
                     currentCharacter = await API.patchCharacter(id, payload2);
+                    syncTopbarAvatarFromCurrentCharacter();
                 } catch (e2) {
                     console.error("[spells.js] Save failed after 409 retry.", e2);
                 }
@@ -1073,6 +1082,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setSelectedCharacterId(c.id);
                 closeDrawer();
                 await loadCharacterAndHydrate();
+                syncTopbarAvatarFromCurrentCharacter();
                 await loadCharactersForDrawer();
             });
 

@@ -1,5 +1,5 @@
 import { API } from "./api.js";
-
+import { renderTopbarCharacterAvatar } from "./app.js";
 document.addEventListener("DOMContentLoaded", () => {
     // =========================================================
     // DOM
@@ -238,6 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
             };
 
             currentCharacter = await API.patchCharacter(id, payload);
+            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             if (isConflict409(e)) {
                 try {
@@ -253,6 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     };
 
                     currentCharacter = await API.patchCharacter(id, payload2);
+                    syncTopbarAvatarFromCurrentCharacter();
                 } catch (e2) {
                     console.error("[inventory.js] Save failed after 409 retry.", e2);
                 }
@@ -286,6 +288,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const n = Number(value);
         if (!Number.isFinite(n) || n < 0) return 0;
         return Math.min(n, MAX_ITEM_WEIGHT);
+    }
+    function syncTopbarAvatarFromCurrentCharacter() {
+        renderTopbarCharacterAvatar(currentCharacter);
     }
 
     // =========================================================
@@ -763,6 +768,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setSelectedCharacterId(c.id);
                 closeDrawer();
                 await loadCharacterAndHydrate();
+                syncTopbarAvatarFromCurrentCharacter();
                 await loadCharactersForDrawer();
             });
 
@@ -784,6 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fillMoneyInputs();
             renderAllInventoryTables();
             renderCarryStats();
+            syncTopbarAvatarFromCurrentCharacter();
             return;
         }
 
@@ -798,6 +805,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fillMoneyInputs();
             renderAllInventoryTables();
             renderCarryStats();
+            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             console.error("[inventory.js] Failed to load character. Running in-memory only.", e);
 
@@ -808,6 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fillMoneyInputs();
             renderAllInventoryTables();
             renderCarryStats();
+            syncTopbarAvatarFromCurrentCharacter();
         }
     }
 

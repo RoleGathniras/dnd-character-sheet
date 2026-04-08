@@ -1,4 +1,5 @@
 import { API } from "./api.js";
+import { renderTopbarCharacterAvatar } from "./app.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     // =========================================================
@@ -16,9 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const notes_places = document.getElementById("notes_places");
     const notes_story = document.getElementById("notes_story");
 
+
     const required = [
         btnMenu, drawer, backdrop, btnCloseDrawer, listMine, listNpcs,
-        notes_npcs, notes_quests, notes_places, notes_story
+        notes_npcs, notes_quests, notes_places, notes_story,
+        currentCharacterAvatar, currentCharacterAvatarImg, currentCharacterAvatarFallback
     ];
 
     if (required.some((el) => !el)) {
@@ -85,6 +88,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function syncTopbarAvatarFromCurrentCharacter() {
+        renderTopbarCharacterAvatar(currentCharacter);
+    }
+
     function getHttpStatus(err) {
         return (
             err?.status ??
@@ -121,6 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .replaceAll(">", "&gt;")
             .replaceAll('"', "&quot;");
     }
+
 
     function markDirtyAndScheduleSave() {
         writeStateIntoCharacter();
@@ -159,6 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
             };
 
             currentCharacter = await API.patchCharacter(id, payload);
+            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             if (isConflict409(e)) {
                 try {
@@ -174,6 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     };
 
                     currentCharacter = await API.patchCharacter(id, payload2);
+                    syncTopbarAvatarFromCurrentCharacter();
                 } catch (e2) {
                     console.error("[notes.js] Save failed after 409 retry.", e2);
                 }
@@ -306,6 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setSelectedCharacterId(c.id);
                 closeDrawer();
                 await loadCharacterAndHydrate();
+                syncTopbarAvatarFromCurrentCharacter();
                 await loadCharactersForDrawer();
             });
 
@@ -326,6 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             applyPersistNotes(emptyPersistNotes());
             fillInputs();
+            syncTopbarAvatarFromCurrentCharacter();
             return;
         }
 
@@ -338,6 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
             applyPersistNotes(persist);
 
             fillInputs();
+            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             console.error("[notes.js] Failed to load character. Running in-memory only.", e);
 
@@ -346,6 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             applyPersistNotes(emptyPersistNotes());
             fillInputs();
+            syncTopbarAvatarFromCurrentCharacter();
         }
     }
 
@@ -364,6 +378,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     startup().then(() => {
+        syncTopbarAvatarFromCurrentCharacter();
         loadCharactersForDrawer();
     });
 });

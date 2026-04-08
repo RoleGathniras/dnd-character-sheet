@@ -10,18 +10,28 @@
 
 <body>
     <!-- Appbar -->
-    <div class="appbar">
-        <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
-
-        <!-- Actions Dropdown -->
-        <div class="actions">
-            <button id="btnActions" class="btn" aria-label="Character" hidden style="display:none">Erstellen</button>
+    <header class="appbar">
+        <div id="currentCharacterAvatar" class="topbarCharacterAvatar" hidden
+            aria-label="Aktuell ausgewählter Charakter" title="Zur Übersicht">
+            <img id="currentCharacterAvatarImg" class="topbarCharacterAvatar__img" alt="Charakterbild" hidden />
+            <div id="currentCharacterAvatarFallback" class="topbarCharacterAvatar__fallback">?</div>
         </div>
 
-        <button id="btnNavOpen" class="btn" aria-label="Sheet Navigation" style="display:none">Navigation</button>
-        <button id="btnLogin" class="btn">Login</button>
-        <button id="btnLogout" class="btn" style="display:none">Logout</button>
-        <button id="btnRegister" class="btn">Registrieren</button>
+        <div class="appbar__left">
+            <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
+        </div>
+
+        <div class="appbar__right">
+            <div class="actions">
+                <button id="btnActions" class="btn" aria-label="Character" hidden
+                    style="display:none">Erstellen</button>
+            </div>
+
+            <button id="btnNavOpen" class="btn" aria-label="Sheet Navigation" style="display:none">Navigation</button>
+            <button id="btnLogin" class="btn">Login</button>
+            <button id="btnLogout" class="btn" style="display:none">Logout</button>
+            <button id="btnRegister" class="btn">Registrieren</button>
+        </div>
 
         <div id="authPanel" class="panel authPanel" hidden>
             <div class="authRow">
@@ -37,7 +47,7 @@
             </div>
             <div class="authHint">Nach Erstellung muss ein Admin dich freischalten.</div>
         </div>
-    </div>
+    </header>
 
     <!-- Drawer -->
     <div id="drawer" class="drawer" aria-hidden="true">

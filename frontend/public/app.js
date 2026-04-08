@@ -55,6 +55,8 @@ const btnNavClose = document.getElementById("btnNavClose");
 const navList = document.getElementById("navList");
 
 const currentCharacterAvatar = document.getElementById("currentCharacterAvatar");
+const currentCharacterAvatarImg = document.getElementById("currentCharacterAvatarImg");
+const currentCharacterAvatarFallback = document.getElementById("currentCharacterAvatarFallback");
 
 // ============================================================
 // EXPORTS
@@ -213,6 +215,74 @@ export async function loadCharacters() {
 
     setStatus(`Charaktere geladen: ${chars.length}`);
     return chars;
+}
+export function getCharacterImageDataUrl(character) {
+    return (
+        character?.data?.description?.appearance?.imageDataUrl ||
+        character?.data?.character_description?.appearance?.imageDataUrl ||
+        character?.data?.appearance?.imageDataUrl ||
+        ""
+    );
+}
+
+export function getCharacterImageCrop(character) {
+    const crop =
+        character?.data?.description?.appearance?.imageCrop ||
+        character?.data?.character_description?.appearance?.imageCrop ||
+        character?.data?.appearance?.imageCrop ||
+        null;
+
+    return {
+        x: Number(crop?.x ?? 50),
+        y: Number(crop?.y ?? 50),
+        zoom: Number(crop?.zoom ?? 1),
+    };
+}
+
+export function renderTopbarCharacterAvatar(character) {
+    if (!currentCharacterAvatar || !currentCharacterAvatarImg || !currentCharacterAvatarFallback) {
+        return;
+    }
+
+    currentCharacterAvatar.hidden = false;
+
+    if (!character) {
+        currentCharacterAvatarImg.removeAttribute("src");
+        currentCharacterAvatarImg.hidden = true;
+        currentCharacterAvatarFallback.hidden = false;
+        currentCharacterAvatarFallback.textContent = "?";
+        return;
+    }
+
+    const imageDataUrl = getCharacterImageDataUrl(character);
+    const crop = getCharacterImageCrop(character);
+    const name = String(character?.name || "Charakter").trim();
+    const fallbackLetter = name ? name.charAt(0).toUpperCase() : "?";
+
+    if (imageDataUrl) {
+        currentCharacterAvatarImg.src = imageDataUrl;
+        currentCharacterAvatarImg.alt = name;
+        currentCharacterAvatarImg.style.objectPosition = `${crop.x}% ${crop.y}%`;
+        currentCharacterAvatarImg.hidden = false;
+        currentCharacterAvatarFallback.hidden = true;
+    } else {
+        currentCharacterAvatarImg.removeAttribute("src");
+        currentCharacterAvatarImg.hidden = true;
+        currentCharacterAvatarFallback.hidden = false;
+        currentCharacterAvatarFallback.textContent = fallbackLetter;
+    }
+}
+
+export function bindTopbarAvatarNavigation() {
+    if (!currentCharacterAvatar) return;
+    if (currentCharacterAvatar.dataset.bound === "1") return;
+
+    currentCharacterAvatar.dataset.bound = "1";
+    currentCharacterAvatar.style.cursor = "pointer";
+
+    currentCharacterAvatar.addEventListener("click", () => {
+        window.location.href = "/index.html";
+    });
 }
 
 // ============================================================
@@ -607,7 +677,7 @@ window.addEventListener("hashchange", () => {
 // ============================================================
 
 (function startup() {
-
+    bindTopbarAvatarNavigation();
     const isIndexPage =
         location.pathname === "/" ||
         location.pathname.endsWith("/index") ||

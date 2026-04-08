@@ -5,12 +5,14 @@ import {
     loadCharacters,
     refreshCurrentUserAndUI,
     renderDrawerTitle,
+    renderTopbarCharacterAvatar,
     setAdminVisible,
     setCurrentCharacter,
     setLoggedInUI,
     setStatus,
 } from "./app.js";
 import { jsonToSheet, sheetToJson } from "./mapper.js";
+
 
 (function () {
     const isSheetPage = location.pathname.endsWith("/sheet.html");
@@ -20,6 +22,7 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
     const btnSave = document.getElementById("btnSave");
     const btnDelete = document.getElementById("btnDelete");
 
+    let currentCharacter = null;
     let currentCharacterUpdatedAt = null;
     let isDirty = false;
     let autosaveTimer = null;
@@ -74,6 +77,9 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
         if (btnSave) btnSave.disabled = false;
         setStatus("Ungespeicherte Änderungen ⚠");
         scheduleAutoSave();
+    }
+    function syncTopbarAvatarFromCurrentCharacter() {
+        renderTopbarCharacterAvatar(currentCharacter);
     }
 
     function scheduleAutoSave() {
@@ -270,6 +276,8 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
     async function loadCharacter(id) {
         const cid = Number(id);
         if (!cid) {
+            currentCharacter = null;
+            syncTopbarAvatarFromCurrentCharacter();
             setStatus("Kein Charakter ausgewählt.");
             return;
         }
@@ -279,12 +287,14 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
 
             const c = await API.getCharacter(cid);
 
+            currentCharacter = c;
             setCurrentCharacter(c.id);
             currentCharacterUpdatedAt = c.updated_at;
 
             jsonToSheet(c.data);
             recalcDerived();
             recalcAttacks?.();
+            syncTopbarAvatarFromCurrentCharacter();
 
             const titleEl = document.getElementById("sheetTitle");
             if (titleEl) titleEl.textContent = c.name;
@@ -295,6 +305,8 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
             setStatus(`Geladen: ${c.name}`);
         } catch (e) {
             console.error(e);
+            currentCharacter = null;
+            syncTopbarAvatarFromCurrentCharacter();
             setStatus("Fehler beim Laden des Charakters ❌");
             alert("Fehler beim Laden des Charakters.");
         }
@@ -310,14 +322,26 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
         try {
             if (!silent) setStatus("Speichere…");
 
-            const data = sheetToJson();
+            const sheetData = sheetToJson();
+
+            const baseData =
+                currentCharacter && currentCharacter.data && typeof currentCharacter.data === "object"
+                    ? structuredClone(currentCharacter.data)
+                    : {};
+
+            const mergedData = {
+                ...baseData,
+                ...sheetData,
+            };
 
             const res = await API.patchCharacter(currentCharacterId, {
-                data,
+                data: mergedData,
                 updated_at: currentCharacterUpdatedAt,
             });
 
+            currentCharacter = res;
             currentCharacterUpdatedAt = res.updated_at;
+            syncTopbarAvatarFromCurrentCharacter();
             isDirty = false;
             if (btnSave) btnSave.disabled = true;
 
@@ -348,6 +372,9 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
     function resetSheetUI() {
         const titleEl = document.getElementById("sheetTitle");
         if (titleEl) titleEl.textContent = "Kein Charakter geladen";
+
+        currentCharacter = null;
+        syncTopbarAvatarFromCurrentCharacter();
 
         isDirty = false;
         currentCharacterUpdatedAt = null;
