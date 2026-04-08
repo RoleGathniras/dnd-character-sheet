@@ -63,7 +63,7 @@ import { buildSheetNav } from "./nav.js";
         meta.innerHTML = `
             <div class="userName">
                 ${escapeHtml(u.username)}
-                ${pending ? `<span class="badge">pending</span>` : ``}
+                ${pending ? `<span class="badge">inaktiv</span>` : ``}
             </div>
             <div class="userId">ID: ${u.id}</div>
         `;
@@ -123,30 +123,25 @@ import { buildSheetNav } from "./nav.js";
             }
         });
 
-        let btnApprove = null;
-        if (pending) {
-            btnApprove = document.createElement("button");
-            btnApprove.className = "btn btn--primary";
-            btnApprove.textContent = "Freischalten";
+        const btnToggleActive = document.createElement("button");
+        btnToggleActive.className = "btn btn--primary";
+        btnToggleActive.textContent = u.is_active ? "Deaktivieren" : "Aktivieren";
 
-            btnApprove.addEventListener("click", async () => {
-                btnApprove.disabled = true;
-                try {
-                    await API.activateUser(u.id);
-                    await loadUsersIntoAdmin();
-                } catch (e) {
-                    console.error(e);
-                    alert(e?.message || "Freischalten fehlgeschlagen.");
-                    btnApprove.disabled = false;
-                }
-            });
-        }
+        btnToggleActive.addEventListener("click", async () => {
+            btnToggleActive.disabled = true;
+            try {
+                await API.setUserActive(u.id, !u.is_active);
+                await loadUsersIntoAdmin();
+            } catch (e) {
+                console.error(e);
+                alert(e?.message || "Status konnte nicht geändert werden.");
+                btnToggleActive.disabled = false;
+            }
+        });
 
         const actions = document.createElement("div");
         actions.className = "userActions";
-
-        if (btnApprove) actions.append(btnApprove);
-        actions.append(sel, btnSaveRole, btnDeleteUser);
+        actions.append(btnToggleActive, sel, btnSaveRole, btnDeleteUser);
 
         row.append(meta, actions);
         return row;
@@ -177,7 +172,7 @@ import { buildSheetNav } from "./nav.js";
         const username = createUserUsername?.value?.trim();
         const password = createUserPassword?.value ?? "";
         const role = createUserRole?.value ?? "player";
-        const activate = !!createUserActive?.checked;
+        const isActive = !!createUserActive?.checked;
 
         if (!username || !password) {
             alert("Bitte Username und Passwort eingeben.");
@@ -187,22 +182,12 @@ import { buildSheetNav } from "./nav.js";
         btnCreateUser.disabled = true;
 
         try {
-            await API.register(username, password);
-
-            const users = await API.listUsers();
-            const createdUser = users.find((u) => u.username === username);
-
-            if (!createdUser) {
-                throw new Error("User wurde erstellt, aber konnte anschließend nicht geladen werden.");
-            }
-
-            if (activate && createdUser.is_active === false) {
-                await API.activateUser(createdUser.id);
-            }
-
-            if (createdUser.role !== role) {
-                await API.patchUserRole(createdUser.id, role);
-            }
+            await API.createUserByAdmin({
+                username,
+                password,
+                role,
+                isActive,
+            });
 
             createUserUsername.value = "";
             createUserPassword.value = "";

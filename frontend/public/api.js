@@ -5,9 +5,13 @@ export const API = {
         return localStorage.getItem(this.tokenKey);
     },
 
-    set token(v) {
-        if (v) localStorage.setItem(this.tokenKey, v);
+    set token(value) {
+        if (value) localStorage.setItem(this.tokenKey, value);
         else localStorage.removeItem(this.tokenKey);
+    },
+
+    clearToken() {
+        this.token = null;
     },
 
     async login(username, password) {
@@ -22,43 +26,41 @@ export const API = {
         });
 
         if (!res.ok) {
-            const txt = await res.text();
-            throw new Error(`Login fehlgeschlagen: ${txt}`);
+            const text = await res.text();
+            throw new Error(`Login fehlgeschlagen: ${text}`);
         }
 
         const data = await res.json();
         this.token = data.access_token;
         return data;
     },
-    async register(username, password) {
-        return this.request("/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password }),
+
+    async request(path, options = {}) {
+        const headers = new Headers(options.headers || {});
+        const token = this.token;
+
+        if (token) {
+            headers.set("Authorization", `Bearer ${token}`);
+        }
+
+        const response = await fetch(`/api${path}`, {
+            ...options,
+            headers,
         });
-    },
 
+        if (!response.ok) {
+            const contentType = response.headers.get("content-type") || "";
+            const responseBody = contentType.includes("application/json")
+                ? await response.json()
+                : await response.text();
 
-    async request(path, opts = {}) {
-        const headers = new Headers(opts.headers || {});
-        const t = this.token;
-        if (t) headers.set("Authorization", `Bearer ${t}`);
-
-        const res = await fetch(`/api${path}`, { ...opts, headers });
-
-        if (!res.ok) {
-            const ct = res.headers.get("content-type") || "";
-            const body = ct.includes("application/json")
-                ? await res.json()
-                : await res.text();
-
-            const detail = body?.detail;
-            let reason = "";
+            const detail = responseBody?.detail;
+            let message = "";
 
             if (typeof detail === "string") {
-                reason = detail;
+                message = detail;
             } else if (Array.isArray(detail)) {
-                reason = detail
+                message = detail
                     .map((entry) => {
                         const loc = Array.isArray(entry?.loc) ? entry.loc.join(".") : "unknown";
                         const msg = entry?.msg || "Ungültige Eingabe";
@@ -66,31 +68,38 @@ export const API = {
                     })
                     .join(" | ");
             } else if (detail?.message) {
-                reason = detail.message;
-            } else if (typeof body === "string") {
-                reason = body;
+                message = detail.message;
+            } else if (typeof responseBody === "string") {
+                message = responseBody;
             }
 
-            if (!reason) {
-                if (res.status === 401) reason = "Nicht eingeloggt oder Sitzung abgelaufen.";
-                else if (res.status === 404) reason = "Charakter nicht verfügbar oder kein Zugriff.";
-                else if (res.status === 422) reason = "Ungültige Eingabedaten.";
-                else reason = "Unbekannter Fehler.";
+            if (!message) {
+                if (response.status === 401) message = "Nicht eingeloggt oder Sitzung abgelaufen.";
+                else if (response.status === 403) message = "Keine Berechtigung.";
+                else if (response.status === 404) message = "Ressource nicht gefunden.";
+                else if (response.status === 409) message = "Konflikt mit dem aktuellen Datenstand.";
+                else if (response.status === 422) message = "Ungültige Eingabedaten.";
+                else message = "Unbekannter Fehler.";
             }
 
-            const err = new Error(reason);
-            err.status = res.status;
-            err.path = path;
-            err.method = opts.method || "GET";
-            err.raw = body;
+            const error = new Error(message);
+            error.status = response.status;
+            error.path = path;
+            error.method = options.method || "GET";
+            error.raw = responseBody;
 
-            throw err;
+            throw error;
         }
 
-        const ct = res.headers.get("content-type") || "";
-        return ct.includes("application/json") ? res.json() : res.text();
-    },
+        if (response.status === 204) {
+            return null;
+        }
 
+        const contentType = response.headers.get("content-type") || "";
+        return contentType.includes("application/json")
+            ? await response.json()
+            : await response.text();
+    },
 
     // ===== User =====
 
@@ -104,11 +113,16 @@ export const API = {
         return this.request("/characters");
     },
 
+    listCharacters() {
+        return this.characters();
+    },
+
     getCharacter(id) {
         return this.request(`/characters/${id}`);
     },
+
     createCharacter(payload) {
-        return this.request(`/characters`, {
+        return this.request("/characters", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
@@ -122,12 +136,16 @@ export const API = {
             body: JSON.stringify(payload),
         });
     },
+
+    updateCharacter(id, payload) {
+        return this.patchCharacter(id, payload);
+    },
+
     deleteCharacter(id) {
         return this.request(`/characters/${id}`, {
             method: "DELETE",
         });
     },
-
 
     // ===== Admin =====
 
@@ -135,43 +153,60 @@ export const API = {
         return this.request("/users");
     },
 
-    patchUserRole(id, role) {
+    createUser({ username, password, role = "player", isActive = true }) {
+        return this.request("/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username,
+                password,
+                role,
+                is_active: isActive,
+            }),
+        });
+    },
+
+    async createUserByAdmin({ username, password, role = "player", isActive = true }) {
+        return this.createUser({ username, password, role, isActive });
+    },
+
+    updateUser(id, payload) {
         return this.request(`/users/${id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ role }),
+            body: JSON.stringify(payload),
         });
     },
+
+    patchUserRole(id, role) {
+        return this.updateUser(id, { role });
+    },
+
+    setUserActive(id, isActive) {
+        return this.updateUser(id, { is_active: isActive });
+    },
+
+    activateUser(id) {
+        return this.setUserActive(id, true);
+    },
+
+    deactivateUser(id) {
+        return this.setUserActive(id, false);
+    },
+
+    changeUserPassword(id, password) {
+        return this.updateUser(id, { password });
+    },
+
     deleteUser(id) {
         return this.request(`/users/${id}`, {
             method: "DELETE",
         });
     },
-    activateUser(id) {
-        return this.request(`/users/${id}/activate`, {
-            method: "PATCH",
-        });
+
+    // ===== Legacy / entfernt im Backend =====
+
+    async register() {
+        throw new Error("Die offene Registrierung wurde entfernt. User müssen jetzt vom Admin angelegt werden.");
     },
-    async createUserByAdmin({ username, password, role = "player", isActive = true }) {
-        await this.register(username, password);
-
-        const users = await this.listUsers();
-        const created = users.find((u) => u.username === username);
-
-        if (!created) {
-            throw new Error("Neu erstellter User konnte nicht gefunden werden.");
-        }
-
-        if (isActive && created.is_active === false) {
-            await this.activateUser(created.id);
-        }
-
-        if (created.role !== role) {
-            await this.patchUserRole(created.id, role);
-        }
-
-        return created;
-    }
-
-
 };
