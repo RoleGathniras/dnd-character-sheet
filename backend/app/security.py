@@ -1,15 +1,16 @@
+import os
 from datetime import datetime, timedelta
 from typing import Optional
 
 from jose import jwt
 from passlib.context import CryptContext
 
-import os
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is not set")
 
-SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_ME_IN_PROD")
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
-
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 

@@ -57,20 +57,25 @@ export const API = {
 
             if (typeof detail === "string") {
                 reason = detail;
+            } else if (Array.isArray(detail)) {
+                reason = detail
+                    .map((entry) => {
+                        const loc = Array.isArray(entry?.loc) ? entry.loc.join(".") : "unknown";
+                        const msg = entry?.msg || "Ungültige Eingabe";
+                        return `${loc}: ${msg}`;
+                    })
+                    .join(" | ");
             } else if (detail?.message) {
                 reason = detail.message;
             } else if (typeof body === "string") {
                 reason = body;
             }
 
-            // Fallback-Meldungen
             if (!reason) {
-                if (res.status === 401)
-                    reason = "Nicht eingeloggt oder Sitzung abgelaufen.";
-                else if (res.status === 404)
-                    reason = "Charakter nicht verfügbar oder kein Zugriff.";
-                else
-                    reason = "Unbekannter Fehler.";
+                if (res.status === 401) reason = "Nicht eingeloggt oder Sitzung abgelaufen.";
+                else if (res.status === 404) reason = "Charakter nicht verfügbar oder kein Zugriff.";
+                else if (res.status === 422) reason = "Ungültige Eingabedaten.";
+                else reason = "Unbekannter Fehler.";
             }
 
             const err = new Error(reason);
