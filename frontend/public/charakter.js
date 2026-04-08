@@ -214,6 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
             };
 
             currentCharacter = await API.patchCharacter(id, payload);
+            console.log("[charakter.js] PATCH response", structuredClone(currentCharacter));
         } catch (e) {
             if (isConflict409(e)) {
                 try {
@@ -221,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const latest = await API.getCharacter(id);
 
                     latest.data = latest.data && typeof latest.data === "object" ? latest.data : {};
-                    latest.data.character_description = myDescription;
+                    latest.data.description = myDescription;
 
                     const payload2 = {
                         data: latest.data,
@@ -320,14 +321,30 @@ document.addEventListener("DOMContentLoaded", () => {
         appearance_imageFile.addEventListener("change", async () => {
             const file = appearance_imageFile.files?.[0];
             if (!file) return;
+            if (file.size > 10 * 1024 * 1024) {
+                console.warn("[charakter.js] Image file too large.");
+                appearance_imageFile.value = "";
+                return;
+            }
+
+            if (!file.type.startsWith("image/")) {
+                console.warn("[charakter.js] Selected file is not an image.");
+                appearance_imageFile.value = "";
+                return;
+            }
 
             try {
-                const dataUrl = await readFileAsDataUrl(file);
+                const dataUrl = await resizeImageFile(file, {
+                    maxWidth: 512,
+                    maxHeight: 512,
+                    quality: 0.82,
+                });
+
                 descriptionState.appearance.imageDataUrl = dataUrl;
                 renderImagePreview();
                 markDirtyAndScheduleSave();
             } catch (e) {
-                console.error("[charakter.js] Failed to read image file.", e);
+                console.error("[charakter.js] Failed to process image file.", e);
             } finally {
                 appearance_imageFile.value = "";
             }
@@ -339,13 +356,100 @@ document.addEventListener("DOMContentLoaded", () => {
             markDirtyAndScheduleSave();
         });
     }
-
-    function readFileAsDataUrl(file) {
+    function resizeImageFile(file, { maxWidth = 512, maxHeight = 512, quality = 0.82 } = {}) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
 
             reader.onload = () => {
-                resolve(String(reader.result || ""));
+                const img = new Image();
+
+                img.onload = () => {
+                    let { width, height } = img;
+
+                    if (!width || !height) {
+                        reject(new Error("Ungültige Bildgröße."));
+                        return;
+                    }
+
+                    const scale = Math.min(1, maxWidth / width, maxHeight / height);
+                    const targetWidth = Math.max(1, Math.round(width * scale));
+                    const targetHeight = Math.max(1, Math.round(height * scale));
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = targetWidth;
+                    canvas.height = targetHeight;
+
+                    const ctx = canvas.getContext("2d");
+                    if (!ctx) {
+                        reject(new Error("Canvas-Kontext konnte nicht erstellt werden."));
+                        return;
+                    }
+
+                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+                    const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
+                    resolve(compressedDataUrl);
+                };
+
+                img.onerror = () => reject(new Error("Bild konnte nicht geladen werden."));
+                img.src = String(reader.result || "");
+            };
+
+            reader.onerror = () => {
+                reject(reader.error || new Error("Datei konnte nicht gelesen werden."));
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+
+    function resizeImageFile(file, { maxWidth = 512, maxHeight = 512, quality = 0.82 } = {}) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = () => {
+                const img = new Image();
+
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (!width || !height) {
+                        reject(new Error("Ungültige Bildgröße."));
+                        return;
+                    }
+
+                    const scale = Math.min(
+                        1,
+                        maxWidth / width,
+                        maxHeight / height
+                    );
+
+                    const targetWidth = Math.max(1, Math.round(width * scale));
+                    const targetHeight = Math.max(1, Math.round(height * scale));
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = targetWidth;
+                    canvas.height = targetHeight;
+
+                    const ctx = canvas.getContext("2d");
+                    if (!ctx) {
+                        reject(new Error("Canvas-Kontext konnte nicht erstellt werden."));
+                        return;
+                    }
+
+                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+                    const dataUrl = canvas.toDataURL("image/jpeg", quality);
+                    resolve(dataUrl);
+                };
+
+                img.onerror = () => {
+                    reject(new Error("Bild konnte nicht geladen werden."));
+                };
+
+                img.src = String(reader.result || "");
             };
 
             reader.onerror = () => {

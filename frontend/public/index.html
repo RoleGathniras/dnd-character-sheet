@@ -11,10 +11,21 @@
 <body>
     <!-- Appbar -->
     <div class="appbar">
-        <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
-        <button id="btnLogin" class="btn">Login</button>
-        <button id="btnLogout" class="btn" style="display:none">Logout</button>
-        <button id="btnRegister" class="btn">Registrieren</button>
+        <div class="appbar__left">
+            <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
+        </div>
+
+        <div class="appbar__right">
+            <div id="currentCharacterAvatar" class="topbarCharacterAvatar" hidden
+                aria-label="Aktuell ausgewählter Charakter">
+                <img id="currentCharacterAvatarImg" class="topbarCharacterAvatar__img" alt="Charakterbild" hidden />
+                <div id="currentCharacterAvatarFallback" class="topbarCharacterAvatar__fallback">?</div>
+            </div>
+
+            <button id="btnLogin" class="btn">Login</button>
+            <button id="btnLogout" class="btn" style="display:none">Logout</button>
+            <button id="btnRegister" class="btn">Registrieren</button>
+        </div>
     </div>
 
     <div id="authPanel" class="panel authPanel" hidden>

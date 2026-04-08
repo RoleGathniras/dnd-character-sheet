@@ -54,6 +54,8 @@ const btnNavOpen = document.getElementById("btnNavOpen");
 const btnNavClose = document.getElementById("btnNavClose");
 const navList = document.getElementById("navList");
 
+const currentCharacterAvatar = document.getElementById("currentCharacterAvatar");
+
 // ============================================================
 // EXPORTS
 // ============================================================
@@ -127,6 +129,10 @@ export function setLoggedInUI(isLoggedIn) {
     setDisplay(btnMenu, isLoggedIn ? "inline-block" : "none");
     setDisplay(btnActions, isLoggedIn ? "inline-block" : "none");
     setDisplay(btnNavOpen, isLoggedIn ? "inline-block" : "none");
+
+    if (currentCharacterAvatar) {
+        currentCharacterAvatar.hidden = !isLoggedIn;
+    }
 
     if (!isLoggedIn) closeNavDrawer();
 
@@ -525,7 +531,7 @@ function doLogout() {
     window.location.href = "/index.html";
 }
 
-function updateLandingAuthState(isLoggedIn) {
+export function updateLandingAuthState(isLoggedIn) {
     if (charactersPanel) {
         charactersPanel.hidden = !isLoggedIn;
     }
