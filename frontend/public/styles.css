@@ -1726,6 +1726,9 @@ body.no-scroll {
     border: 1px solid var(--border);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.02);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .table--spells {
@@ -1743,11 +1746,17 @@ body.no-scroll {
 .table--spells td {
     display: block;
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .panel-row td.panelCell {
     padding: 0;
     border: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .panelSpell {
@@ -1755,10 +1764,12 @@ body.no-scroll {
     flex-direction: column;
     gap: 10px;
     width: 100%;
+    min-width: 0;
     max-width: 100%;
     padding: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
 }
 
 .panel-row:last-child .panelSpell {
@@ -1767,19 +1778,24 @@ body.no-scroll {
 
 .panelSpell__top {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 36px;
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
         "name delete"
         "meta meta";
     gap: 8px;
     align-items: start;
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .panelSpell__name {
     grid-area: name;
-    min-width: 0;
+    display: block;
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -1792,7 +1808,9 @@ body.no-scroll {
     line-height: 1.25;
     text-align: left;
     cursor: pointer;
-    word-break: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     transition: border-color .12s ease, background .12s ease, color .12s ease;
 }
 
@@ -1815,16 +1833,18 @@ body.no-scroll {
 
 .panelSpell__meta {
     grid-area: meta;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 6px;
     min-width: 0;
+    max-width: 100%;
 }
 
 .panelSpell__meta span,
 .panelSpell__sub span {
-    display: inline-flex;
-    align-items: center;
+    display: block;
+    min-width: 0;
+    max-width: 100%;
     min-height: 28px;
     padding: 4px 8px;
     border: 1px solid var(--border);
@@ -1834,18 +1854,25 @@ body.no-scroll {
     font-size: 0.78rem;
     line-height: 1.2;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .panelSpell__bottom {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 6px;
-    align-items: center;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .panelSpell__effect {
-    display: inline-flex;
-    align-items: center;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     min-height: 28px;
     padding: 4px 8px;
     border: 1px solid var(--border);
@@ -1855,15 +1882,26 @@ body.no-scroll {
     font-size: 0.78rem;
     line-height: 1.2;
     white-space: nowrap;
-    max-width: 140px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .panelSpell__sub {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 6px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.panel-row {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.panelSpell__meta>*,
+.panelSpell__sub>* {
+    min-width: 0;
 }
 
 @media (min-width: 900px) {
@@ -1906,6 +1944,35 @@ body.no-scroll {
     .panelSpell {
         padding: 14px 16px;
     }
+
+    .panelSpell__meta {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+
+    .panelSpell__bottom {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .panelSpell__sub {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+}
+
+.panel-row,
+.panel-row td,
+.panel-row .panelCell,
+.panel-row .panelSpell,
+.panel-row .panelSpell__top,
+.panel-row .panelSpell__bottom {
+    min-width: 0;
+    max-width: 100%;
 }
 
 /* =========================================================
@@ -1925,12 +1992,21 @@ body.no-scroll {
 }
 
 .spellDesc__header {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    min-width: 0;
+}
+
+#spellDescTitle {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .spellDesc__body {
@@ -1943,6 +2019,11 @@ body.no-scroll {
     resize: vertical;
 }
 
+#btnCloseSpellDesc {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
 /* =========================================================
    SPELLBOOK + DETAILS
    ========================================================= */
@@ -1951,18 +2032,29 @@ body.no-scroll {
     display: grid;
     grid-template-columns: 1fr;
     gap: 14px;
+    min-width: 0;
+}
+
+.grid2>section {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .spellbook {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .spellbook__item {
+    display: block;
     width: 100%;
-    display: flex;
-    justify-content: flex-start;
+    min-width: 0;
+    max-width: 100%;
+
     text-align: left;
     padding: 12px 14px;
     border-radius: 12px;
@@ -1970,7 +2062,20 @@ body.no-scroll {
     background: rgba(255, 255, 255, 0.04);
     color: var(--text);
     font-weight: 600;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
     transition: border-color .12s ease, background .12s ease, transform .06s ease, color .12s ease;
+}
+
+#sec-spellbook,
+#sec-spellbook .card,
+#sec-spellbook .card__body {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .spellbook__item:hover {
@@ -2073,13 +2178,15 @@ body.no-scroll {
     }
 
     .grid2 {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
-    .table--spells th,
     .table--spells td {
-        font-size: 14px;
-        padding: 12px;
+        display: table-cell;
+        width: auto;
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
     }
 
     .table--spells th:nth-child(3),
@@ -2087,6 +2194,13 @@ body.no-scroll {
     .table--spells th:nth-child(4),
     .table--spells td:nth-child(4) {
         display: table-cell;
+    }
+
+    .table--spells th,
+    .table--spells td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 
