@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>D&D 5E – Admin</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="app">
+    <!-- Topbar -->
+    <header class="appbar">
+        <div class="appbar__left">
+            <button id="btnMenu" class="btn" aria-label="Charaktere öffnen">☰</button>
+        </div>
+
+        <div class="appbar__center">
+            <h1 class="appbar__title">Admin</h1>
+        </div>
+
+        <div class="appbar__right">
+            <button id="btnNavOpen" class="btn" aria-label="Navigation öffnen">≡</button>
+            <button id="btnLogout" class="btn">Logout</button>
+        </div>
+    </header>
+
+    <!-- Drawer -->
+    <aside id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <div id="drawerUserTitle">Charaktere</div>
+            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+        </div>
+
+        <div class="drawer__section">
+            <button id="toggleMine" class="drawer__toggle" aria-expanded="true">Meine Charaktere</button>
+            <div id="listMine" class="drawer__list"></div>
+        </div>
+
+        <div class="drawer__section">
+            <button id="toggleNpcs" class="drawer__toggle" aria-expanded="false">NPCs</button>
+            <div id="listNpcs" class="drawer__list" hidden></div>
+        </div>
+
+        <div class="drawer__section">
+            <button id="toggleActions" class="drawer__toggle" aria-expanded="true">Aktionen</button>
+            <div id="actionsMenu" class="drawer__list">
+                <button id="btnCreatePC" class="btn drawer__action">PC erstellen</button>
+                <button id="btnCreateNPC" class="btn drawer__action">NPC erstellen</button>
+                <button id="btnAdmin" class="btn drawer__action" hidden>Admin</button>
+            </div>
+        </div>
+    </aside>
+
+    <div id="backdrop" class="backdrop" hidden></div>
+
+    <!-- Nav Drawer -->
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <div>Navigation</div>
+            <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
+        </div>
+        <nav id="navList" class="drawer__list"></nav>
+    </aside>
+
+    <div id="navBackdrop" class="backdrop" hidden></div>
+
+    <!-- Main -->
+    <main class="page page--admin" id="sheetRoot">
+        <section class="panel">
+            <div class="panel__header">
+                <h2>User erstellen</h2>
+            </div>
+
+            <div class="formGrid">
+                <label>
+                    <span>Username</span>
+                    <input id="createUserUsername" class="input" type="text" maxlength="50" />
+                </label>
+
+                <label>
+                    <span>Passwort</span>
+                    <input id="createUserPassword" class="input" type="password" maxlength="100" />
+                </label>
+
+                <label>
+                    <span>Rolle</span>
+                    <select id="createUserRole" class="select">
+                        <option value="player">player</option>
+                        <option value="dm">dm</option>
+                        <option value="admin">admin</option>
+                    </select>
+                </label>
+
+                <label class="checkboxRow">
+                    <input id="createUserActive" type="checkbox" checked />
+                    <span>Sofort freischalten</span>
+                </label>
+            </div>
+
+            <div class="panel__actions">
+                <button id="btnCreateUser" class="btn btn--primary">User erstellen</button>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel__header panel__header--split">
+                <h2>User-Verwaltung</h2>
+                <button id="btnReloadUsers" class="btn">Neu laden</button>
+            </div>
+
+            <div id="adminUsers">Lade…</div>
+        </section>
+    </main>
+
+
+    <script type="module" src="./app.js"></script>
+    <script type="module" src="./admin.js"></script>
+</body>
+
+</html>

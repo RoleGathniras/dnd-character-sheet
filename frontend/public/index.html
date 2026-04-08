@@ -16,30 +16,9 @@
         </div>
 
         <div class="appbar__right">
-            <div id="currentCharacterAvatar" class="topbarCharacterAvatar" hidden
-                aria-label="Aktuell ausgewählter Charakter">
-                <img id="currentCharacterAvatarImg" class="topbarCharacterAvatar__img" alt="Charakterbild" hidden />
-                <div id="currentCharacterAvatarFallback" class="topbarCharacterAvatar__fallback">?</div>
-            </div>
-
             <button id="btnLogin" class="btn">Login</button>
             <button id="btnLogout" class="btn" style="display:none">Logout</button>
-            <button id="btnRegister" class="btn">Registrieren</button>
         </div>
-    </div>
-
-    <div id="authPanel" class="panel authPanel" hidden>
-        <div class="authRow">
-            <input id="authUsername" class="input" placeholder="Username" autocomplete="username" />
-        </div>
-        <div class="authRow">
-            <input id="authPassword" class="input" placeholder="Passwort" type="password" autocomplete="new-password" />
-        </div>
-        <div class="authActions">
-            <button id="btnAuthDoRegister" class="btn btn--primary">Account erstellen</button>
-            <button id="btnAuthCancel" class="btn">Abbrechen</button>
-        </div>
-        <div class="authHint">Nach Erstellung muss ein Admin dich freischalten.</div>
     </div>
 
     <!-- Drawer -->
@@ -80,10 +59,9 @@
                         style="display:none">Speichern</button>
                     <button id="btnDelete" class="btn btn--danger drawer__item" disabled style="display:none">Charakter
                         löschen</button>
+                    <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
                 </div>
             </div>
-
-            <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
         </div>
     </div>
 
@@ -115,14 +93,6 @@
             </div>
 
             <div id="characterGrid" class="characterGrid"></div>
-        </section>
-
-        <section id="adminPanel" class="panel" hidden>
-            <div class="adminHeader">
-                <div class="adminTitle">Admin – User</div>
-                <button id="btnReloadUsers" class="btn">Neu laden</button>
-            </div>
-            <div id="adminUsers" class="adminUsers"></div>
         </section>
     </main>
 

@@ -17,7 +17,7 @@ export const API = {
 
         const res = await fetch("/api/auth/token", {
             method: "POST",
-            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body,
         });
 
@@ -33,8 +33,8 @@ export const API = {
     async register(username, password) {
         return this.request("/auth/register", {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({username, password}),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
         });
     },
 
@@ -44,7 +44,7 @@ export const API = {
         const t = this.token;
         if (t) headers.set("Authorization", `Bearer ${t}`);
 
-        const res = await fetch(`/api${path}`, {...opts, headers});
+        const res = await fetch(`/api${path}`, { ...opts, headers });
 
         if (!res.ok) {
             const ct = res.headers.get("content-type") || "";
@@ -105,7 +105,7 @@ export const API = {
     createCharacter(payload) {
         return this.request(`/characters`, {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
         });
     },
@@ -113,7 +113,7 @@ export const API = {
     patchCharacter(id, payload) {
         return this.request(`/characters/${id}`, {
             method: "PATCH",
-            headers: {"Content-Type": "application/json"},
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
         });
     },
@@ -133,8 +133,8 @@ export const API = {
     patchUserRole(id, role) {
         return this.request(`/users/${id}`, {
             method: "PATCH",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({role}),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ role }),
         });
     },
     deleteUser(id) {
@@ -147,6 +147,26 @@ export const API = {
             method: "PATCH",
         });
     },
+    async createUserByAdmin({ username, password, role = "player", isActive = true }) {
+        await this.register(username, password);
+
+        const users = await this.listUsers();
+        const created = users.find((u) => u.username === username);
+
+        if (!created) {
+            throw new Error("Neu erstellter User konnte nicht gefunden werden.");
+        }
+
+        if (isActive && created.is_active === false) {
+            await this.activateUser(created.id);
+        }
+
+        if (created.role !== role) {
+            await this.patchUserRole(created.id, role);
+        }
+
+        return created;
+    }
 
 
 };
