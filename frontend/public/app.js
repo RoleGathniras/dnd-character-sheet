@@ -3,7 +3,12 @@ import { buildSheetNav } from "/nav.js";
 
 let currentCharacterId = Number(localStorage.getItem("dnd_current_character_id")) || null;
 let currentUser = null;
+const isIndexPage =
+    location.pathname === "/" ||
+    location.pathname.endsWith("/index") ||
+    location.pathname.endsWith("/index.html");
 
+const isSheetPage = location.pathname.endsWith("/sheet.html");
 // ============================================================
 // DOM
 // ============================================================
@@ -26,7 +31,7 @@ const listNpcs = document.getElementById("listNpcs");
 const toggleMine = document.getElementById("toggleMine");
 const toggleNpcs = document.getElementById("toggleNpcs");
 const toggleActions = document.getElementById("toggleActions");
-
+const drawerActionsSection = document.getElementById("drawerActionsSection");
 const sheetRootEl = document.getElementById("sheetRoot");
 
 const btnDelete = document.getElementById("btnDelete");
@@ -76,7 +81,7 @@ export function setCurrentCharacter(id) {
     }
 
     if (btnSave) btnSave.disabled = true;
-    if (btnDelete) btnDelete.disabled = !currentCharacterId;
+    updateDrawerActions();
 }
 
 export function renderDrawerTitle() {
@@ -94,17 +99,54 @@ export function renderDrawerTitle() {
 }
 
 export function applyRoleUI() {
-    if (!btnCreateNPC) return;
-
-    const role = currentUser?.role;
-    const isDmOrAdmin = role === "dm" || role === "admin";
-
-    btnCreateNPC.style.display = isDmOrAdmin ? "inline-block" : "none";
-    btnCreateNPC.disabled = !isDmOrAdmin;
+    updateDrawerActions();
 }
 
-export function setAdminVisible(isAdmin) {
-    if (btnAdmin) btnAdmin.hidden = !isAdmin;
+function updateDrawerActions() {
+    const role = currentUser?.role;
+    const isLoggedIn = !!API.token;
+    const isDmOrAdmin = role === "dm" || role === "admin";
+    const isAdmin = role === "admin";
+    const hasSelectedCharacter = !!currentCharacterId;
+
+    if (drawerActionsSection) {
+        drawerActionsSection.style.display = isIndexPage ? "" : "none";
+    }
+
+    if (btnCreatePC) {
+        btnCreatePC.style.display = isIndexPage ? "" : "none";
+        btnCreatePC.disabled = !isLoggedIn;
+    }
+
+    if (btnCreateNPC) {
+        btnCreateNPC.style.display = isIndexPage && isDmOrAdmin ? "" : "none";
+        btnCreateNPC.disabled = !isDmOrAdmin;
+    }
+
+    if (btnDelete) {
+        btnDelete.style.display = isIndexPage && hasSelectedCharacter ? "" : "none";
+        btnDelete.disabled = !isLoggedIn || !hasSelectedCharacter;
+    }
+
+    if (btnAdmin) {
+        btnAdmin.hidden = !(isIndexPage && isAdmin);
+    }
+
+    if (toggleActions && actionsMenu) {
+        const hasVisibleAction =
+            (btnCreatePC && btnCreatePC.style.display !== "none") ||
+            (btnCreateNPC && btnCreateNPC.style.display !== "none") ||
+            (btnDelete && btnDelete.style.display !== "none") ||
+            (btnAdmin && !btnAdmin.hidden);
+
+        if (!hasVisibleAction) {
+            setSectionOpen(toggleActions, actionsMenu, false);
+        }
+    }
+}
+
+export function setAdminVisible() {
+    updateDrawerActions();
 }
 
 export function setLoggedInUI(isLoggedIn) {
@@ -112,9 +154,6 @@ export function setLoggedInUI(isLoggedIn) {
     setDisplay(btnLogout, isLoggedIn ? "inline-block" : "none");
 
     if (btnSave) btnSave.disabled = true;
-
-    if (btnCreatePC) btnCreatePC.disabled = !isLoggedIn;
-    if (btnDelete) btnDelete.disabled = !isLoggedIn || !currentCharacterId;
 
     setDisplay(btnMenu, isLoggedIn ? "inline-block" : "none");
     setDisplay(btnActions, isLoggedIn ? "inline-block" : "none");
@@ -132,13 +171,15 @@ export function setLoggedInUI(isLoggedIn) {
     if (sheetRootEl) {
         sheetRootEl.style.display = isLoggedIn ? "" : "none";
     }
+
+    updateDrawerActions();
 }
 
 export async function refreshCurrentUserAndUI() {
     try {
         currentUser = await API.me();
         renderDrawerTitle();
-        setAdminVisible(currentUser?.role === "admin");
+        setAdminVisible();
         applyRoleUI();
     } catch (e) {
         console.error(e);
@@ -146,7 +187,7 @@ export async function refreshCurrentUserAndUI() {
         currentUser = null;
         renderDrawerTitle();
         applyRoleUI();
-        setAdminVisible(false);
+        setAdminVisible();
         throw e;
     }
 }
@@ -200,6 +241,7 @@ export async function loadCharacters() {
         else listMine.appendChild(b);
     }
 
+    updateDrawerActions();
     setStatus(`Charaktere geladen: ${chars.length}`);
     return chars;
 }
@@ -492,7 +534,28 @@ btnAdmin?.addEventListener("click", () => {
 window.addEventListener("hashchange", () => {
     scrollToHashWithRetry();
 });
+btnDelete?.addEventListener("click", async () => {
+    if (!currentCharacterId) return;
 
+    const ok = window.confirm("Willst du diesen Charakter wirklich löschen?");
+    if (!ok) return;
+
+    try {
+        await API.deleteCharacter(currentCharacterId);
+        setCurrentCharacter(null);
+        await loadCharacters();
+        updateDrawerActions();
+        closeDrawer();
+        setStatus("Charakter gelöscht.");
+
+        if (!isIndexPage) {
+            window.location.href = "/index.html";
+        }
+    } catch (e) {
+        console.error(e);
+        alert(e?.message || "Charakter konnte nicht gelöscht werden.");
+    }
+});
 // ============================================================
 // STARTUP
 // ============================================================
@@ -500,12 +563,6 @@ window.addEventListener("hashchange", () => {
 (function startup() {
     bindTopbarAvatarNavigation();
 
-    const isIndexPage =
-        location.pathname === "/" ||
-        location.pathname.endsWith("/index") ||
-        location.pathname.endsWith("/index.html");
-
-    const isSheetPage = location.pathname.endsWith("/sheet.html");
     const isSpellPage = location.pathname.endsWith("/spell.html");
     const isInventoryPage = location.pathname.endsWith("/inventory.html");
     const isCharacterPage = location.pathname.endsWith("/charakter.html");
@@ -520,10 +577,12 @@ window.addEventListener("hashchange", () => {
     if (isIndexPage) {
         setLoggedInUI(!!API.token);
         renderDrawerTitle();
+        updateDrawerActions();
         return;
     }
 
     if (!isSheetPage) {
         setLoggedInUI(!!API.token);
+        updateDrawerActions();
     }
 })();
