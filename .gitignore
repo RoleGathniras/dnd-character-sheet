@@ -1,27 +1,78 @@
-# ===== Python =====
+# =========================
+# Python
+# =========================
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.so
 
-# Virtualenv (falls jemals lokal)
+# virtuelle Umgebungen
 .venv/
+venv/
+env/
 
-.env
-.env.*
+# Build / Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
 # Test / Coverage
 .coverage
+.coverage.*
 htmlcov/
 .pytest_cache/
-# ===== Docker =====
+.mypy_cache/
+.ruff_cache/
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Datenbanken / lokale Daten
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Logs
+# =========================
 *.log
-# ===== Frontend =====
-frontend/public/.DS_Store
+logs/
+*.pid
+
+# =========================
+# Docker
+# =========================
+.docker/
+
+# =========================
+# Frontend
+# =========================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
 frontend/public/*.map
-# ===== OS / Editor =====
+
+# =========================
+# OS / Editor
+# =========================
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
 
-.dnd_character_sheet.egg-info/
+# =========================
+# Sonstiges
+# =========================
+*.tmp
+*.bak
+*.swp
+*~
