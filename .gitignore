@@ -70,9 +70,14 @@ Thumbs.db
 .idea/
 
 # =========================
+# PDF
+# =========================
+frontend/assets/pdf/*.pdf
+
+# =========================
 # Sonstiges
 # =========================
 *.tmp
 *.bak
 *.swp
-*~
+*~frontend/assets/pdf/*.pdf
