@@ -147,10 +147,22 @@ const playerRulesData = [
     {
         id: "zauber",
         title: "Zauber",
-        entry: { title: "Zauber" },
+        entry: { title: "Zauber", page: 1, file: "/assets/pdf/spelllist.pdf" },
         topics: [
-            { title: "Zauberlisten" },
-            { title: "Zauberbeschreibungen" }
+            { title: "Zauberliste des Barden", page: 1, file: "/assets/pdf/spelllist.pdf" },
+            { title: "Zauberliste des Klerikers", page: 1, file: "/assets/pdf/spelllist.pdf" },
+            { title: "Zauberliste des Druiden", page: 2, file: "/assets/pdf/spelllist.pdf" },
+            { title: "Zauberliste des Paladins", page: 2, file: "/assets/pdf/spelllist.pdf" },
+            { title: "Zauberliste des Waldläufers", page: 3, file: "/assets/pdf/spelllist.pdf" },
+            { title: "Zauberliste des Zauberers", page: 3, file: "/assets/pdf/spelllist.pdf" },
+            { title: "Zauberliste des Hexenmeisters", page: 4, file: "/assets/pdf/spelllist.pdf" },
+            { title: "Zauberliste des Magiers", page: 4, file: "/assets/pdf/spelllist.pdf" },
+
+            { title: "Zauberbeschreibung A - E", page: 1, file: "/assets/pdf/spelldescriptions_a_e.pdf" },
+            { title: "Zauberbeschreibung F - I", page: 1, file: "/assets/pdf/spelldescriptions_f_i.pdf" },
+            { title: "Zauberbeschreibung K - P", page: 1, file: "/assets/pdf/spelldescriptions_k_p.pdf" },
+            { title: "Zauberbeschreibung R - S", page: 1, file: "/assets/pdf/spelldescriptions_r_s.pdf" },
+            { title: "Zauberbeschreibung T - Z", page: 1, file: "/assets/pdf/spelldescriptions_t_z.pdf" }
         ]
     },
     {
