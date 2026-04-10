@@ -1,28 +1,27 @@
+import { API } from "./api.js";
+import {
+    loadCharacters,
+    refreshCurrentUserAndUI,
+    renderTopbarCharacterAvatar,
+    setLoggedInUI,
+} from "./app.js";
+
 // ============================================================
 // PLAYER RULES
 // ============================================================
 
-// Platzhalter bleibt erstmal bestehen.
-// Die einzelnen PDFs bzw. Dateipfade richten wir danach sauber ein.
 const PDF_FILE_PATH = "/assets/pdf/spielerhandbuch.pdf";
 const PDF_PAGE_OFFSET = 0;
 
 // ============================================================
 // DATA
-// - page = Buchseite
-// - PDF-Seite wird automatisch mit Offset berechnet
-// - Aktuell sind noch keine Seiten hinterlegt
 // ============================================================
 
 const playerRulesData = [
     {
         id: "voelker",
         title: "Völker",
-        entry: {
-            title: "Völker",
-            page: 1,
-            file: "/assets/pdf/races.pdf"
-        },
+        entry: { title: "Völker", page: 1, file: "/assets/pdf/races.pdf" },
         topics: [
             { title: "Ein Volk auswählen", page: 1, file: "/assets/pdf/races.pdf" },
             { title: "Elfen", page: 2, file: "/assets/pdf/races.pdf" },
@@ -36,15 +35,10 @@ const playerRulesData = [
             { title: "Tieflinge", page: 26, file: "/assets/pdf/races.pdf" }
         ]
     },
-
     {
         id: "klassen",
         title: "Klassen",
-        entry: {
-            title: "Klassen",
-            page: 1,
-            file: "/assets/pdf/classes.pdf"
-        },
+        entry: { title: "Klassen", page: 1, file: "/assets/pdf/classes.pdf" },
         topics: [
             { title: "Barbar", page: 2, file: "/assets/pdf/classes.pdf" },
             { title: "Barde", page: 7, file: "/assets/pdf/classes.pdf" },
@@ -60,30 +54,24 @@ const playerRulesData = [
             { title: "Zauberer", page: 70, file: "/assets/pdf/classes.pdf" }
         ]
     },
-
     {
         id: "persoenlichkeit-und-hintergrund",
         title: "Persönlichkeit und Hintergrund",
         entry: {
             title: "Persönlichkeit und Hintergrund",
             page: 1,
-            file: "/assets/pdf/background.pdf"
+            file: "/assets/pdf/backround.pdf"
         },
         topics: [
-            { title: "Einzelheiten des Charakters", page: 1, file: "/assets/pdf/background.pdf" },
-            { title: "Inspiration", page: 5, file: "/assets/pdf/background.pdf" },
-            { title: "Hintergründe", page: 5, file: "/assets/pdf/background.pdf" }
+            { title: "Einzelheiten des Charakters", page: 1, file: "/assets/pdf/backround.pdf" },
+            { title: "Inspiration", page: 5, file: "/assets/pdf/backround.pdf" },
+            { title: "Hintergründe", page: 5, file: "/assets/pdf/backround.pdf" }
         ]
     },
-
     {
         id: "ausruestung",
         title: "Ausrüstung",
-        entry: {
-            title: "Ausrüstung",
-            page: 1,
-            file: "/assets/pdf/gear.pdf"
-        },
+        entry: { title: "Ausrüstung", page: 1, file: "/assets/pdf/gear.pdf" },
         topics: [
             { title: "Anfangsausrüstung", page: 1, file: "/assets/pdf/gear.pdf" },
             { title: "Reichtümer", page: 1, file: "/assets/pdf/gear.pdf" },
@@ -97,30 +85,19 @@ const playerRulesData = [
             { title: "Tand", page: 18, file: "/assets/pdf/gear.pdf" }
         ]
     },
-
     {
         id: "anpassungsmoeglichkeiten",
         title: "Anpassungsmöglichkeiten",
-        entry: {
-            title: "Anpassungsmöglichkeiten",
-            page: 1,
-            file: "/assets/pdf/customization.pdf"
-        },
+        entry: { title: "Anpassungsmöglichkeiten", page: 1, file: "/assets/pdf/customization.pdf" },
         topics: [
             { title: "Klassenkombinationen", page: 1, file: "/assets/pdf/customization.pdf" },
             { title: "Talente", page: 3, file: "/assets/pdf/customization.pdf" }
         ]
     },
-
-
     {
         id: "attributswerte-verwenden",
         title: "Attributswerte verwenden",
-        entry: {
-            title: "Attributswerte verwenden",
-            page: 1,
-            file: "/assets/pdf/attributes.pdf"
-        },
+        entry: { title: "Attributswerte verwenden", page: 1, file: "/assets/pdf/attributes.pdf" },
         topics: [
             { title: "Attributswerte und Modifikatoren", page: 1, file: "/assets/pdf/attributes.pdf" },
             { title: "Vorteil und Nachteil", page: 1, file: "/assets/pdf/attributes.pdf" },
@@ -133,11 +110,7 @@ const playerRulesData = [
     {
         id: "auf-abenteuer-ausziehen",
         title: "Auf Abenteuer ausziehen",
-        entry: {
-            title: "Auf Abenteuer ausziehen",
-            page: 1,
-            file: "/assets/pdf/adventures.pdf"
-        },
+        entry: { title: "Auf Abenteuer ausziehen", page: 1, file: "/assets/pdf/adventures.pdf" },
         topics: [
             { title: "Zeit", page: 1, file: "/assets/pdf/adventures.pdf" },
             { title: "Bewegung", page: 1, file: "/assets/pdf/adventures.pdf" },
@@ -147,15 +120,10 @@ const playerRulesData = [
             { title: "Zwischen den Abenteuern", page: 6, file: "/assets/pdf/adventures.pdf" }
         ]
     },
-
     {
         id: "kampf",
         title: "Kampf",
-        entry: {
-            title: "Kampf",
-            page: 1,
-            file: "/assets/pdf/fight.pdf"
-        },
+        entry: { title: "Kampf", page: 1, file: "/assets/pdf/fight.pdf" },
         topics: [
             { title: "Der Kampfablauf", page: 1, file: "/assets/pdf/fight.pdf" },
             { title: "Bewegung und Positionierung", page: 2, file: "/assets/pdf/fight.pdf" },
@@ -167,78 +135,49 @@ const playerRulesData = [
             { title: "Unterwasserkampf", page: 10, file: "/assets/pdf/fight.pdf" }
         ]
     },
-
-
     {
         id: "zauber-wirken",
         title: "Zauber wirken",
-        entry: {
-            title: "Zauber wirken",
-            page: 1,
-            file: "/assets/pdf/usemagic.pdf"
-        },
+        entry: { title: "Zauber wirken", page: 1, file: "/assets/pdf/usemagic.pdf" },
         topics: [
             { title: "Was ist ein Zauber?", page: 1, file: "/assets/pdf/usemagic.pdf" },
             { title: "Einen Zauber wirken", page: 2, file: "/assets/pdf/usemagic.pdf" }
         ]
     },
-
     {
         id: "zauber",
         title: "Zauber",
-        entry: {
-            title: "Zauber"
-        },
+        entry: { title: "Zauber" },
         topics: [
             { title: "Zauberlisten" },
             { title: "Zauberbeschreibungen" }
         ]
     },
-
     {
         id: "zustaende",
         title: "Zustände",
-        entry: {
-            title: "Zustände",
-            page: 1,
-            file: "/assets/pdf/states.pdf"
-        },
+        entry: { title: "Zustände", page: 1, file: "/assets/pdf/states.pdf" },
         topics: []
     },
-
     {
         id: "goetter-des-multiversums",
         title: "Götter des Multiversums",
-        entry: {
-            title: "Götter des Multiversums",
-            page: 1,
-            file: "/assets/pdf/gods.pdf"
-        },
+        entry: { title: "Götter des Multiversums", page: 1, file: "/assets/pdf/gods.pdf" },
         topics: []
     },
-
     {
         id: "die-existenzebenen",
         title: "Die Existenzebenen",
-        entry: {
-            title: "Die Existenzebenen",
-            page: 1,
-            file: "/assets/pdf/planes.pdf"
-        },
+        entry: { title: "Die Existenzebenen", page: 1, file: "/assets/pdf/planes.pdf" },
         topics: [
             { title: "Die Materielle Ebene", page: 1, file: "/assets/pdf/planes.pdf" },
             { title: "Jenseits der Materiellen Ebene", page: 2, file: "/assets/pdf/planes.pdf" }
         ]
     },
-
     {
         id: "kreaturenspielwerte",
         title: "Kreaturenspielwerte",
-        entry: {
-            title: "Kreaturenspielwerte",
-            page: 1,
-            file: "/assets/pdf/creatures.pdf"
-        },
+        entry: { title: "Kreaturenspielwerte", page: 1, file: "/assets/pdf/creatures.pdf" },
         topics: []
     }
 ];
@@ -248,9 +187,7 @@ const playerRulesData = [
 // ============================================================
 
 function normalizeText(value) {
-    return String(value || "")
-        .trim()
-        .toLowerCase();
+    return String(value || "").trim().toLowerCase();
 }
 
 function getSectionTitle(sectionElement) {
@@ -325,11 +262,70 @@ function bindSection(sectionElement, sectionData) {
     bindTopicButtons(topicList, sectionData.topics || []);
 }
 
+function buildRulesNav() {
+    const navList = document.getElementById("navList");
+    if (!navList) return;
+
+    navList.innerHTML = "";
+
+    const sections = Array.from(document.querySelectorAll(".ruleSection"));
+
+    sections.forEach((section) => {
+        const label =
+            section.dataset.navLabel ||
+            section.querySelector(".ruleSection__title")?.textContent?.trim() ||
+            "Abschnitt";
+
+        const id = section.id;
+        if (!id) return;
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "drawer__item";
+        button.textContent = label;
+
+        button.addEventListener("click", () => {
+            const target = document.getElementById(id);
+            if (!target) return;
+
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+
+            const navDrawer = document.getElementById("navDrawer");
+            const navBackdrop = document.getElementById("navBackdrop");
+
+            navDrawer?.classList.remove("is-open");
+            navDrawer?.setAttribute("aria-hidden", "true");
+            if (navBackdrop) navBackdrop.hidden = true;
+        });
+
+        navList.appendChild(button);
+    });
+}
+
+async function loadCurrentCharacterAvatar() {
+    const selectedId =
+        localStorage.getItem("dnd_current_character_id") ||
+        localStorage.getItem("selectedCharacterId");
+
+    if (!selectedId) {
+        renderTopbarCharacterAvatar(null);
+        return;
+    }
+
+    try {
+        const character = await API.getCharacter(Number(selectedId));
+        renderTopbarCharacterAvatar(character);
+    } catch (error) {
+        console.warn("[player_rules.js] Charakterbild konnte nicht geladen werden.", error);
+        renderTopbarCharacterAvatar(null);
+    }
+}
+
 // ============================================================
 // INIT
 // ============================================================
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const sectionElements = Array.from(document.querySelectorAll(".ruleSection"));
 
     const dataByTitle = new Map(
@@ -347,4 +343,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         bindSection(sectionElement, sectionData);
     });
+
+    buildRulesNav();
+
+    const isLoggedIn = !!API.token;
+    setLoggedInUI(isLoggedIn);
+
+    if (isLoggedIn) {
+        try {
+            await refreshCurrentUserAndUI();
+            await loadCharacters();
+        } catch (error) {
+            console.warn("[player_rules.js] User/Drawer konnte nicht geladen werden.", error);
+        }
+
+        await loadCurrentCharacterAvatar();
+    } else {
+        renderTopbarCharacterAvatar(null);
+    }
 });

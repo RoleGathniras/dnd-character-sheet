@@ -5,11 +5,80 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Spielerhandbuch</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="./styles.css" />
 </head>
 
-<body>
-    <main class="page page--playerRules">
+<body class="app">
+    <!-- Topbar -->
+    <header class="appbar">
+        <div id="currentCharacterAvatar" class="topbarCharacterAvatar" hidden
+            aria-label="Aktuell ausgewählter Charakter" title="Zur Übersicht">
+            <img id="currentCharacterAvatarImg" class="topbarCharacterAvatar__img" alt="Charakterbild" hidden />
+            <div id="currentCharacterAvatarFallback" class="topbarCharacterAvatar__fallback">?</div>
+        </div>
+
+        <div class="appbar__left">
+            <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
+        </div>
+
+        <div class="appbar__right">
+            <button id="btnNavOpen" class="btn" aria-label="Spielerhandbuch Navigation">Navigation</button>
+            <button id="btnLogout" class="btn" style="display:none">Logout</button>
+        </div>
+    </header>
+
+    <!-- Charakter-Drawer -->
+    <div id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <strong id="drawerUserTitle">Charaktere</strong>
+            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+        </div>
+
+        <div class="drawer__content">
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
+                    Charaktere
+                </button>
+                <div id="listMine" class="drawer__list">
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
+            </div>
+
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
+                    NPCs
+                </button>
+                <div id="listNpcs" class="drawer__list" hidden>
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
+            </div>
+
+            <div class="drawer__section" id="drawerActionsSection" hidden>
+                <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
+                    Aktionen
+                </button>
+
+                <div id="actionsMenu" class="actionsMenu drawer__list" hidden>
+                    <button id="btnCreatePC" class="btn drawer__item" disabled hidden>Neuer Charakter</button>
+                    <button id="btnCreateNPC" class="btn drawer__item" disabled hidden>Neuer NPC</button>
+                    <button id="btnSave" class="btn btn--primary drawer__item" disabled hidden>Speichern</button>
+                    <button id="btnDelete" class="btn btn--danger drawer__item" disabled hidden>
+                        Charakter löschen
+                    </button>
+                </div>
+            </div>
+
+            <button id="btnPlayerRules" class="drawer__item" type="button">
+                Spielerhandbuch
+            </button>
+
+            <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
+        </div>
+    </div>
+
+    <div id="backdrop" class="backdrop" hidden></div>
+
+    <main class="page page--playerRules" id="sheetRoot">
         <section class="rulesCard">
             <div class="rulesCard__header">
                 <h1 class="rulesCard__title">Spielerhandbuch</h1>
@@ -19,7 +88,7 @@
             </div>
 
             <!-- KAPITEL 2 -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-voelker" data-nav-label="Völker">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Völker</span>
@@ -28,9 +97,7 @@
                 </button>
 
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Völker
-                    </button>
+                    <button class="ruleEntryButton" type="button">Völker</button>
 
                     <div class="ruleTopicList">
                         <button class="ruleTopicButton" type="button">Ein Volk auswählen</button>
@@ -48,7 +115,7 @@
             </div>
 
             <!-- KAPITEL 3 -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-klassen" data-nav-label="Klassen">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Klassen</span>
@@ -57,9 +124,7 @@
                 </button>
 
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Klassen
-                    </button>
+                    <button class="ruleEntryButton" type="button">Klassen</button>
 
                     <div class="ruleTopicList">
                         <button class="ruleTopicButton" type="button">Barbar</button>
@@ -79,7 +144,8 @@
             </div>
 
             <!-- KAPITEL 4 -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-persoenlichkeit-und-hintergrund"
+                data-nav-label="Persönlichkeit & Hintergrund">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Persönlichkeit und Hintergrund</span>
@@ -88,9 +154,7 @@
                 </button>
 
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Persönlichkeit und Hintergrund
-                    </button>
+                    <button class="ruleEntryButton" type="button">Persönlichkeit und Hintergrund</button>
 
                     <div class="ruleTopicList">
                         <button class="ruleTopicButton" type="button">Einzelheiten des Charakters</button>
@@ -101,7 +165,7 @@
             </div>
 
             <!-- KAPITEL 5 -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-ausruestung" data-nav-label="Ausrüstung">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Ausrüstung</span>
@@ -110,9 +174,7 @@
                 </button>
 
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Ausrüstung
-                    </button>
+                    <button class="ruleEntryButton" type="button">Ausrüstung</button>
 
                     <div class="ruleTopicList">
                         <button class="ruleTopicButton" type="button">Anfangsausrüstung</button>
@@ -130,7 +192,7 @@
             </div>
 
             <!-- KAPITEL 6 -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-anpassung" data-nav-label="Anpassungsmöglichkeiten">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Anpassungsmöglichkeiten</span>
@@ -139,9 +201,7 @@
                 </button>
 
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Anpassungsmöglichkeiten
-                    </button>
+                    <button class="ruleEntryButton" type="button">Anpassungsmöglichkeiten</button>
 
                     <div class="ruleTopicList">
                         <button class="ruleTopicButton" type="button">Klassenkombinationen</button>
@@ -151,7 +211,7 @@
             </div>
 
             <!-- KAPITEL 7 -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-attribute" data-nav-label="Attributswerte">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Attributswerte verwenden</span>
@@ -160,9 +220,7 @@
                 </button>
 
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Attributswerte verwenden
-                    </button>
+                    <button class="ruleEntryButton" type="button">Attributswerte verwenden</button>
 
                     <div class="ruleTopicList">
                         <button class="ruleTopicButton" type="button">Attributswerte und Modifikatoren</button>
@@ -176,7 +234,7 @@
             </div>
 
             <!-- KAPITEL 8 -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-abenteuer" data-nav-label="Abenteuer">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Auf Abenteuer ausziehen</span>
@@ -185,9 +243,7 @@
                 </button>
 
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Auf Abenteuer ausziehen
-                    </button>
+                    <button class="ruleEntryButton" type="button">Auf Abenteuer ausziehen</button>
 
                     <div class="ruleTopicList">
                         <button class="ruleTopicButton" type="button">Zeit</button>
@@ -201,7 +257,7 @@
             </div>
 
             <!-- KAPITEL 9 -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-kampf" data-nav-label="Kampf">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Kampf</span>
@@ -210,9 +266,7 @@
                 </button>
 
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Kampf
-                    </button>
+                    <button class="ruleEntryButton" type="button">Kampf</button>
 
                     <div class="ruleTopicList">
                         <button class="ruleTopicButton" type="button">Der Kampfablauf</button>
@@ -228,7 +282,7 @@
             </div>
 
             <!-- KAPITEL 10 -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-zauber-wirken" data-nav-label="Zauber wirken">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Zauber wirken</span>
@@ -237,9 +291,7 @@
                 </button>
 
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Zauber wirken
-                    </button>
+                    <button class="ruleEntryButton" type="button">Zauber wirken</button>
 
                     <div class="ruleTopicList">
                         <button class="ruleTopicButton" type="button">Was ist ein Zauber?</button>
@@ -249,7 +301,7 @@
             </div>
 
             <!-- KAPITEL 11 -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-zauber" data-nav-label="Zauber">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Zauber</span>
@@ -258,9 +310,7 @@
                 </button>
 
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Zauber
-                    </button>
+                    <button class="ruleEntryButton" type="button">Zauber</button>
 
                     <div class="ruleTopicList">
                         <button class="ruleTopicButton" type="button">Zauberlisten</button>
@@ -269,40 +319,32 @@
                 </div>
             </div>
 
-            <!-- ANHANG A -->
-            <div class="ruleSection">
+            <!-- ANHÄNGE -->
+            <div class="ruleSection" id="sec-rules-zustaende" data-nav-label="Zustände">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Zustände</span>
                     </span>
                     <span class="ruleSection__icon">⌄</span>
                 </button>
-
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Zustände
-                    </button>
+                    <button class="ruleEntryButton" type="button">Zustände</button>
                 </div>
             </div>
 
-            <!-- ANHANG B -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-goetter" data-nav-label="Götter">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Götter des Multiversums</span>
                     </span>
                     <span class="ruleSection__icon">⌄</span>
                 </button>
-
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Götter des Multiversums
-                    </button>
+                    <button class="ruleEntryButton" type="button">Götter des Multiversums</button>
                 </div>
             </div>
 
-            <!-- ANHANG C -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-ebenen" data-nav-label="Existenzebenen">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Die Existenzebenen</span>
@@ -311,9 +353,7 @@
                 </button>
 
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Die Existenzebenen
-                    </button>
+                    <button class="ruleEntryButton" type="button">Die Existenzebenen</button>
 
                     <div class="ruleTopicList">
                         <button class="ruleTopicButton" type="button">Die Materielle Ebene</button>
@@ -322,23 +362,34 @@
                 </div>
             </div>
 
-            <!-- ANHANG D -->
-            <div class="ruleSection">
+            <div class="ruleSection" id="sec-rules-kreaturen" data-nav-label="Kreaturenspielwerte">
                 <button class="ruleSection__toggle" type="button" aria-expanded="false">
                     <span class="ruleSection__left">
                         <span class="ruleSection__title">Kreaturenspielwerte</span>
                     </span>
                     <span class="ruleSection__icon">⌄</span>
                 </button>
-
                 <div class="ruleSection__body" hidden>
-                    <button class="ruleEntryButton" type="button">
-                        Kreaturenspielwerte
-                    </button>
+                    <button class="ruleEntryButton" type="button">Kreaturenspielwerte</button>
                 </div>
             </div>
         </section>
     </main>
+
+    <!-- Navigation Drawer -->
+    <div id="navBackdrop" class="backdrop" hidden></div>
+
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>Navigation</strong>
+            <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
+        </div>
+        <div id="navList" class="drawer__content">
+            <!-- Items kommen per JS -->
+        </div>
+    </aside>
+
+    <script type="module" src="/app.js"></script>
     <script type="module" src="./player_rules.js"></script>
 </body>
 

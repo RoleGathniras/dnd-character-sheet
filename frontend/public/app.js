@@ -38,6 +38,7 @@ const btnDelete = document.getElementById("btnDelete");
 const btnCreatePC = document.getElementById("btnCreatePC");
 const btnCreateNPC = document.getElementById("btnCreateNPC");
 const btnAdmin = document.getElementById("btnAdmin");
+const btnPlayerRules = document.getElementById("btnPlayerRules");
 
 const charactersPanel = document.getElementById("charactersPanel");
 const landingHero = document.getElementById("landingHero");
@@ -127,16 +128,21 @@ function updateDrawerActions() {
         btnDelete.style.display = isIndexPage && hasSelectedCharacter ? "" : "none";
         btnDelete.disabled = !isLoggedIn || !hasSelectedCharacter;
     }
-
+    if (btnPlayerRules) {
+        btnPlayerRules.style.display = isLoggedIn ? "" : "none";
+        btnPlayerRules.disabled = !isLoggedIn;
+    }
     if (btnAdmin) {
         btnAdmin.hidden = !(isIndexPage && isAdmin);
     }
+
 
     if (toggleActions && actionsMenu) {
         const hasVisibleAction =
             (btnCreatePC && btnCreatePC.style.display !== "none") ||
             (btnCreateNPC && btnCreateNPC.style.display !== "none") ||
             (btnDelete && btnDelete.style.display !== "none") ||
+            (btnPlayerRules && btnPlayerRules.style.display !== "none") ||
             (btnAdmin && !btnAdmin.hidden);
 
         if (!hasVisibleAction) {
@@ -529,6 +535,10 @@ bindSectionToggle(toggleActions, actionsMenu, true);
 btnAdmin?.addEventListener("click", () => {
     closeDrawer();
     window.location.href = "/admin.html";
+});
+btnPlayerRules?.addEventListener("click", () => {
+    closeDrawer();
+    window.location.href = "/player_rules.html";
 });
 
 window.addEventListener("hashchange", () => {
