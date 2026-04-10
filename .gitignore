@@ -69,10 +69,6 @@ Thumbs.db
 .vscode/
 .idea/
 
-# =========================
-# PDF
-# =========================
-frontend/public/assets/pdf
 
 # =========================
 # Sonstiges
