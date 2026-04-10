@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Spielerhandbuch</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="app">
+    <!-- Topbar -->
+    <header class="appbar">
+        <div id="currentCharacterAvatar" class="topbarCharacterAvatar" hidden
+            aria-label="Aktuell ausgewählter Charakter" title="Zur Übersicht">
+            <img id="currentCharacterAvatarImg" class="topbarCharacterAvatar__img" alt="Charakterbild" hidden />
+            <div id="currentCharacterAvatarFallback" class="topbarCharacterAvatar__fallback">?</div>
+        </div>
+
+        <div class="appbar__left">
+            <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
+        </div>
+
+        <div class="appbar__right">
+            <button id="btnNavOpen" class="btn" aria-label="Spielerhandbuch Navigation">Navigation</button>
+            <button id="btnLogout" class="btn" style="display:none">Logout</button>
+        </div>
+    </header>
+
+    <!-- Charakter-Drawer -->
+    <div id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <strong id="drawerUserTitle">Charaktere</strong>
+            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+        </div>
+
+        <div class="drawer__content">
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
+                    Charaktere
+                </button>
+                <div id="listMine" class="drawer__list">
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
+            </div>
+
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
+                    NPCs
+                </button>
+                <div id="listNpcs" class="drawer__list" hidden>
+                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                </div>
+            </div>
+
+            <div class="drawer__section" id="drawerActionsSection" hidden>
+                <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
+                    Aktionen
+                </button>
+
+                <div id="actionsMenu" class="actionsMenu drawer__list" hidden>
+                    <button id="btnCreatePC" class="btn drawer__item" disabled hidden>Neuer Charakter</button>
+                    <button id="btnCreateNPC" class="btn drawer__item" disabled hidden>Neuer NPC</button>
+                    <button id="btnSave" class="btn btn--primary drawer__item" disabled hidden>Speichern</button>
+                    <button id="btnDelete" class="btn btn--danger drawer__item" disabled hidden>
+                        Charakter löschen
+                    </button>
+                </div>
+            </div>
+
+            <button id="btnPlayerRules" class="drawer__item" type="button">
+                Spielerhandbuch
+            </button>
+
+            <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
+        </div>
+    </div>
+
+    <div id="backdrop" class="backdrop" hidden></div>
+
+    <main class="page page--playerRules" id="sheetRoot">
+        <section class="rulesCard">
+            <div class="rulesCard__header">
+                <h1 class="rulesCard__title">Spielerhandbuch</h1>
+                <p class="rulesCard__subtext">
+                    Wähle ein Kapitel oder einen Unterpunkt aus, um später direkt zur passenden PDF-Seite zu springen.
+                </p>
+            </div>
+
+            <!-- KAPITEL 2 -->
+            <div class="ruleSection" id="sec-rules-voelker" data-nav-label="Völker">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Völker</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Völker</button>
+
+                    <div class="ruleTopicList">
+                        <button class="ruleTopicButton" type="button">Ein Volk auswählen</button>
+                        <button class="ruleTopicButton" type="button">Elfen</button>
+                        <button class="ruleTopicButton" type="button">Halblinge</button>
+                        <button class="ruleTopicButton" type="button">Menschen</button>
+                        <button class="ruleTopicButton" type="button">Zwerge</button>
+                        <button class="ruleTopicButton" type="button">Drachenblütige</button>
+                        <button class="ruleTopicButton" type="button">Gnome</button>
+                        <button class="ruleTopicButton" type="button">Halbelfen</button>
+                        <button class="ruleTopicButton" type="button">Halborks</button>
+                        <button class="ruleTopicButton" type="button">Tieflinge</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KAPITEL 3 -->
+            <div class="ruleSection" id="sec-rules-klassen" data-nav-label="Klassen">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Klassen</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Klassen</button>
+
+                    <div class="ruleTopicList">
+                        <button class="ruleTopicButton" type="button">Barbar</button>
+                        <button class="ruleTopicButton" type="button">Barde</button>
+                        <button class="ruleTopicButton" type="button">Druide</button>
+                        <button class="ruleTopicButton" type="button">Hexenmeister</button>
+                        <button class="ruleTopicButton" type="button">Kämpfer</button>
+                        <button class="ruleTopicButton" type="button">Kleriker</button>
+                        <button class="ruleTopicButton" type="button">Magier</button>
+                        <button class="ruleTopicButton" type="button">Mönch</button>
+                        <button class="ruleTopicButton" type="button">Paladin</button>
+                        <button class="ruleTopicButton" type="button">Schurke</button>
+                        <button class="ruleTopicButton" type="button">Waldläufer</button>
+                        <button class="ruleTopicButton" type="button">Zauberer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KAPITEL 4 -->
+            <div class="ruleSection" id="sec-rules-persoenlichkeit-und-hintergrund"
+                data-nav-label="Persönlichkeit & Hintergrund">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Persönlichkeit und Hintergrund</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Persönlichkeit und Hintergrund</button>
+
+                    <div class="ruleTopicList">
+                        <button class="ruleTopicButton" type="button">Einzelheiten des Charakters</button>
+                        <button class="ruleTopicButton" type="button">Inspiration</button>
+                        <button class="ruleTopicButton" type="button">Hintergründe</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KAPITEL 5 -->
+            <div class="ruleSection" id="sec-rules-ausruestung" data-nav-label="Ausrüstung">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Ausrüstung</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Ausrüstung</button>
+
+                    <div class="ruleTopicList">
+                        <button class="ruleTopicButton" type="button">Anfangsausrüstung</button>
+                        <button class="ruleTopicButton" type="button">Reichtümer</button>
+                        <button class="ruleTopicButton" type="button">Rüstungen und Schilde</button>
+                        <button class="ruleTopicButton" type="button">Waffen</button>
+                        <button class="ruleTopicButton" type="button">Abenteurerausrüstung</button>
+                        <button class="ruleTopicButton" type="button">Werkzeuge</button>
+                        <button class="ruleTopicButton" type="button">Reittiere und Fahrzeuge</button>
+                        <button class="ruleTopicButton" type="button">Handelsgüter</button>
+                        <button class="ruleTopicButton" type="button">Ausgaben</button>
+                        <button class="ruleTopicButton" type="button">Tand</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KAPITEL 6 -->
+            <div class="ruleSection" id="sec-rules-anpassung" data-nav-label="Anpassungsmöglichkeiten">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Anpassungsmöglichkeiten</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Anpassungsmöglichkeiten</button>
+
+                    <div class="ruleTopicList">
+                        <button class="ruleTopicButton" type="button">Klassenkombinationen</button>
+                        <button class="ruleTopicButton" type="button">Talente</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KAPITEL 7 -->
+            <div class="ruleSection" id="sec-rules-attribute" data-nav-label="Attributswerte">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Attributswerte verwenden</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Attributswerte verwenden</button>
+
+                    <div class="ruleTopicList">
+                        <button class="ruleTopicButton" type="button">Attributswerte und Modifikatoren</button>
+                        <button class="ruleTopicButton" type="button">Vorteil und Nachteil</button>
+                        <button class="ruleTopicButton" type="button">Übungsbonus</button>
+                        <button class="ruleTopicButton" type="button">Attributswürfe</button>
+                        <button class="ruleTopicButton" type="button">Einzelne Attributswerte anwenden</button>
+                        <button class="ruleTopicButton" type="button">Rettungswürfe</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KAPITEL 8 -->
+            <div class="ruleSection" id="sec-rules-abenteuer" data-nav-label="Abenteuer">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Auf Abenteuer ausziehen</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Auf Abenteuer ausziehen</button>
+
+                    <div class="ruleTopicList">
+                        <button class="ruleTopicButton" type="button">Zeit</button>
+                        <button class="ruleTopicButton" type="button">Bewegung</button>
+                        <button class="ruleTopicButton" type="button">Die Umgebung</button>
+                        <button class="ruleTopicButton" type="button">Soziale Interaktion</button>
+                        <button class="ruleTopicButton" type="button">Rasten</button>
+                        <button class="ruleTopicButton" type="button">Zwischen den Abenteuern</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KAPITEL 9 -->
+            <div class="ruleSection" id="sec-rules-kampf" data-nav-label="Kampf">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Kampf</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Kampf</button>
+
+                    <div class="ruleTopicList">
+                        <button class="ruleTopicButton" type="button">Der Kampfablauf</button>
+                        <button class="ruleTopicButton" type="button">Bewegung und Positionierung</button>
+                        <button class="ruleTopicButton" type="button">Aktionen im Kampf</button>
+                        <button class="ruleTopicButton" type="button">Einen Angriff ausführen</button>
+                        <button class="ruleTopicButton" type="button">Deckung</button>
+                        <button class="ruleTopicButton" type="button">Schaden und Heilung</button>
+                        <button class="ruleTopicButton" type="button">Berittener Kampf</button>
+                        <button class="ruleTopicButton" type="button">Unterwasserkampf</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KAPITEL 10 -->
+            <div class="ruleSection" id="sec-rules-zauber-wirken" data-nav-label="Zauber wirken">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Zauber wirken</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Zauber wirken</button>
+
+                    <div class="ruleTopicList">
+                        <button class="ruleTopicButton" type="button">Was ist ein Zauber?</button>
+                        <button class="ruleTopicButton" type="button">Einen Zauber wirken</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KAPITEL 11 -->
+
+
+            <div class="ruleSection" id="sec-rules-zauber" data-nav-label="Zauber">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Zauber</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Zauber</button>
+
+                    <div class="ruleTopicList">
+                        <button class="ruleTopicButton" type="button">Zauberliste des Barden</button>
+                        <button class="ruleTopicButton" type="button">Zauberliste des Klerikers</button>
+                        <button class="ruleTopicButton" type="button">Zauberliste des Druiden</button>
+                        <button class="ruleTopicButton" type="button">Zauberliste des Paladins</button>
+                        <button class="ruleTopicButton" type="button">Zauberliste des Waldläufers</button>
+                        <button class="ruleTopicButton" type="button">Zauberliste des Zauberers</button>
+                        <button class="ruleTopicButton" type="button">Zauberliste des Hexenmeisters</button>
+                        <button class="ruleTopicButton" type="button">Zauberliste des Magiers</button>
+
+                        <button class="ruleTopicButton" type="button">Zauberbeschreibung A - E</button>
+                        <button class="ruleTopicButton" type="button">Zauberbeschreibung F - I</button>
+                        <button class="ruleTopicButton" type="button">Zauberbeschreibung K - P</button>
+                        <button class="ruleTopicButton" type="button">Zauberbeschreibung R - S</button>
+                        <button class="ruleTopicButton" type="button">Zauberbeschreibung T - Z</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANHÄNGE -->
+            <div class="ruleSection" id="sec-rules-zustaende" data-nav-label="Zustände">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Zustände</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Zustände</button>
+                </div>
+            </div>
+
+            <div class="ruleSection" id="sec-rules-goetter" data-nav-label="Götter">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Götter des Multiversums</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Götter des Multiversums</button>
+                </div>
+            </div>
+
+            <div class="ruleSection" id="sec-rules-ebenen" data-nav-label="Existenzebenen">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Die Existenzebenen</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Die Existenzebenen</button>
+
+                    <div class="ruleTopicList">
+                        <button class="ruleTopicButton" type="button">Die Materielle Ebene</button>
+                        <button class="ruleTopicButton" type="button">Jenseits der Materiellen Ebene</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ruleSection" id="sec-rules-kreaturen" data-nav-label="Kreaturenspielwerte">
+                <button class="ruleSection__toggle" type="button" aria-expanded="false">
+                    <span class="ruleSection__left">
+                        <span class="ruleSection__title">Kreaturenspielwerte</span>
+                    </span>
+                    <span class="ruleSection__icon">⌄</span>
+                </button>
+                <div class="ruleSection__body" hidden>
+                    <button class="ruleEntryButton" type="button">Kreaturenspielwerte</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Navigation Drawer -->
+    <div id="navBackdrop" class="backdrop" hidden></div>
+
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>Navigation</strong>
+            <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
+        </div>
+        <div id="navList" class="drawer__content">
+            <!-- Items kommen per JS -->
+        </div>
+    </aside>
+
+    <script type="module" src="/app.js"></script>
+    <script type="module" src="./player_rules.js"></script>
+</body>
+
+</html>

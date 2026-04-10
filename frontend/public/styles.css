@@ -3213,3 +3213,269 @@ body.no-scroll {
         min-height: 260px;
     }
 }
+
+/* =========================================================
+   PLAYER RULES PAGE – MOBILE FIRST / APP STYLE
+   ========================================================= */
+
+.page--playerRules {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 12px;
+    display: grid;
+    gap: 14px;
+    overflow-x: hidden;
+}
+
+.page--playerRules section[id] {
+    scroll-margin-top: 84px;
+}
+
+.page--playerRules .rulesCard {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+}
+
+.page--playerRules .rulesCard__header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.page--playerRules .rulesCard__title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.page--playerRules .rulesCard__subtext {
+    margin: 4px 0 0;
+    color: var(--muted);
+    line-height: 1.4;
+    font-size: 0.92rem;
+}
+
+/* =========================================================
+   SECTION / KAPITEL
+   ========================================================= */
+
+.page--playerRules .ruleSection {
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.page--playerRules .ruleSection:first-child {
+    border-top: 0;
+}
+
+.page--playerRules .ruleSection__toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.page--playerRules .ruleSection__left {
+    min-width: 0;
+}
+
+.page--playerRules .ruleSection__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.3;
+}
+
+.page--playerRules .ruleSection__icon {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 0.95rem;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.page--playerRules .ruleSection.is-open .ruleSection__icon {
+    transform: rotate(180deg);
+}
+
+.page--playerRules .ruleSection__body {
+    padding: 0 12px 12px;
+}
+
+.page--playerRules .ruleSection__body[hidden] {
+    display: none;
+}
+
+/* =========================================================
+   KAPITELBUTTON IM AUFGEKLAPPTEN BEREICH
+   Beispiel:
+   Einleitung (klickbar zur Kapitelstartseite)
+   ========================================================= */
+
+.page--playerRules .ruleEntryButton {
+    width: 100%;
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.page--playerRules .ruleEntryButton:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+.page--playerRules .ruleEntryButton:focus-visible {
+    outline: none;
+    border-color: rgba(120, 160, 255, 0.8);
+    box-shadow: 0 0 0 3px rgba(120, 160, 255, 0.14);
+}
+
+/* =========================================================
+   EINGERÜCKTE UNTERPUNKTE
+   ========================================================= */
+
+.page--playerRules .ruleTopicList {
+    margin-top: 8px;
+    padding-left: 18px;
+    display: grid;
+    gap: 8px;
+}
+
+.page--playerRules .ruleTopicButton {
+    width: 100%;
+    display: block;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-left: 2px solid rgba(255, 255, 255, 0.10);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.025);
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.page--playerRules .ruleTopicButton:hover {
+    background: rgba(255, 255, 255, 0.055);
+    border-color: rgba(255, 255, 255, 0.14);
+    border-left-color: rgba(255, 255, 255, 0.22);
+}
+
+.page--playerRules .ruleTopicButton:focus-visible {
+    outline: none;
+    border-color: rgba(120, 160, 255, 0.8);
+    box-shadow: 0 0 0 3px rgba(120, 160, 255, 0.14);
+}
+
+/* =========================================================
+   OPTIONALE KLEINE METADATEN
+   z.B. Seitenzahl
+   ========================================================= */
+
+.page--playerRules .ruleMeta {
+    display: inline-block;
+    margin-left: 8px;
+    color: var(--muted);
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
+@media (min-width: 900px) {
+    .page--playerRules {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .page--playerRules .rulesCard__header {
+        padding: 16px 18px 12px;
+    }
+
+    .page--playerRules .ruleSection__toggle {
+        padding: 15px 18px;
+    }
+
+    .page--playerRules .ruleSection__body {
+        padding: 0 18px 18px;
+    }
+
+    .page--playerRules .ruleTopicList {
+        padding-left: 24px;
+    }
+}
+
+/* =========================================================
+   PLAYER RULES VIEWER
+   ========================================================= */
+
+.ruleViewer {
+    gap: 14px;
+}
+
+.ruleViewer__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ruleViewer__pageInfo {
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.ruleViewer__canvasWrap {
+    width: 100%;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 640px) {
+    .ruleViewer__toolbar {
+        justify-content: center;
+    }
+
+    .ruleViewer__pageInfo {
+        width: 100%;
+        order: -1;
+    }
+}
