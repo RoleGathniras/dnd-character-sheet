@@ -2,237 +2,192 @@
 // PLAYER RULES
 // ============================================================
 
+// Platzhalter bleibt erstmal bestehen.
+// Die einzelnen PDFs bzw. Dateipfade richten wir danach sauber ein.
 const PDF_FILE_PATH = "/assets/pdf/spielerhandbuch.pdf";
-const PDF_PAGE_OFFSET = 1;
+const PDF_PAGE_OFFSET = 0;
 
 // ============================================================
 // DATA
 // - page = Buchseite
 // - PDF-Seite wird automatisch mit Offset berechnet
+// - Aktuell sind noch keine Seiten hinterlegt
 // ============================================================
 
 const playerRulesData = [
     {
-        id: "einleitung",
-        title: "Einleitung",
+        id: "voelker",
+        title: "Völker",
         entry: {
-            title: "Einleitung",
-            page: 5
+            title: "Völker",
+            page: 1,
+            file: "/assets/pdf/races.pdf"
         },
         topics: [
-            { title: "Abenteuerwelten", page: 5 },
-            { title: "Wie man dieses Buch verwendet", page: 6 },
-            { title: "Wie man spielt", page: 6 },
-            { title: "Abenteuer", page: 7 }
+            { title: "Ein Volk auswählen", page: 1, file: "/assets/pdf/races.pdf" },
+            { title: "Elfen", page: 2, file: "/assets/pdf/races.pdf" },
+            { title: "Halblinge", page: 7, file: "/assets/pdf/races.pdf" },
+            { title: "Menschen", page: 10, file: "/assets/pdf/races.pdf" },
+            { title: "Zwerge", page: 13, file: "/assets/pdf/races.pdf" },
+            { title: "Drachenblütige", page: 16, file: "/assets/pdf/races.pdf" },
+            { title: "Gnome", page: 19, file: "/assets/pdf/races.pdf" },
+            { title: "Halbelfen", page: 22, file: "/assets/pdf/races.pdf" },
+            { title: "Halborks", page: 24, file: "/assets/pdf/races.pdf" },
+            { title: "Tieflinge", page: 26, file: "/assets/pdf/races.pdf" }
         ]
     },
 
     {
-        id: "teil-1",
-        title: "Teil 1: Charaktere Schritt für Schritt",
+        id: "klassen",
+        title: "Klassen",
         entry: {
-            title: "Teil 1: Charaktere Schritt für Schritt"
+            title: "Klassen",
+            page: 1,
+            file: "/assets/pdf/classes.pdf"
         },
         topics: [
-            { title: "Kapitel 1: Charaktere Schritt für Schritt" },
-            { title: "Kapitel 2: Völker" },
-            { title: "Kapitel 3: Klassen" },
-            { title: "Kapitel 4: Persönlichkeit und Hintergrund" },
-            { title: "Kapitel 5: Ausrüstung" },
-            { title: "Kapitel 6: Anpassungsmöglichkeiten" }
+            { title: "Barbar", page: 2, file: "/assets/pdf/classes.pdf" },
+            { title: "Barde", page: 7, file: "/assets/pdf/classes.pdf" },
+            { title: "Druide", page: 12, file: "/assets/pdf/classes.pdf" },
+            { title: "Hexenmeister", page: 18, file: "/assets/pdf/classes.pdf" },
+            { title: "Kämpfer", page: 25, file: "/assets/pdf/classes.pdf" },
+            { title: "Kleriker", page: 31, file: "/assets/pdf/classes.pdf" },
+            { title: "Magier", page: 39, file: "/assets/pdf/classes.pdf" },
+            { title: "Mönch", page: 47, file: "/assets/pdf/classes.pdf" },
+            { title: "Paladin", page: 53, file: "/assets/pdf/classes.pdf" },
+            { title: "Schurke", page: 60, file: "/assets/pdf/classes.pdf" },
+            { title: "Waldläufer", page: 65, file: "/assets/pdf/classes.pdf" },
+            { title: "Zauberer", page: 70, file: "/assets/pdf/classes.pdf" }
         ]
     },
 
     {
-        id: "kapitel-1",
-        title: "Kapitel 1: Charaktere Schritt für Schritt",
+        id: "persoenlichkeit-und-hintergrund",
+        title: "Persönlichkeit und Hintergrund",
         entry: {
-            title: "Kapitel 1: Charaktere Schritt für Schritt"
+            title: "Persönlichkeit und Hintergrund",
+            page: 1,
+            file: "/assets/pdf/background.pdf"
         },
         topics: [
-            { title: "einen Charakter 1. Stufe" }
+            { title: "Einzelheiten des Charakters", page: 1, file: "/assets/pdf/background.pdf" },
+            { title: "Inspiration", page: 5, file: "/assets/pdf/background.pdf" },
+            { title: "Hintergründe", page: 5, file: "/assets/pdf/background.pdf" }
         ]
     },
 
     {
-        id: "kapitel-2",
-        title: "Kapitel 2: Völker",
+        id: "ausruestung",
+        title: "Ausrüstung",
         entry: {
-            title: "Kapitel 2: Völker"
+            title: "Ausrüstung",
+            page: 1,
+            file: "/assets/pdf/gear.pdf"
         },
         topics: [
-            { title: "Ein Volk auswählen" },
-            { title: "Elf" },
-            { title: "Halblinge" },
-            { title: "Menschen" },
-            { title: "Zwerge" },
-            { title: "Drachenblütige" },
-            { title: "Gnome" },
-            { title: "Halbelfen" },
-            { title: "Halborks" },
-            { title: "Tieflinge" }
+            { title: "Anfangsausrüstung", page: 1, file: "/assets/pdf/gear.pdf" },
+            { title: "Reichtümer", page: 1, file: "/assets/pdf/gear.pdf" },
+            { title: "Rüstungen und Schilde", page: 2, file: "/assets/pdf/gear.pdf" },
+            { title: "Waffen", page: 4, file: "/assets/pdf/gear.pdf" },
+            { title: "Abenteurerausrüstung", page: 6, file: "/assets/pdf/gear.pdf" },
+            { title: "Werkzeuge", page: 12, file: "/assets/pdf/gear.pdf" },
+            { title: "Reittiere und Fahrzeuge", page: 13, file: "/assets/pdf/gear.pdf" },
+            { title: "Handelsgüter", page: 15, file: "/assets/pdf/gear.pdf" },
+            { title: "Ausgaben", page: 15, file: "/assets/pdf/gear.pdf" },
+            { title: "Tand", page: 18, file: "/assets/pdf/gear.pdf" }
         ]
     },
 
     {
-        id: "kapitel-3",
-        title: "Kapitel 3: Klassen",
+        id: "anpassungsmoeglichkeiten",
+        title: "Anpassungsmöglichkeiten",
         entry: {
-            title: "Kapitel 3: Klassen"
+            title: "Anpassungsmöglichkeiten",
+            page: 1,
+            file: "/assets/pdf/customization.pdf"
         },
         topics: [
-            { title: "Barbar" },
-            { title: "Barde" },
-            { title: "Druide" },
-            { title: "Hexenmeister" },
-            { title: "Kämpfer" },
-            { title: "Kleriker" },
-            { title: "Magier" },
-            { title: "Mönch" },
-            { title: "Paladin" },
-            { title: "Schurke" },
-            { title: "Waldläufer" },
-            { title: "Zauberer" }
+            { title: "Klassenkombinationen", page: 1, file: "/assets/pdf/customization.pdf" },
+            { title: "Talente", page: 3, file: "/assets/pdf/customization.pdf" }
+        ]
+    },
+
+
+    {
+        id: "attributswerte-verwenden",
+        title: "Attributswerte verwenden",
+        entry: {
+            title: "Attributswerte verwenden",
+            page: 1,
+            file: "/assets/pdf/attributes.pdf"
+        },
+        topics: [
+            { title: "Attributswerte und Modifikatoren", page: 1, file: "/assets/pdf/attributes.pdf" },
+            { title: "Vorteil und Nachteil", page: 1, file: "/assets/pdf/attributes.pdf" },
+            { title: "Übungsbonus", page: 1, file: "/assets/pdf/attributes.pdf" },
+            { title: "Attributswürfe", page: 2, file: "/assets/pdf/attributes.pdf" },
+            { title: "Einzelne Attributswerte anwenden", page: 3, file: "/assets/pdf/attributes.pdf" },
+            { title: "Rettungswürfe", page: 7, file: "/assets/pdf/attributes.pdf" }
+        ]
+    },
+    {
+        id: "auf-abenteuer-ausziehen",
+        title: "Auf Abenteuer ausziehen",
+        entry: {
+            title: "Auf Abenteuer ausziehen",
+            page: 1,
+            file: "/assets/pdf/adventures.pdf"
+        },
+        topics: [
+            { title: "Zeit", page: 1, file: "/assets/pdf/adventures.pdf" },
+            { title: "Bewegung", page: 1, file: "/assets/pdf/adventures.pdf" },
+            { title: "Die Umgebung", page: 3, file: "/assets/pdf/adventures.pdf" },
+            { title: "Soziale Interaktion", page: 5, file: "/assets/pdf/adventures.pdf" },
+            { title: "Rasten", page: 6, file: "/assets/pdf/adventures.pdf" },
+            { title: "Zwischen den Abenteuern", page: 6, file: "/assets/pdf/adventures.pdf" }
         ]
     },
 
     {
-        id: "kapitel-4",
-        title: "Kapitel 4: Persönlichkeit und Hintergrund",
+        id: "kampf",
+        title: "Kampf",
         entry: {
-            title: "Kapitel 4: Persönlichkeit und Hintergrund"
+            title: "Kampf",
+            page: 1,
+            file: "/assets/pdf/fight.pdf"
         },
         topics: [
-            { title: "Einzelheiten des Charakters" },
-            { title: "Inspiration" },
-            { title: "Hintergründe" }
+            { title: "Der Kampfablauf", page: 1, file: "/assets/pdf/fight.pdf" },
+            { title: "Bewegung und Positionierung", page: 2, file: "/assets/pdf/fight.pdf" },
+            { title: "Aktionen im Kampf", page: 4, file: "/assets/pdf/fight.pdf" },
+            { title: "Einen Angriff ausführen", page: 5, file: "/assets/pdf/fight.pdf" },
+            { title: "Deckung", page: 8, file: "/assets/pdf/fight.pdf" },
+            { title: "Schaden und Heilung", page: 8, file: "/assets/pdf/fight.pdf" },
+            { title: "Berittener Kampf", page: 10, file: "/assets/pdf/fight.pdf" },
+            { title: "Unterwasserkampf", page: 10, file: "/assets/pdf/fight.pdf" }
+        ]
+    },
+
+
+    {
+        id: "zauber-wirken",
+        title: "Zauber wirken",
+        entry: {
+            title: "Zauber wirken",
+            page: 1,
+            file: "/assets/pdf/usemagic.pdf"
+        },
+        topics: [
+            { title: "Was ist ein Zauber?", page: 1, file: "/assets/pdf/usemagic.pdf" },
+            { title: "Einen Zauber wirken", page: 2, file: "/assets/pdf/usemagic.pdf" }
         ]
     },
 
     {
-        id: "kapitel-5",
-        title: "Kapitel 5: Ausrüstung",
+        id: "zauber",
+        title: "Zauber",
         entry: {
-            title: "Kapitel 5: Ausrüstung"
-        },
-        topics: [
-            { title: "Anfangsausrüstung" },
-            { title: "Reichtümer" },
-            { title: "Rüstungen und Schilde" },
-            { title: "Waffen" },
-            { title: "Abenteurerausrüstung" },
-            { title: "Werkzeuge" },
-            { title: "Reittiere und Fahrzeuge" },
-            { title: "Handelsgüter" },
-            { title: "Ausgaben" },
-            { title: "Tand" }
-        ]
-    },
-
-    {
-        id: "kapitel-6",
-        title: "Kapitel 6: Anpassungsmöglichkeiten",
-        entry: {
-            title: "Kapitel 6: Anpassungsmöglichkeiten"
-        },
-        topics: [
-            { title: "Klassenkombinationen" },
-            { title: "Talente" }
-        ]
-    },
-
-    {
-        id: "teil-2",
-        title: "Teil 2: Abenteuer",
-        entry: {
-            title: "Teil 2: Abenteuer"
-        },
-        topics: [
-            { title: "Kapitel 7: Attributswerte verwenden" },
-            { title: "Kapitel 8: Auf Abenteuer ausziehen" },
-            { title: "Kapitel 9: Kampf" }
-        ]
-    },
-
-    {
-        id: "kapitel-7",
-        title: "Kapitel 7: Attributswerte verwenden",
-        entry: {
-            title: "Kapitel 7: Attributswerte verwenden"
-        },
-        topics: [
-            { title: "Attributswerte und Modifikatoren" },
-            { title: "Vorteil und Nachteil" },
-            { title: "Übungsbonus" },
-            { title: "Attributswürfe" },
-            { title: "Einzelne Attributswerte anwenden" },
-            { title: "Rettungswürfe" }
-        ]
-    },
-
-    {
-        id: "kapitel-8",
-        title: "Kapitel 8: Auf Abenteuer ausziehen",
-        entry: {
-            title: "Kapitel 8: Auf Abenteuer ausziehen"
-        },
-        topics: [
-            { title: "Zeit" },
-            { title: "Bewegung" },
-            { title: "Die Umgebung" },
-            { title: "Soziale Interaktion" },
-            { title: "Rasten" },
-            { title: "Verschiedene Abenteuern" }
-        ]
-    },
-
-    {
-        id: "kapitel-9",
-        title: "Kapitel 9: Kampf",
-        entry: {
-            title: "Kapitel 9: Kampf"
-        },
-        topics: [
-            { title: "Der Kampfablauf" },
-            { title: "Bewegung und Positionierung" },
-            { title: "Aktionen im Kampf" },
-            { title: "Einen Angriff ausführen" },
-            { title: "Deckung" },
-            { title: "Schaden und Heilung" },
-            { title: "Berittener Kampf" },
-            { title: "Unterwasserkampf" }
-        ]
-    },
-
-    {
-        id: "teil-3",
-        title: "Teil 3: Magie",
-        entry: {
-            title: "Teil 3: Magie"
-        },
-        topics: [
-            { title: "Kapitel 10: Zauber wirken" },
-            { title: "Kapitel 11: Zauber" }
-        ]
-    },
-
-    {
-        id: "kapitel-10",
-        title: "Kapitel 10: Zauber wirken",
-        entry: {
-            title: "Kapitel 10: Zauber wirken"
-        },
-        topics: [
-            { title: "Was ist ein Zauber?" },
-            { title: "Einen Zauber wirken" }
-        ]
-    },
-
-    {
-        id: "kapitel-11",
-        title: "Kapitel 11: Zauber",
-        entry: {
-            title: "Kapitel 11: Zauber"
+            title: "Zauber"
         },
         topics: [
             { title: "Zauberlisten" },
@@ -241,67 +196,48 @@ const playerRulesData = [
     },
 
     {
-        id: "anhang-a",
-        title: "Anhang A: Zustände",
+        id: "zustaende",
+        title: "Zustände",
         entry: {
-            title: "Anhang A: Zustände"
+            title: "Zustände",
+            page: 1,
+            file: "/assets/pdf/states.pdf"
         },
         topics: []
     },
 
     {
-        id: "anhang-b",
-        title: "Anhang B: Götter des Multiversums",
+        id: "goetter-des-multiversums",
+        title: "Götter des Multiversums",
         entry: {
-            title: "Anhang B: Götter des Multiversums"
+            title: "Götter des Multiversums",
+            page: 1,
+            file: "/assets/pdf/gods.pdf"
         },
         topics: []
     },
 
     {
-        id: "anhang-c",
-        title: "Anhang C: Die Existenzebenen",
+        id: "die-existenzebenen",
+        title: "Die Existenzebenen",
         entry: {
-            title: "Anhang C: Die Existenzebenen"
+            title: "Die Existenzebenen",
+            page: 1,
+            file: "/assets/pdf/planes.pdf"
         },
         topics: [
-            { title: "Die Materielle Ebene" },
-            { title: "Jenseits der Materiellen Ebene" }
+            { title: "Die Materielle Ebene", page: 1, file: "/assets/pdf/planes.pdf" },
+            { title: "Jenseits der Materiellen Ebene", page: 2, file: "/assets/pdf/planes.pdf" }
         ]
     },
 
     {
-        id: "anhang-d",
-        title: "Anhang D: Kreaturenspielwerte",
+        id: "kreaturenspielwerte",
+        title: "Kreaturenspielwerte",
         entry: {
-            title: "Anhang D: Kreaturenspielwerte"
-        },
-        topics: []
-    },
-
-    {
-        id: "anhang-e",
-        title: "Anhang E: Lektüre zur Inspiration",
-        entry: {
-            title: "Anhang E: Lektüre zur Inspiration"
-        },
-        topics: []
-    },
-
-    {
-        id: "index",
-        title: "Index",
-        entry: {
-            title: "Index"
-        },
-        topics: []
-    },
-
-    {
-        id: "charakterblatt",
-        title: "Charakterblatt",
-        entry: {
-            title: "Charakterblatt"
+            title: "Kreaturenspielwerte",
+            page: 1,
+            file: "/assets/pdf/creatures.pdf"
         },
         topics: []
     }
@@ -311,16 +247,29 @@ const playerRulesData = [
 // HELPERS
 // ============================================================
 
+function normalizeText(value) {
+    return String(value || "")
+        .trim()
+        .toLowerCase();
+}
+
+function getSectionTitle(sectionElement) {
+    const titleElement = sectionElement.querySelector(".ruleSection__title");
+    return normalizeText(titleElement?.textContent);
+}
+
 function openRuleEntry(entry) {
     if (!entry || typeof entry.page !== "number") {
         alert(`Für "${entry?.title || "diesen Eintrag"}" ist noch keine PDF-Seite hinterlegt.`);
         return;
     }
 
-    const pdfPage = entry.page + PDF_PAGE_OFFSET;
-    const pdfUrl = `${PDF_FILE_PATH}#page=${pdfPage}`;
+    const filePath = entry.file || PDF_FILE_PATH;
 
-    window.open(pdfUrl, "_blank", "noopener");
+    const viewerUrl =
+        `/rule_viewer.html?file=${encodeURIComponent(filePath)}&page=${encodeURIComponent(entry.page)}&title=${encodeURIComponent(entry.title)}`;
+
+    window.location.href = viewerUrl;
 }
 
 function setButtonLabel(button, entry) {
@@ -339,10 +288,7 @@ function bindEntryButton(button, entry) {
     if (!button || !entry) return;
 
     setButtonLabel(button, entry);
-
-    button.addEventListener("click", () => {
-        openRuleEntry(entry);
-    });
+    button.addEventListener("click", () => openRuleEntry(entry));
 }
 
 function bindTopicButtons(container, topics) {
@@ -355,10 +301,7 @@ function bindTopicButtons(container, topics) {
         if (!topic) return;
 
         setButtonLabel(button, topic);
-
-        button.addEventListener("click", () => {
-            openRuleEntry(topic);
-        });
+        button.addEventListener("click", () => openRuleEntry(topic));
     });
 }
 
@@ -389,8 +332,19 @@ function bindSection(sectionElement, sectionData) {
 document.addEventListener("DOMContentLoaded", () => {
     const sectionElements = Array.from(document.querySelectorAll(".ruleSection"));
 
-    sectionElements.forEach((sectionElement, index) => {
-        const sectionData = playerRulesData[index];
+    const dataByTitle = new Map(
+        playerRulesData.map(section => [normalizeText(section.title), section])
+    );
+
+    sectionElements.forEach((sectionElement) => {
+        const sectionTitle = getSectionTitle(sectionElement);
+        const sectionData = dataByTitle.get(sectionTitle);
+
+        if (!sectionData) {
+            console.warn(`Keine Daten für Section gefunden: "${sectionTitle}"`, sectionElement);
+            return;
+        }
+
         bindSection(sectionElement, sectionData);
     });
 });

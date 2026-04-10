@@ -3433,3 +3433,49 @@ body.no-scroll {
         padding-left: 24px;
     }
 }
+
+/* =========================================================
+   PLAYER RULES VIEWER
+   ========================================================= */
+
+.ruleViewer {
+    gap: 14px;
+}
+
+.ruleViewer__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ruleViewer__pageInfo {
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.ruleViewer__canvasWrap {
+    width: 100%;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 640px) {
+    .ruleViewer__toolbar {
+        justify-content: center;
+    }
+
+    .ruleViewer__pageInfo {
+        width: 100%;
+        order: -1;
+    }
+}

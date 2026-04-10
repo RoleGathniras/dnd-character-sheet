@@ -72,7 +72,7 @@ Thumbs.db
 # =========================
 # PDF
 # =========================
-frontend/assets/pdf/*.pdf
+frontend/public/assets/pdf
 
 # =========================
 # Sonstiges
@@ -80,4 +80,4 @@ frontend/assets/pdf/*.pdf
 *.tmp
 *.bak
 *.swp
-*~frontend/assets/pdf/*.pdf
+

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Regelwerk Viewer</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <main class="page page--playerRules">
+        <section class="rulesCard ruleViewer">
+            <div class="rulesCard__header">
+                <h1 class="rulesCard__title" id="viewerTitle">Regelwerk</h1>
+                <p class="rulesCard__subtext" id="viewerStatus">PDF wird geladen ...</p>
+            </div>
+
+            <div class="ruleViewer__toolbar">
+                <button class="ruleEntryButton" id="btnPrevPage" type="button">← Vorherige Seite</button>
+
+                <div class="ruleViewer__pageInfo">
+                    <span id="pageIndicator">Seite 1 / 1</span>
+                </div>
+
+                <button class="ruleEntryButton" id="btnNextPage" type="button">Nächste Seite →</button>
+            </div>
+
+            <div class="ruleViewer__toolbar">
+                <button class="ruleTopicButton" id="btnZoomOut" type="button">- Zoom</button>
+                <button class="ruleTopicButton" id="btnZoomReset" type="button">100%</button>
+                <button class="ruleTopicButton" id="btnZoomIn" type="button">+ Zoom</button>
+            </div>
+
+            <div class="ruleViewer__canvasWrap">
+                <canvas id="pdfCanvas"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="./rule_viewer.js"></script>
+</body>
+
+</html>
