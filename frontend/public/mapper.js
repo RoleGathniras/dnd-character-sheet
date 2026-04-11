@@ -83,6 +83,7 @@ export function jsonToSheet(data) {
     setInputValue(resolveField("inspiration"), d.inspiration);
 
     setInputValue(resolveField("ac"), d.ac);
+    setInputValue(resolveField("initiative"), d.initiative);
     setInputValue(resolveField("hp_current"), d.hp_current);
     setInputValue(resolveField("hp_max"), d.hp_max);
     setInputValue(resolveField("hp_temp"), d.hp_temp);
@@ -122,7 +123,7 @@ export function jsonToSheet(data) {
         if (fEl) fEl.checked = Boolean(d?.[fId]);
     }
 
-// ===== Combat: Angriffe=====
+    // ===== Combat: Angriffe=====
     for (let i = 1; i <= 5; i++) {
         setInputValue(resolveField(`attack_${i}_type`), d?.[`attack_${i}_type`] ?? "");
         setInputValue(resolveField(`attack_${i}_abil`), d?.[`attack_${i}_abil`] ?? "");
@@ -144,9 +145,10 @@ export function sheetToJson() {
     out.level = getInputValue(resolveField("level"));
     out.inspiration = !!resolveField("inspiration")?.checked;
     out.ac = getInputValue(resolveField("ac"));
+    out.initiative = toIntOrNull(getInputValue(resolveField("initiative")));
     out.speed = getInputValue(resolveField("speed"));
 
-// --- HP Normalisierung ---
+    // --- HP Normalisierung ---
     const hpMaxRaw = toIntOrNull(getInputValue(resolveField("hp_max")));
     const hpCurRaw = toIntOrNull(getInputValue(resolveField("hp_current")));
     const hpTempRaw = toIntOrNull(getInputValue(resolveField("hp_temp")));
@@ -155,7 +157,7 @@ export function sheetToJson() {
     let hp_current = hpCurRaw === null ? null : hpCurRaw;
     const hp_temp = hpTempRaw === null ? null : Math.max(0, hpTempRaw);
 
-// Current clampen
+    // Current clampen
     if (hp_current !== null) {
         if (hp_max !== null) {
             hp_current = clamp(hp_current, 0, hp_max);
@@ -204,7 +206,7 @@ export function sheetToJson() {
         out[`death_fail_${i}`] = !!document.getElementById(`death_fail_${i}`)?.checked;
     }
 
-// ===== Combat: Angriffe=====
+    // ===== Combat: Angriffe=====
     for (let i = 1; i <= 5; i++) {
         out[`attack_${i}_type`] = getInputValue(resolveField(`attack_${i}_type`)) ?? "";
         out[`attack_${i}_abil`] = getInputValue(resolveField(`attack_${i}_abil`)) ?? "";

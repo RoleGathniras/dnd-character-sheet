@@ -200,15 +200,26 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
         const min = el.min !== "" ? Number(el.min) : null;
         const max = el.max !== "" ? Number(el.max) : null;
 
-        let val = Number(el.value);
+        let raw = String(el.value ?? "").trim();
 
-        if (!Number.isFinite(val)) return;
+        if (raw === "") return;
+
+        raw = raw.replace(",", ".");
+        let val = Number(raw);
+
+        if (!Number.isFinite(val)) {
+            el.value = "";
+            return;
+        }
+
+        val = Math.trunc(val);
 
         if (min !== null && val < min) val = min;
         if (max !== null && val > max) val = max;
 
-        if (val !== Number(el.value)) {
-            el.value = val;
+        const next = String(val);
+        if (el.value !== next) {
+            el.value = next;
         }
     }
 
@@ -419,12 +430,106 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
         bindSkillAutoCalc();
         bindAttackAutoCalc();
 
+        sheetRootEl?.addEventListener("focusin", (e) => {
+            const el = e.target;
+            if (!(el instanceof HTMLInputElement)) return;
+            if (el.type !== "number") return;
+
+            // Inhalt markieren, damit neuer Wert den alten direkt ersetzt
+            requestAnimationFrame(() => {
+                el.select();
+            });
+        });
+
+        sheetRootEl?.addEventListener("keydown", (e) => {
+            const el = e.target;
+            if (!(el instanceof HTMLInputElement)) return;
+            if (el.type !== "number") return;
+
+            const allowedKeys = [
+                "Backspace",
+                "Delete",
+                "Tab",
+                "Escape",
+                "Enter",
+                "ArrowLeft",
+                "ArrowRight",
+                "ArrowUp",
+                "ArrowDown",
+                "Home",
+                "End",
+            ];
+
+            if (allowedKeys.includes(e.key)) return;
+
+            // Strg/Cmd-Kombinationen erlauben (copy, paste, cut, select all)
+            if (e.ctrlKey || e.metaKey) return;
+
+            // Nur ganze Zahlen und optional führendes Minus erlauben
+            if (!/^[0-9-]$/.test(e.key)) {
+                e.preventDefault();
+                return;
+            }
+
+            // Minus nur einmal und nur am Anfang erlauben
+            if (e.key === "-") {
+                const hasMin = el.min !== "";
+                const min = hasMin ? Number(el.min) : null;
+
+                // Kein Minus erlauben, wenn Feld keine negativen Werte zulässt
+                if (min !== null && min >= 0) {
+                    e.preventDefault();
+                    return;
+                }
+
+                const start = el.selectionStart ?? 0;
+                const end = el.selectionEnd ?? 0;
+                const value = el.value ?? "";
+
+                const nextValue = value.slice(0, start) + "-" + value.slice(end);
+
+                if (start !== 0 || nextValue.indexOf("-") !== 0 || value.includes("-")) {
+                    e.preventDefault();
+                }
+            }
+        });
+
         sheetRootEl?.addEventListener("input", (e) => {
-            clampInput(e.target);
+            const el = e.target;
+            if (el instanceof HTMLInputElement && el.type === "number") {
+                // Alles außer Ziffern und optional führendem Minus entfernen
+                const hasMin = el.min !== "";
+                const min = hasMin ? Number(el.min) : null;
+                const allowNegative = min === null || min < 0;
+
+                let value = el.value ?? "";
+
+                value = value.replace(",", "");
+                value = value.replace(".", "");
+                value = value.replace(/[eE]/g, "");
+                value = value.replace(/\+/g, "");
+
+                if (allowNegative) {
+                    value = value.replace(/(?!^)-/g, "");
+                } else {
+                    value = value.replace(/-/g, "");
+                }
+
+                value = value.replace(/[^\d-]/g, "");
+
+                if (!allowNegative) {
+                    value = value.replace(/-/g, "");
+                }
+
+                if (el.value !== value) {
+                    el.value = value;
+                }
+            }
+
             markDirty();
         });
 
-        sheetRootEl?.addEventListener("change", (e) => {
+        sheetRootEl?.addEventListener("focusout", (e) => {
             clampInput(e.target);
             markDirty();
         });

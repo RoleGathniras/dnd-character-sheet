@@ -152,7 +152,7 @@
 
                         <div class="abilityCard">
                             <div class="abilityHead">Stärke</div>
-                            <input id="str" type="number" min="1" max="30" step="1" />
+                            <input id="str" type="number" min="0" max="30" step="1" inputmode="numeric" />
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="str_mod" type="number" readonly />
@@ -160,7 +160,7 @@
                         </div>
                         <div class="abilityCard">
                             <div class="abilityHead">Geschicklichkeit</div>
-                            <input id="dex" type="number" min="1" max="30" step="1" />
+                            <input id="dex" type="number" min="0" max="30" step="1" inputmode="numeric" />
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="dex_mod" type="number" readonly />
@@ -168,7 +168,7 @@
                         </div>
                         <div class="abilityCard">
                             <div class="abilityHead">Konstitution</div>
-                            <input id="con" type="number" min="1" max="30" step="1" />
+                            <input id="con" type="number" min="0" max="30" step="1" inputmode="numeric" />>
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="con_mod" type="number" readonly />
@@ -176,7 +176,7 @@
                         </div>
                         <div class="abilityCard">
                             <div class="abilityHead">Intelligenz</div>
-                            <input id="int" type="number" min="1" max="30" step="1" />
+                            <input id="int" type="number" min="0" max="30" step="1" inputmode="numeric" />
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="int_mod" type="number" readonly />
@@ -184,7 +184,7 @@
                         </div>
                         <div class="abilityCard">
                             <div class="abilityHead">Weisheit</div>
-                            <input id="wis" type="number" min="1" max="30" step="1" />
+                            <input id="wis" type="number" min="0" max="30" step="1" inputmode="numeric" />
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="wis_mod" type="number" readonly />
@@ -192,7 +192,7 @@
                         </div>
                         <div class="abilityCard">
                             <div class="abilityHead">Charisma</div>
-                            <input id="cha" type="number" min="1" max="30" step="1" />
+                            <input id="cha" type="number" min="0" max="30" step="1" inputmode="numeric" />
                             <div class="modBadge">
                                 <span class="modLabel">MOD</span>
                                 <input id="cha_mod" type="number" readonly />
@@ -243,7 +243,7 @@
                         <h3>Vorteile / Nachteile</h3>
                         <label>
                             Notizen (z.B. Vorteil bei RW gegen Gift, Nachteil bei Weisheit etc.)
-                            <textarea id="notes_adv_dis" rows="4" maxlength="300"
+                            <textarea id="notes_adv_dis" rows="4" maxlength="1000"
                                 placeholder="z. B. Vorteil bei RW gegen Gift, Nachteil bei Wahrnehmung im Dunkeln"></textarea>
                         </label>
                     </section>
