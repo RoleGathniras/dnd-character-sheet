@@ -62,7 +62,7 @@ class Spell(SQLModel, table=True):
     concentration: bool = Field(default=False)
     ritual: bool = Field(default=False)
 
-    hit: str = Field(default="", max_length=50)
+    hit: str = Field(default="", max_length=150)
     kind: str = Field(default="", max_length=50)
     effect: str = Field(default="", max_length=750)
 
