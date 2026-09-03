@@ -66,4 +66,4 @@ class Spell(SQLModel, table=True):
     kind: str = Field(default="", max_length=50)
     effect: str = Field(default="", max_length=750)
 
-    desc: str = Field(default="", max_length=3000)
+    desc: str = Field(default="", max_length=10000)
