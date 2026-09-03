@@ -64,6 +64,6 @@ class Spell(SQLModel, table=True):
 
     hit: str = Field(default="", max_length=50)
     kind: str = Field(default="", max_length=50)
-    effect: str = Field(default="", max_length=100)
+    effect: str = Field(default="", max_length=500)
 
     desc: str = Field(default="", max_length=3000)
