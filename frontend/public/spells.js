@@ -19,16 +19,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const spellSaveDc = document.getElementById("spellSaveDc");
     const spellAtkBonus = document.getElementById("spellAtkBonus");
     const spellAbility = document.getElementById("spellAbility");
+
     // Details-Inputs
     const sb_name = document.getElementById("sb_name");
+    const sb_level = document.getElementById("sb_level");
+    const sb_school = document.getElementById("sb_school");
     const sb_time = document.getElementById("sb_time");
+    const sb_concentration = document.getElementById("sb_concentration");
+    const sb_ritual = document.getElementById("sb_ritual");
     const sb_range = document.getElementById("sb_range");
+    const sb_components = document.getElementById("sb_components");
+    const sb_material = document.getElementById("sb_material");
+    const sb_duration = document.getElementById("sb_duration");
     const sb_hit = document.getElementById("sb_hit");
     const sb_kind = document.getElementById("sb_kind");
     const sb_effect = document.getElementById("sb_effect");
     const sb_desc = document.getElementById("sb_desc");
     const spellDetailsCard = document.querySelector(".spellDetailsCard");
     const btnCloseSpellDetails = document.getElementById("btnCloseSpellDetails");
+    const btnSelectSpell = document.getElementById("btnSelectSpell");
+    const spellSelectCard = document.getElementById("spellSelectCard");
+    const spellSelectList = document.getElementById("spellSelectList");
+    const spellSelectPreview = document.getElementById("spellSelectPreview");
 
     // Charakter Drawer
     const btnMenu = document.getElementById("btnMenu");
@@ -56,7 +68,12 @@ document.addEventListener("DOMContentLoaded", () => {
         !spellDescText ||
         !sb_name ||
         !sb_time ||
+        !sb_concentration ||
+        !sb_ritual ||
         !sb_range ||
+        !sb_components ||
+        !sb_material ||
+        !sb_duration ||
         !sb_hit ||
         !sb_kind ||
         !sb_effect ||
@@ -66,7 +83,10 @@ document.addEventListener("DOMContentLoaded", () => {
         !spellAbility ||
         !spellDetailsCard ||
         !btnCloseSpellDetails ||
-
+        !btnSelectSpell ||
+        !spellSelectCard ||
+        !spellSelectList ||
+        !spellSelectPreview ||
         !btnMenu ||
         !drawer ||
         !backdrop ||
@@ -470,24 +490,48 @@ document.addEventListener("DOMContentLoaded", () => {
     function createEmptySpell() {
         return {
             id: createSpellId(),
+
             name: "",
+            level: currentLevel === "cantrip" ? 0 : Number(currentLevel),
+            school: "",
+
             time: "",
             range: "",
+            components: "",
+            material: "",
+            duration: "",
+
+            concentration: false,
+            ritual: false,
+
             hit: "",
             kind: "",
             effect: "",
+
             desc: "",
         };
     }
     function normalizeSpell(raw) {
         return {
             id: String(raw?.id || createSpellId()),
+
             name: limitText(raw?.name, MAX_SB_NAME_LENGTH),
+            level: toNonNegativeInteger(raw?.level ?? 0, 9),
+            school: limitText(raw?.school, 50),
+
             time: limitText(raw?.time, MAX_SB_TIME_LENGTH),
             range: limitText(raw?.range, MAX_SB_RANGE_LENGTH),
+            components: limitText(raw?.components, 50),
+            material: limitText(raw?.material, 300),
+            duration: limitText(raw?.duration, 100),
+
+            concentration: Boolean(raw?.concentration),
+            ritual: Boolean(raw?.ritual),
+
             hit: limitText(raw?.hit, MAX_SB_HIT_LENGTH),
             kind: limitText(raw?.kind, MAX_SB_KIND_LENGTH),
             effect: limitText(raw?.effect, MAX_SB_EFFECT_LENGTH),
+
             desc: String(raw?.desc ?? "").slice(0, MAX_SB_DESC_LENGTH),
         };
     }
@@ -579,8 +623,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function clearSpellDetails() {
         sb_name.value = "";
+        sb_level.value = "";
+        sb_school.value = "";
         sb_time.value = "";
+        sb_concentration.checked = false;
+        sb_ritual.checked = false;
         sb_range.value = "";
+        sb_components.value = "";
+        sb_material.value = "";
+        sb_duration.value = "";
         sb_hit.value = "";
         sb_kind.value = "";
         sb_effect.value = "";
@@ -592,9 +643,17 @@ document.addEventListener("DOMContentLoaded", () => {
             clearSpellDetails();
             return;
         }
+
         sb_name.value = spell.name || "";
+        sb_level.value = spell.level === 0 ? "Zaubertrick" : String(spell.level);
+        sb_school.value = spell.school || "";
         sb_time.value = spell.time || "";
+        sb_concentration.checked = Boolean(spell.concentration);
+        sb_ritual.checked = Boolean(spell.ritual);
         sb_range.value = spell.range || "";
+        sb_components.value = spell.components || "";
+        sb_material.value = spell.material || "";
+        sb_duration.value = spell.duration || "";
         sb_hit.value = spell.hit || "";
         sb_kind.value = spell.kind || "";
         sb_effect.value = spell.effect || "";
@@ -780,24 +839,30 @@ document.addEventListener("DOMContentLoaded", () => {
     // (n/a)
 
     // 6 Events: “Button klickt → Funktion”
+
+    function applyPatch(patchFn) {
+        const spell = getSelectedSpell(currentLevel);
+        if (!spell) return;
+
+        patchFn(spell);
+        syncPanelSpellById(currentLevel, spell.id);
+
+        renderSpellbook(currentLevel);
+        renderPanel(currentLevel);
+        writeBackToCharacterData();
+        markDirtyAndScheduleSave();
+    }
     function bindSpellDetailsInputs() {
-        function applyPatch(patchFn) {
-            const spell = getSelectedSpell(currentLevel);
-            if (!spell) return;
-
-            patchFn(spell);
-            syncPanelSpellById(currentLevel, spell.id);
-
-            renderSpellbook(currentLevel);
-            renderPanel(currentLevel);
-            writeBackToCharacterData();
-            markDirtyAndScheduleSave();
-        }
-
         sb_name.addEventListener("input", () =>
             applyPatch((s) => {
                 s.name = limitText(sb_name.value, MAX_SB_NAME_LENGTH);
                 sb_name.value = s.name;
+            })
+        );
+        sb_school.addEventListener("change", () =>
+            applyPatch((s) => {
+                s.school = limitText(sb_school.value, 50);
+                sb_school.value = s.school;
             })
         );
 
@@ -808,10 +873,42 @@ document.addEventListener("DOMContentLoaded", () => {
             })
         );
 
+        sb_concentration.addEventListener("change", () =>
+            applyPatch((s) => {
+                s.concentration = sb_concentration.checked;
+            })
+        );
+
+        sb_ritual.addEventListener("change", () =>
+            applyPatch((s) => {
+                s.ritual = sb_ritual.checked;
+            })
+        );
+
         sb_range.addEventListener("input", () =>
             applyPatch((s) => {
                 s.range = limitText(sb_range.value, MAX_SB_RANGE_LENGTH);
                 sb_range.value = s.range;
+            })
+        );
+        sb_components.addEventListener("input", () =>
+            applyPatch((s) => {
+                s.components = limitText(sb_components.value, 50);
+                sb_components.value = s.components;
+            })
+        );
+
+        sb_material.addEventListener("input", () =>
+            applyPatch((s) => {
+                s.material = limitText(sb_material.value, 300);
+                sb_material.value = s.material;
+            })
+        );
+
+        sb_duration.addEventListener("input", () =>
+            applyPatch((s) => {
+                s.duration = limitText(sb_duration.value, 100);
+                sb_duration.value = s.duration;
             })
         );
 
@@ -847,20 +944,27 @@ document.addEventListener("DOMContentLoaded", () => {
     function bindTabs() {
         tabs.forEach((t) => {
             t.addEventListener("click", () => {
-                currentLevel = t.dataset.spellLevel; // 👉 DAS HIER NEU
+                currentLevel = t.dataset.spellLevel;
+
+                spellSelectCard.classList.add("is-hidden");
+                spellSelectList.innerHTML = "";
+
                 setActiveTab(t.dataset.spellLevel);
             });
 
             t.addEventListener("keydown", (e) => {
                 if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    currentLevel = t.dataset.spellLevel; // 👉 UND HIER
+                    currentLevel = t.dataset.spellLevel;
+
+                    spellSelectCard.classList.add("is-hidden");
+                    spellSelectList.innerHTML = "";
+
                     setActiveTab(t.dataset.spellLevel);
                 }
             });
         });
     }
-
     function bindSlotsCountInput() {
         slotsCountInput.addEventListener("input", () => {
             if (currentLevel === "cantrip") return;
@@ -943,9 +1047,100 @@ document.addEventListener("DOMContentLoaded", () => {
     function bindSpellDetailsClose() {
         btnCloseSpellDetails.addEventListener("click", () => {
             selectedSpellId = null;
+            spellSelectCard.classList.add("is-hidden");
+            spellSelectList.innerHTML = "";
             renderSpellbook(currentLevel);
             clearSpellDetails();
             closeSpellDetails();
+        });
+    }
+
+    function bindSelectSpell() {
+        btnSelectSpell.addEventListener("click", async () => {
+            const level = currentLevel === "cantrip"
+                ? 0
+                : Number(currentLevel);
+
+            try {
+                const spells = await API.getSpells(level);
+
+                spellSelectList.innerHTML = "";
+                spellSelectPreview.innerHTML = "";
+
+                if (spells.length === 0) {
+                    spellSelectList.innerHTML = `
+                        <p class="muted small">
+                            Keine Zauber für diesen Grad in der Datenbank gefunden.
+                        </p>
+                    `;
+
+                    spellSelectCard.classList.remove("is-hidden");
+                    return;
+                }
+
+                for (const spell of spells) {
+                    const item = document.createElement("button");
+                    item.type = "button";
+                    item.className = "btn btn--ghost";
+                    item.textContent = spell.name;
+
+                    item.addEventListener("click", () => {
+                        spellSelectPreview.innerHTML = `
+                        <h3>${spell.name}</h3>
+                        <p><strong>Grad:</strong> ${spell.level}</p>
+                        <p><strong>Schule:</strong> ${spell.school}</p>
+                        <p><strong>Zeit:</strong> ${spell.time}</p>
+                        <p><strong>Reichweite:</strong> ${spell.range}</p>
+                        <p><strong>Komponenten:</strong> ${spell.components}</p>
+                        <p><strong>Dauer:</strong> ${spell.duration}</p>
+                        <p><strong>Effekt:</strong> ${spell.effect}</p>
+                        <p>${spell.desc}</p>
+                        <button class="btn" id="btnTakeSpell" type="button">
+                        Diesen Zauber übernehmen
+                        </button>
+                    `;
+                        const btnTakeSpell = document.getElementById("btnTakeSpell");
+
+                        btnTakeSpell.addEventListener("click", () => {
+                            applyPatch((s) => {
+                                s.name = spell.name;
+                                s.level = spell.level;
+                                s.school = spell.school;
+
+                                s.time = spell.time;
+                                s.range = spell.range;
+                                s.components = spell.components;
+                                s.material = spell.material;
+                                s.duration = spell.duration;
+
+                                s.concentration = spell.concentration;
+                                s.ritual = spell.ritual;
+
+                                s.hit = spell.hit;
+                                s.kind = spell.kind;
+                                s.effect = spell.effect;
+
+                                s.desc = spell.desc;
+                            });
+                            const selectedSpell = getSelectedSpell(currentLevel);
+
+                            if (selectedSpell) {
+                                fillSpellDetails(selectedSpell);
+                            }
+
+                            spellSelectCard.classList.add("is-hidden");
+                            spellSelectList.innerHTML = "";
+                            spellSelectPreview.innerHTML = "";
+                        });
+                    });
+
+                    spellSelectList.appendChild(item);
+                }
+
+                spellSelectCard.classList.remove("is-hidden");
+            } catch (error) {
+                console.error("Zauber konnten nicht geladen werden:", error);
+            }
         });
     }
 
@@ -1109,8 +1304,10 @@ document.addEventListener("DOMContentLoaded", () => {
         bindAddSpell();
         bindDeleteSpell();
         bindSpellDetailsClose();
+        bindSelectSpell();
         bindUseInPanel();
         bindPanelClick();
+
 
         await loadCharacterAndHydrate();
         setActiveTab("cantrip");           // rendert jetzt mit hydriertem state

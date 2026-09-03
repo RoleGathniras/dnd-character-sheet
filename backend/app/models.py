@@ -42,3 +42,28 @@ class Character(SQLModel, table=True):
     kind: CharacterKind = Field(default=CharacterKind.pc)
     data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     updated_at: datetime = Field(default_factory=utcnow, nullable=False)
+
+class Spell(SQLModel, table=True):
+    __tablename__ = "spells"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+    name: str = Field(index=True, max_length=80)
+    level: int = Field(index=True, ge=0, le=9)
+    school: str = Field(max_length=50)
+
+    time: str = Field(max_length=50)
+    range: str = Field(max_length=50)
+
+    components: str = Field(max_length=50)
+    material: str = Field(default="", max_length=300)
+    duration: str = Field(max_length=100)
+
+    concentration: bool = Field(default=False)
+    ritual: bool = Field(default=False)
+
+    hit: str = Field(default="", max_length=50)
+    kind: str = Field(default="", max_length=50)
+    effect: str = Field(default="", max_length=100)
+
+    desc: str = Field(default="", max_length=3000)

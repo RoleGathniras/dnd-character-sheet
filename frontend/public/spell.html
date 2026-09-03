@@ -235,8 +235,12 @@
                     </div>
 
                     <div class="row gap">
-                        <button class="btn btn--ghost" id="btnCloseSpellDetails" type="button">Schließen</button>
-                    </div>
+                        <button class="btn btn--ghost" id="btnCloseSpellDetails" type="button">
+                            Schließen
+                        </button>
+                        <button class="btn" id="btnSelectSpell" type="button">
+                            Zauber auswählen
+                        </button>
                     </div>
 
                     <div class="card__body spellDetailsCard__body">
@@ -244,6 +248,26 @@
                             <label class="field">
                                 <span class="label">Name</span>
                                 <input id="sb_name" type="text" maxlength="50" placeholder="z.B. Magic Missile" />
+                            </label>
+
+                            <label class="field">
+                                <span class="label">Zaubergrad</span>
+                                <input id="sb_level" type="text" readonly />
+                            </label>
+
+                            <label class="field">
+                                <span class="label">Schule</span>
+                                <select id="sb_school">
+                                    <option value="">—</option>
+                                    <option value="abjuration">Bannmagie</option>
+                                    <option value="conjuration">Beschwörung</option>
+                                    <option value="divination">Erkenntnismagie</option>
+                                    <option value="enchantment">Verzauberung</option>
+                                    <option value="evocation">Hervorrufung</option>
+                                    <option value="illusion">Illusion</option>
+                                    <option value="necromancy">Nekromantie</option>
+                                    <option value="transmutation">Verwandlung</option>
+                                </select>
                             </label>
 
                             <label class="field">
@@ -258,7 +282,7 @@
                             </label>
 
                             <label class="field">
-                                <span class="label">Trefferwert</span>
+                                <span class="label">Angriff / Rettungswurf</span>
                                 <input id="sb_hit" type="text" maxlength="50" placeholder="z.B. +7 / Rettungswurf" />
                             </label>
 
@@ -268,9 +292,36 @@
                                     placeholder="z.B. Feuer, Heilung, Kontrolle" />
                             </label>
 
-                            <label class="field field--full">
+                            <label class="field">
                                 <span class="label">Komponenten</span>
-                                <input id="sb_effect" type="text" maxlength="100" placeholder="z.B. V, S, M" />
+                                <input id="sb_components" type="text" maxlength="50" placeholder="z.B. V, G, M" />
+                            </label>
+
+                            <label class="field">
+                                <span class="label">Dauer</span>
+                                <input id="sb_duration" type="text" maxlength="100"
+                                    placeholder="z.B. Augenblicklich / 1 Minute" />
+                            </label>
+
+                            <label class="field">
+                                <span class="label">Konzentration</span>
+                                <input id="sb_concentration" type="checkbox" />
+                            </label>
+
+                            <label class="field">
+                                <span class="label">Ritual</span>
+                                <input id="sb_ritual" type="checkbox" />
+                            </label>
+
+                            <label class="field field--full">
+                                <span class="label">Material</span>
+                                <input id="sb_material" type="text" maxlength="300"
+                                    placeholder="z.B. eine winzige Kugel aus Fledermausguano und Schwefel" />
+                            </label>
+
+                            <label class="field field--full">
+                                <span class="label">Effekt</span>
+                                <input id="sb_effect" type="text" maxlength="100" placeholder="z.B. 8W6 Feuerschaden" />
                             </label>
 
                             <label class="field field--full">
@@ -279,6 +330,16 @@
                                     placeholder="Voller Text des Zaubers…"></textarea>
                             </label>
                         </div>
+                    </div>
+                </section>
+                <section class="card spellSelectCard is-hidden" id="spellSelectCard">
+                    <div class="card__header">
+                        <div class="h2">Zauber auswählen</div>
+                    </div>
+
+                    <div class="card__body">
+                        <div id="spellSelectList"></div>
+                        <div id="spellSelectPreview"></div>
                     </div>
                 </section>
             </section>

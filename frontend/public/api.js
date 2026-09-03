@@ -147,6 +147,12 @@ export const API = {
         });
     },
 
+    // ===== Spells =====
+
+    getSpells(level) {
+        return this.request(`/spells?level=${level}`);
+    },
+
     // ===== Admin =====
 
     listUsers() {

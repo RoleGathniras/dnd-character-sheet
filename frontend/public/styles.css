@@ -2043,6 +2043,10 @@ body.no-scroll {
     display: none;
 }
 
+.spellSelectCard.is-hidden {
+    display: none;
+}
+
 .spellDesc__header {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -2192,7 +2196,7 @@ body.no-scroll {
    SPELL DETAILS COLLAPSIBLE
    ========================================================= */
 
-.spellDetailsCard.is-collapsed .spellDetailsCard__body {
+.spellDetailsCard.is-collapsed {
     display: none;
 }
 
