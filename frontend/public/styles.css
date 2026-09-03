@@ -3461,12 +3461,21 @@ body.no-scroll {
 .ruleViewer__canvasWrap {
     width: 100%;
     overflow: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+
     border: 1px solid var(--border);
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.03);
     padding: 10px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
+}
+
+.ruleViewer__page {
+    position: relative;
+    display: inline-block;
+    margin: 0 auto;
 }
 
 .ruleViewer__page {

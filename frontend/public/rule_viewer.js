@@ -20,6 +20,7 @@ const btnZoomIn = document.getElementById("btnZoomIn");
 const canvas = document.getElementById("pdfCanvas");
 const ctx = canvas.getContext("2d");
 const textLayerDiv = document.getElementById("pdfTextLayer");
+const canvasWrap = document.querySelector(".ruleViewer__canvasWrap");
 
 // ============================================================
 // STATE
@@ -102,6 +103,7 @@ async function renderPage(pageNumber) {
 
         textLayerDiv.style.width = `${viewport.width}px`;
         textLayerDiv.style.height = `${viewport.height}px`;
+        textLayerDiv.style.setProperty("--scale-factor", viewport.scale);
 
         const textContent = await page.getTextContent();
 
@@ -194,5 +196,27 @@ btnNextPage.addEventListener("click", () => changePage(1));
 btnZoomOut.addEventListener("click", () => changeZoom(scale - 0.2));
 btnZoomReset.addEventListener("click", () => changeZoom(1.2));
 btnZoomIn.addEventListener("click", () => changeZoom(scale + 0.2));
+
+let lastSelectionScrollLeft = 0;
+
+document.addEventListener("selectionchange", () => {
+    const selection = window.getSelection();
+
+    if (!selection || selection.isCollapsed) {
+        lastSelectionScrollLeft = canvasWrap.scrollLeft;
+        return;
+    }
+
+    // Mobile Browser springen bei Textauswahl teilweise
+    // automatisch zum Zeilenanfang zurück.
+    if (
+        lastSelectionScrollLeft > 20 &&
+        canvasWrap.scrollLeft < 10
+    ) {
+        canvasWrap.scrollLeft = lastSelectionScrollLeft;
+    } else {
+        lastSelectionScrollLeft = canvasWrap.scrollLeft;
+    }
+});
 
 initViewer();
