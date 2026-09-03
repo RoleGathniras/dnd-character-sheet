@@ -11,12 +11,20 @@
 <body>
     <main class="page page--playerRules">
         <section class="rulesCard ruleViewer">
+
             <div class="rulesCard__header">
+                <button class="ruleTopicButton" type="button" onclick="window.location.href='player_rules.html'">
+                    ← Zurück zur Übersicht
+                </button>
+
                 <h1 class="rulesCard__title" id="viewerTitle">Regelwerk</h1>
-                <p class="rulesCard__subtext" id="viewerStatus">PDF wird geladen ...</p>
+                <p class="rulesCard__subtext" id="viewerStatus">
+                    PDF wird geladen ...
+                </p>
             </div>
 
             <div class="ruleViewer__toolbar">
+                <!-- Rest bleibt unverändert -->
                 <button class="ruleEntryButton" id="btnPrevPage" type="button">← Vorherige Seite</button>
 
                 <div class="ruleViewer__pageInfo">
