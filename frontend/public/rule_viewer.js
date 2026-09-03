@@ -19,6 +19,7 @@ const btnZoomIn = document.getElementById("btnZoomIn");
 
 const canvas = document.getElementById("pdfCanvas");
 const ctx = canvas.getContext("2d");
+const textLayerDiv = document.getElementById("pdfTextLayer");
 
 // ============================================================
 // STATE
@@ -95,6 +96,22 @@ async function renderPage(pageNumber) {
         };
 
         await page.render(renderContext).promise;
+
+        // Text-Layer rendern
+        textLayerDiv.innerHTML = "";
+
+        textLayerDiv.style.width = `${viewport.width}px`;
+        textLayerDiv.style.height = `${viewport.height}px`;
+
+        const textContent = await page.getTextContent();
+
+        const textLayer = new pdfjsLib.TextLayer({
+            textContentSource: textContent,
+            container: textLayerDiv,
+            viewport
+        });
+
+        await textLayer.render();
 
         currentPage = pageNumber;
         updatePageIndicator();
