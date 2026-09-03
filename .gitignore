@@ -76,4 +76,6 @@ Thumbs.db
 *.tmp
 *.bak
 *.swp
-frontend/public/assets/pdf
+# Lokale DnD-Regelwerk-PDFs
+frontend/pdf/*
+!frontend/pdf/.gitkeep

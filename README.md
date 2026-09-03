@@ -34,8 +34,37 @@ SECRET_KEY=dein_langer_sicherer_key
 
 (Optional weitere Werte anpassen)
 
----
 
+### 3. Regelwerk-PDFs bereitstellen
+
+Die von der Anwendung verwendeten Regelwerk-PDFs sind **nicht Bestandteil des Git-Repositories** und müssen separat bereitgestellt werden.
+
+Kopiere die PDF-Dateien nach:
+
+```text
+frontend/pdf/
+```
+
+Beispiel:
+
+```text
+frontend/pdf/
+├── races.pdf
+├── classes.pdf
+├── fight.pdf
+├── gear.pdf
+└── ...
+```
+
+Docker bindet diesen Ordner beim Start automatisch read-only in den Webserver ein. Die Dateien sind innerhalb der Anwendung anschließend unter folgendem Pfad verfügbar:
+
+```text
+/assets/pdf/<dateiname>.pdf
+```
+
+Die Dateien in `frontend/pdf/` werden von Git ignoriert und bleiben dadurch auch bei späteren Updates per `git pull` lokal erhalten.
+
+---
 ## ▶️ Anwendung starten
 
 ```bash
