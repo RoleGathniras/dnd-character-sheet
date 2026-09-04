@@ -1,5 +1,6 @@
 import { API } from "./api.js";
 import { buildSheetNav } from "/nav.js";
+import { initCharacterStatusbar, loadCharacterStatusbar, } from "./character_statusbar.js";
 
 let currentCharacterId = Number(localStorage.getItem("dnd_current_character_id")) || null;
 let currentUser = null;
@@ -578,6 +579,20 @@ btnDelete?.addEventListener("click", async () => {
     const isCharacterPage = location.pathname.endsWith("/charakter.html");
     const isNotesPage = location.pathname.endsWith("/notes.html");
     const isAdminPage = location.pathname.endsWith("/admin.html");
+    const hasCharacterStatusbar =
+        isSpellPage ||
+        isInventoryPage ||
+        isCharacterPage ||
+        isNotesPage ||
+        isSheetPage;
+
+    if (hasCharacterStatusbar) {
+        initCharacterStatusbar();
+
+        if (currentCharacterId) {
+            loadCharacterStatusbar(currentCharacterId);
+        }
+    }
 
     if (isSpellPage || isInventoryPage || isCharacterPage || isNotesPage || isSheetPage || isAdminPage) {
         buildSheetNav({ navList, btnNavOpen, closeNavDrawer, sheetRootEl });

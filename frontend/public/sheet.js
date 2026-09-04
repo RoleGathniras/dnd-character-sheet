@@ -24,6 +24,25 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
 
     let currentCharacter = null;
     let currentCharacterUpdatedAt = null;
+    window.addEventListener("character:updated", (event) => {
+        const updatedCharacter =
+            event.detail?.character;
+
+        if (!updatedCharacter) return;
+
+        if (
+            Number(updatedCharacter.id) !==
+            Number(currentCharacter?.id)
+        ) {
+            return;
+        }
+
+        currentCharacter =
+            updatedCharacter;
+
+        currentCharacterUpdatedAt =
+            updatedCharacter.updated_at;
+    });
     let isDirty = false;
     let autosaveTimer = null;
     let isSaving = false;

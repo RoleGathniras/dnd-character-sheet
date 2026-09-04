@@ -82,11 +82,6 @@ export function jsonToSheet(data) {
     setInputValue(resolveField("level"), d.level);
     setInputValue(resolveField("inspiration"), d.inspiration);
 
-    setInputValue(resolveField("ac"), d.ac);
-    setInputValue(resolveField("initiative"), d.initiative);
-    setInputValue(resolveField("hp_current"), d.hp_current);
-    setInputValue(resolveField("hp_max"), d.hp_max);
-    setInputValue(resolveField("hp_temp"), d.hp_temp);
     setInputValue(resolveField("speed"), d.speed);
 
     setInputValue(resolveField("str"), d.str);
@@ -144,31 +139,8 @@ export function sheetToJson() {
     out.race = getInputValue(resolveField("race"));
     out.level = getInputValue(resolveField("level"));
     out.inspiration = !!resolveField("inspiration")?.checked;
-    out.ac = getInputValue(resolveField("ac"));
-    out.initiative = toIntOrNull(getInputValue(resolveField("initiative")));
     out.speed = getInputValue(resolveField("speed"));
 
-    // --- HP Normalisierung ---
-    const hpMaxRaw = toIntOrNull(getInputValue(resolveField("hp_max")));
-    const hpCurRaw = toIntOrNull(getInputValue(resolveField("hp_current")));
-    const hpTempRaw = toIntOrNull(getInputValue(resolveField("hp_temp")));
-
-    const hp_max = hpMaxRaw === null ? null : Math.max(0, hpMaxRaw);
-    let hp_current = hpCurRaw === null ? null : hpCurRaw;
-    const hp_temp = hpTempRaw === null ? null : Math.max(0, hpTempRaw);
-
-    // Current clampen
-    if (hp_current !== null) {
-        if (hp_max !== null) {
-            hp_current = clamp(hp_current, 0, hp_max);
-        } else {
-            hp_current = Math.max(0, hp_current);
-        }
-    }
-
-    out.hp_max = hp_max;
-    out.hp_current = hp_current;
-    out.hp_temp = hp_temp;
 
     out.str = getInputValue(resolveField("str"));
     out.dex = getInputValue(resolveField("dex"));
