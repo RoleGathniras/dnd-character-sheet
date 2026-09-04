@@ -11,7 +11,10 @@ router = APIRouter(prefix="/spells", tags=["spells"])
 @router.get("")
 def get_spells(level: int):
     with Session(engine) as session:
-        statement = select(Spell).where(Spell.level == level)
+        statement = (
+            select(Spell)
+            .where(Spell.level == level)
+            .order_by(Spell.name)
+        )
         spells = session.exec(statement).all()
-
         return spells

@@ -52,8 +52,8 @@ class Spell(SQLModel, table=True):
     level: int = Field(index=True, ge=0, le=9)
     school: str = Field(max_length=50)
 
-    time: str = Field(max_length=50)
-    range: str = Field(max_length=50)
+    time: str = Field(max_length=200)
+    range: str = Field(max_length=500)
 
     components: str = Field(max_length=50)
     material: str = Field(default="", max_length=300)
