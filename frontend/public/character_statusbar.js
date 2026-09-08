@@ -132,19 +132,86 @@ export function initCharacterStatusbar() {
                     type="button"
                     aria-expanded="false"
                 >
-                    <span class="characterStatusbar__label">
-                        Zustände
+                    <span>
+                        <span class="characterStatusbar__label">
+                            Zustände
+                        </span>
+
+                        <span
+                            id="statusbarConditionsCount"
+                            class="characterStatusbar__value"
+                        >
+                            Keine
+                        </span>
                     </span>
 
                     <span aria-hidden="true">▾</span>
                 </button>
 
-                <div
+               <div
                     id="statusbarConditionsPanel"
-                    class="characterStatusbar__panel"
+                    class="characterStatusbar__panel characterStatusbar__conditionsPanel"
                     hidden
                 >
-                    Noch keine Zustände
+                    <button type="button" class="characterStatusbar__condition" data-condition="blinded">
+                        Blind
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="charmed">
+                        Bezaubert
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="deafened">
+                        Taub
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="frightened">
+                        Verängstigt
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="grappled">
+                        Gepackt
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="incapacitated">
+                        Kampfunfähig
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="invisible">
+                        Unsichtbar
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="paralyzed">
+                        Gelähmt
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="petrified">
+                        Versteinert
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="poisoned">
+                        Vergiftet
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="prone">
+                        Liegend
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="restrained">
+                        Festgesetzt
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="stunned">
+                        Betäubt
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="unconscious">
+                        Bewusstlos
+                    </button>
+
+                    <button type="button" class="characterStatusbar__condition" data-condition="exhaustion">
+                        Erschöpfung
+                    </button>
                 </div>
             </div>
 
@@ -162,6 +229,8 @@ export function initCharacterStatusbar() {
         document.getElementById("btnStatusbarConditions"),
         document.getElementById("statusbarConditionsPanel")
     );
+    bindConditionButtons();
+
     bindDropdown(
         document.getElementById("btnStatusbarAc"),
         document.getElementById("statusbarAcPanel")
@@ -243,6 +312,23 @@ export async function loadCharacterStatusbar(characterId) {
         if (hpTempInput) {
             hpTempInput.value = hpTemp ?? 0;
         }
+        const conditions = Array.isArray(data.conditions)
+            ? data.conditions
+            : [];
+
+        const conditionButtons =
+            document.querySelectorAll(
+                ".characterStatusbar__condition"
+            );
+
+        for (const button of conditionButtons) {
+            button.classList.toggle(
+                "is-active",
+                conditions.includes(button.dataset.condition)
+            );
+        }
+
+        renderConditionsState();
 
         bindHpInputs();
         bindAcInput();
@@ -271,6 +357,103 @@ function bindDropdown(button, panel) {
 
         panel.hidden = isOpen;
     });
+}
+
+function bindConditionButtons() {
+    const buttons = document.querySelectorAll(
+        ".characterStatusbar__condition"
+    );
+
+    for (const button of buttons) {
+        if (button.dataset.bound === "1") continue;
+
+        button.dataset.bound = "1";
+
+        button.addEventListener("click", async () => {
+            button.classList.toggle("is-active");
+            renderConditionsState();
+
+            await saveConditions();
+        });
+    }
+}
+
+function renderConditionsState() {
+    const conditionButtons = document.querySelectorAll(
+        ".characterStatusbar__condition"
+    );
+
+    const activeConditions = Array.from(
+        conditionButtons
+    ).filter((button) =>
+        button.classList.contains("is-active")
+    );
+
+    const conditionsButton =
+        document.getElementById("btnStatusbarConditions");
+
+    const conditionsCount =
+        document.getElementById("statusbarConditionsCount");
+
+    const hasConditions = activeConditions.length > 0;
+
+    conditionsButton?.classList.toggle(
+        "has-active-condition",
+        hasConditions
+    );
+
+    if (conditionsCount) {
+        conditionsCount.textContent =
+            hasConditions
+                ? `${activeConditions.length} aktiv`
+                : "Keine";
+    }
+}
+async function saveConditions() {
+    if (!currentStatusbarCharacter) return;
+
+    const activeConditions = Array.from(
+        document.querySelectorAll(
+            ".characterStatusbar__condition.is-active"
+        )
+    ).map((button) => button.dataset.condition);
+
+    try {
+        const latestCharacter =
+            await API.getCharacter(
+                currentStatusbarCharacter.id
+            );
+
+        const newData = {
+            ...(latestCharacter.data ?? {}),
+            conditions: activeConditions,
+        };
+
+        const updatedCharacter =
+            await API.patchCharacter(
+                latestCharacter.id,
+                {
+                    data: newData,
+                    updated_at: latestCharacter.updated_at,
+                }
+            );
+
+        currentStatusbarCharacter = updatedCharacter;
+
+        window.dispatchEvent(
+            new CustomEvent("character:updated", {
+                detail: {
+                    character: updatedCharacter,
+                },
+            })
+        );
+
+    } catch (error) {
+        console.error(
+            "[character_statusbar] Zustände konnten nicht gespeichert werden",
+            error
+        );
+    }
 }
 
 

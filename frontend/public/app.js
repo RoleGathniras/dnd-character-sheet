@@ -49,11 +49,15 @@ const navBackdrop = document.getElementById("navBackdrop");
 const btnNavOpen = document.getElementById("btnNavOpen");
 const btnNavClose = document.getElementById("btnNavClose");
 const navList = document.getElementById("navList");
+const btnCharacterLevel = document.getElementById("btnCharacterLevel");
+const btnCharacterInfo = document.getElementById("btnCharacterInfo");
 
 const currentCharacterAvatar = document.getElementById("currentCharacterAvatar");
 const currentCharacterAvatarImg = document.getElementById("currentCharacterAvatarImg");
 const currentCharacterAvatarFallback = document.getElementById("currentCharacterAvatarFallback");
-
+const topbarCharacterName = document.getElementById("topbarCharacterName");
+const topbarCharacterMeta = document.getElementById("topbarCharacterMeta");
+const topbarCharacterLevel = document.getElementById("topbarCharacterLevel");
 // ============================================================
 // EXPORTS
 // ============================================================
@@ -207,6 +211,13 @@ export async function loadCharacters() {
 
     const chars = await API.characters();
 
+    const currentCharacter = chars.find(
+        (character) =>
+            Number(character.id) === Number(currentCharacterId)
+    );
+
+    renderTopbarCharacterAvatar(currentCharacter ?? null);
+
     for (const c of chars) {
         const b = document.createElement("button");
         b.className = "drawer__item";
@@ -277,7 +288,11 @@ export function getCharacterImageCrop(character) {
 }
 
 export function renderTopbarCharacterAvatar(character) {
-    if (!currentCharacterAvatar || !currentCharacterAvatarImg || !currentCharacterAvatarFallback) {
+    if (
+        !currentCharacterAvatar ||
+        !currentCharacterAvatarImg ||
+        !currentCharacterAvatarFallback
+    ) {
         return;
     }
 
@@ -286,25 +301,66 @@ export function renderTopbarCharacterAvatar(character) {
     if (!character) {
         currentCharacterAvatarImg.removeAttribute("src");
         currentCharacterAvatarImg.hidden = true;
+
         currentCharacterAvatarFallback.hidden = false;
         currentCharacterAvatarFallback.textContent = "?";
+
+        if (topbarCharacterName) {
+            topbarCharacterName.textContent = "Kein Charakter";
+        }
+
+        if (topbarCharacterMeta) {
+            topbarCharacterMeta.textContent = "—";
+        }
+        if (topbarCharacterLevel) {
+            topbarCharacterLevel.textContent = "—";
+        }
+
         return;
     }
 
+    const data = character.data ?? {};
+
     const imageDataUrl = getCharacterImageDataUrl(character);
     const crop = getCharacterImageCrop(character);
-    const name = String(character?.name || "Charakter").trim();
+
+    const name = String(character.name || "Charakter").trim();
     const fallbackLetter = name ? name.charAt(0).toUpperCase() : "?";
+
+    const race = String(data.race ?? "").trim();
+    const characterClass = String(data.class ?? "").trim();
+    const level = String(data.level ?? "").trim();
+
+    if (topbarCharacterName) {
+        topbarCharacterName.textContent = name;
+    }
+
+    if (topbarCharacterMeta) {
+        const metaParts = [];
+
+        if (race) metaParts.push(race);
+        if (characterClass) metaParts.push(characterClass);
+
+        topbarCharacterMeta.textContent =
+            metaParts.length > 0
+                ? metaParts.join(" · ")
+                : "—";
+    }
+    if (topbarCharacterLevel) {
+        topbarCharacterLevel.textContent = level || "—";
+    }
 
     if (imageDataUrl) {
         currentCharacterAvatarImg.src = imageDataUrl;
         currentCharacterAvatarImg.alt = name;
         currentCharacterAvatarImg.style.objectPosition = `${crop.x}% ${crop.y}%`;
+
         currentCharacterAvatarImg.hidden = false;
         currentCharacterAvatarFallback.hidden = true;
     } else {
         currentCharacterAvatarImg.removeAttribute("src");
         currentCharacterAvatarImg.hidden = true;
+
         currentCharacterAvatarFallback.hidden = false;
         currentCharacterAvatarFallback.textContent = fallbackLetter;
     }
@@ -319,6 +375,162 @@ export function bindTopbarAvatarNavigation() {
 
     currentCharacterAvatar.addEventListener("click", () => {
         window.location.href = "/index.html";
+    });
+}
+export function bindTopbarLevelEditing() {
+    if (!btnCharacterLevel) return;
+    if (btnCharacterLevel.dataset.bound === "1") return;
+
+    btnCharacterLevel.dataset.bound = "1";
+
+    btnCharacterLevel.addEventListener("click", async () => {
+        const currentCharacterId =
+            Number(localStorage.getItem("dnd_current_character_id")) || null;
+
+        if (!currentCharacterId) return;
+
+        try {
+            const latestCharacter =
+                await API.getCharacter(currentCharacterId);
+
+            const currentLevel =
+                Number(latestCharacter.data?.level ?? 1);
+
+            const input = window.prompt(
+                "Neue Stufe (1–20):",
+                String(currentLevel)
+            );
+
+            if (input === null) return;
+
+            const level = Number(input);
+
+            if (
+                !Number.isInteger(level) ||
+                level < 1 ||
+                level > 20
+            ) {
+                alert("Die Stufe muss zwischen 1 und 20 liegen.");
+                return;
+            }
+
+            const newData = {
+                ...(latestCharacter.data ?? {}),
+                level,
+            };
+
+            const updatedCharacter =
+                await API.patchCharacter(
+                    latestCharacter.id,
+                    {
+                        data: newData,
+                        updated_at: latestCharacter.updated_at,
+                    }
+                );
+
+            renderTopbarCharacterAvatar(updatedCharacter);
+
+            window.dispatchEvent(
+                new CustomEvent("character:updated", {
+                    detail: {
+                        character: updatedCharacter,
+                    },
+                })
+            );
+        } catch (error) {
+            console.error(
+                "Stufe konnte nicht gespeichert werden:",
+                error
+            );
+        }
+    });
+}
+export function bindTopbarCharacterInfoEditing() {
+    if (!btnCharacterInfo) return;
+    if (btnCharacterInfo.dataset.bound === "1") return;
+
+    btnCharacterInfo.dataset.bound = "1";
+
+    btnCharacterInfo.addEventListener("click", async () => {
+        const currentCharacterId =
+            Number(localStorage.getItem("dnd_current_character_id")) || null;
+
+        if (!currentCharacterId) return;
+
+        try {
+            const latestCharacter =
+                await API.getCharacter(currentCharacterId);
+
+            const currentName =
+                String(latestCharacter.name ?? "").trim();
+
+            const currentRace =
+                String(latestCharacter.data?.race ?? "").trim();
+
+            const currentClass =
+                String(latestCharacter.data?.class ?? "").trim();
+
+            const newName = window.prompt(
+                "Charaktername:",
+                currentName
+            );
+
+            if (newName === null) return;
+
+            const newRace = window.prompt(
+                "Volk:",
+                currentRace
+            );
+
+            if (newRace === null) return;
+
+            const newClass = window.prompt(
+                "Klasse:",
+                currentClass
+            );
+
+            if (newClass === null) return;
+
+            const name = newName.trim();
+            const race = newRace.trim();
+            const characterClass = newClass.trim();
+
+            if (!name || !race || !characterClass) {
+                alert("Name, Volk und Klasse dürfen nicht leer sein.");
+                return;
+            }
+
+            const newData = {
+                ...(latestCharacter.data ?? {}),
+                race,
+                class: characterClass,
+            };
+
+            const updatedCharacter =
+                await API.patchCharacter(
+                    latestCharacter.id,
+                    {
+                        name,
+                        data: newData,
+                        updated_at: latestCharacter.updated_at,
+                    }
+                );
+
+            renderTopbarCharacterAvatar(updatedCharacter);
+
+            window.dispatchEvent(
+                new CustomEvent("character:updated", {
+                    detail: {
+                        character: updatedCharacter,
+                    },
+                })
+            );
+        } catch (error) {
+            console.error(
+                "Charakterdaten konnten nicht gespeichert werden:",
+                error
+            );
+        }
     });
 }
 
@@ -424,25 +636,51 @@ function scrollToHashWithRetry(tries = 20) {
 // ============================================================
 
 async function handleCreate(kind) {
-    const name = prompt(kind === "npc" ? "Name des NPC:" : "Name des Charakters:");
-    if (!name) return;
+    const name = prompt(
+        kind === "npc"
+            ? "Name des NPC:"
+            : "Name des Charakters:"
+    );
+
+    if (!name?.trim()) return;
+
+    const data = {
+        schema_version: 1,
+    };
+
+    if (kind !== "npc") {
+        const race = prompt("Volk:");
+        if (!race?.trim()) return;
+
+        const characterClass = prompt("Klasse:");
+        if (!characterClass?.trim()) return;
+
+        data.race = race.trim();
+        data.class = characterClass.trim();
+        data.level = 1;
+    }
 
     const payload = {
         name: name.trim(),
         kind,
-        data: { schema_version: 1 },
+        data,
     };
 
     try {
         const created = await API.createCharacter(payload);
+
         setCurrentCharacter(created.id);
         await loadCharacters();
 
-        const onSheet = location.pathname.endsWith("/sheet.html");
+        const onSheet =
+            location.pathname.endsWith("/sheet.html");
+
         if (onSheet) {
             window.dispatchEvent(
                 new CustomEvent("character:selected", {
-                    detail: { id: created.id },
+                    detail: {
+                        id: created.id,
+                    },
                 })
             );
         } else {
@@ -455,8 +693,13 @@ async function handleCreate(kind) {
             alert("Nur DM/Admin darf NPCs anlegen.");
             return;
         }
+
         console.error(err);
-        alert(err?.message || "Du kannst max. 10 Charaktere erstellen.");
+
+        alert(
+            err?.message ||
+            "Du kannst max. 10 Charaktere erstellen."
+        );
     }
 }
 
@@ -573,18 +816,24 @@ btnDelete?.addEventListener("click", async () => {
 
 (function startup() {
     bindTopbarAvatarNavigation();
+    bindTopbarLevelEditing();
+    bindTopbarCharacterInfoEditing();
 
     const isSpellPage = location.pathname.endsWith("/spell.html");
     const isInventoryPage = location.pathname.endsWith("/inventory.html");
     const isCharacterPage = location.pathname.endsWith("/charakter.html");
     const isNotesPage = location.pathname.endsWith("/notes.html");
     const isAdminPage = location.pathname.endsWith("/admin.html");
+    const isSkillsPage = location.pathname.endsWith("/skills.html");
+    const isActionsPage = location.pathname.endsWith("/actions.html");
     const hasCharacterStatusbar =
         isSpellPage ||
         isInventoryPage ||
         isCharacterPage ||
         isNotesPage ||
-        isSheetPage;
+        isSheetPage ||
+        isSkillsPage ||
+        isActionsPage;
 
     if (hasCharacterStatusbar) {
         initCharacterStatusbar();
@@ -594,20 +843,40 @@ btnDelete?.addEventListener("click", async () => {
         }
     }
 
-    if (isSpellPage || isInventoryPage || isCharacterPage || isNotesPage || isSheetPage || isAdminPage) {
-        buildSheetNav({ navList, btnNavOpen, closeNavDrawer, sheetRootEl });
+    if (
+        isSpellPage ||
+        isInventoryPage ||
+        isCharacterPage ||
+        isNotesPage ||
+        isSkillsPage ||
+        isActionsPage ||
+        isSheetPage ||
+        isAdminPage
+    ) {
+        buildSheetNav({
+            navList,
+            btnNavOpen,
+            closeNavDrawer,
+            sheetRootEl,
+        });
+
         scrollToHashWithRetry();
-    }
 
-    if (isIndexPage) {
-        setLoggedInUI(!!API.token);
-        renderDrawerTitle();
-        updateDrawerActions();
-        return;
-    }
+        if (isIndexPage) {
+            setLoggedInUI(!!API.token);
+            renderDrawerTitle();
+            updateDrawerActions();
+            return;
+        }
 
-    if (!isSheetPage) {
-        setLoggedInUI(!!API.token);
-        updateDrawerActions();
+        if (!isSheetPage) {
+            setLoggedInUI(!!API.token);
+            updateDrawerActions();
+            if (API.token) {
+                loadCharacters().catch((error) => {
+                    console.error("Charaktere konnten nicht geladen werden:", error);
+                });
+            }
+        }
     }
 })();

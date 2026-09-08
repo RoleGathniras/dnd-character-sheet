@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>D&D 5E – Fertigkeiten</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="app">
+    <!-- Topbar -->
+    <header class="appbar">
+        <div class="appbar__character">
+            <button id="btnMenu" class="appbar__drawerToggle" type="button" aria-label="Charaktere öffnen"
+                title="Charaktere">
+                ‹
+            </button>
+
+            <button id="btnCharacterInfo" class="appbar__characterInfo" type="button"
+                aria-label="Charakterdaten bearbeiten">
+                <span id="topbarCharacterName" class="appbar__characterName">
+                    Kein Charakter
+                </span>
+
+                <span id="topbarCharacterMeta" class="appbar__characterMeta">
+                    —
+                </span>
+            </button>
+
+            <button id="btnCharacterLevel" class="appbar__levelButton" type="button" aria-label="Stufe ändern"
+                title="Stufe ändern">
+                <span class="appbar__levelLabel">Stufe</span>
+                <span id="topbarCharacterLevel" class="appbar__levelValue">—</span>
+            </button>
+        </div>
+
+        <div id="currentCharacterAvatar" class="topbarCharacterAvatar" hidden
+            aria-label="Aktuell ausgewählter Charakter" title="Zur Übersicht">
+            <img id="currentCharacterAvatarImg" class="topbarCharacterAvatar__img" alt="Charakterbild" hidden />
+
+            <div id="currentCharacterAvatarFallback" class="topbarCharacterAvatar__fallback">
+                ?
+            </div>
+        </div>
+
+        <button id="btnNavOpen" class="appbar__navButton" type="button" aria-label="Navigation öffnen"
+            title="Navigation">
+            ☰
+        </button>
+    </header>
+
+    <!-- Drawer -->
+    <div id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <strong id="drawerUserTitle">Charaktere</strong>
+            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+        </div>
+
+        <div class="drawer__content">
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
+                    Charaktere
+                </button>
+
+                <div id="listMine" class="drawer__list">
+                    <button class="drawer__item" disabled>
+                        (noch keine Daten)
+                    </button>
+                </div>
+            </div>
+
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
+                    NPCs
+                </button>
+
+                <div id="listNpcs" class="drawer__list" hidden>
+                    <button class="drawer__item" disabled>
+                        (noch keine Daten)
+                    </button>
+                </div>
+            </div>
+
+            <button id="btnPlayerRules" class="drawer__item" type="button">
+                Spielerhandbuch
+            </button>
+
+            <div class="drawer__footer">
+                <button id="btnLogout" class="drawer__item" type="button">
+                    Abmelden
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="page page--skills"></main>
+    <section id="sec-skills" class="skills" data-nav-label="Fertigkeiten" tabindex="-1">
+        <h3>Fertigkeiten</h3>
+
+        <div class="skillGroup">
+            <div class="skillGroupTitle">Stärke</div>
+            <div class="skillRow">
+                <input id="skill_athletics_prof" type="checkbox" />
+                <div class="skillName">Athletik</div>
+                <input id="skill_athletics" type="number" readonly />
+            </div>
+        </div>
+
+        <div class="skillGroup">
+            <div class="skillGroupTitle">Geschicklichkeit</div>
+            <div class="skillRow">
+                <input id="skill_acrobatics_prof" type="checkbox" />
+                <div class="skillName">Akrobatik</div>
+                <input id="skill_acrobatics" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_sleight_of_hand_prof" type="checkbox" />
+                <div class="skillName">Fingerfertigkeit</div>
+                <input id="skill_sleight_of_hand" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_stealth_prof" type="checkbox" />
+                <div class="skillName">Heimlichkeit</div>
+                <input id="skill_stealth" type="number" readonly />
+            </div>
+        </div>
+
+        <div class="skillGroup">
+            <div class="skillGroupTitle">Intelligenz</div>
+            <div class="skillRow">
+                <input id="skill_arcana_prof" type="checkbox" />
+                <div class="skillName">Arkane Kunde</div>
+                <input id="skill_arcana" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_history_prof" type="checkbox" />
+                <div class="skillName">Geschichte</div>
+                <input id="skill_history" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_investigation_prof" type="checkbox" />
+                <div class="skillName">Nachforschungen</div>
+                <input id="skill_investigation" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_nature_prof" type="checkbox" />
+                <div class="skillName">Natur</div>
+                <input id="skill_nature" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_religion_prof" type="checkbox" />
+                <div class="skillName">Religion</div>
+                <input id="skill_religion" type="number" readonly />
+            </div>
+        </div>
+
+        <div class="skillGroup">
+            <div class="skillGroupTitle">Weisheit</div>
+            <div class="skillRow">
+                <input id="skill_animal_handling_prof" type="checkbox" />
+                <div class="skillName">Mit Tieren umgehen</div>
+                <input id="skill_animal_handling" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_insight_prof" type="checkbox" />
+                <div class="skillName">Motiv erkennen</div>
+                <input id="skill_insight" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_medicine_prof" type="checkbox" />
+                <div class="skillName">Heilkunde</div>
+                <input id="skill_medicine" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_perception_prof" type="checkbox" />
+                <div class="skillName">Wahrnehmung</div>
+                <input id="skill_perception" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_survival_prof" type="checkbox" />
+                <div class="skillName">Überlebenskunst</div>
+                <input id="skill_survival" type="number" readonly />
+            </div>
+        </div>
+
+        <div class="skillGroup">
+            <div class="skillGroupTitle">Charisma</div>
+            <div class="skillRow">
+                <input id="skill_deception_prof" type="checkbox" />
+                <div class="skillName">Täuschung</div>
+                <input id="skill_deception" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_intimidation_prof" type="checkbox" />
+                <div class="skillName">Einschüchtern</div>
+                <input id="skill_intimidation" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_performance_prof" type="checkbox" />
+                <div class="skillName">Auftreten</div>
+                <input id="skill_performance" type="number" readonly />
+            </div>
+            <div class="skillRow">
+                <input id="skill_persuasion_prof" type="checkbox" />
+                <div class="skillName">Überreden</div>
+                <input id="skill_persuasion" type="number" readonly />
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <!-- Navigation Drawer -->
+    <div id="navBackdrop" class="backdrop" hidden></div>
+
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>Navigation</strong>
+            <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
+        </div>
+        <div id="navList" class="drawer__content">
+            <!-- Items kommen per JS -->
+        </div>
+    </aside>
+    <script type="module" src="/app.js"></script>
+    <script type="module" src="/skills.js"></script>
+</body>
+
+</html>

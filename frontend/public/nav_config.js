@@ -6,11 +6,26 @@ export const NAV = [
     sections: [
       ["sec-values", "Werte"],
       ["sec-abilities", "Attribute"],
-      ["sec-skills", "Fertigkeiten"],
       ["sec-saves", "Rettungswürfe"],
       ["sec-passives", "Passive Werte"],
       ["sec-deathsaves", "Deathsaves"],
-      ["sec-combat", "Kampf"],
+    ],
+  },
+  {
+    key: "skills",
+    title: "Fertigkeiten",
+    href: "/skills.html",
+    sections: [
+      ["sec-skills", "Fertigkeiten"],
+    ],
+  },
+  {
+    key: "actions",
+    title: "Aktionen",
+    href: "/actions.html",
+    sections: [
+      ["sec-attacks", "Angriffe"],
+      ["sec-actions", "Aktionen"],
     ],
   },
   {

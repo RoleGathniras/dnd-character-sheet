@@ -25,65 +25,11 @@ function resolveField(key) {
     return byId(key) || qs(`[name="${key}"]`) || qs(`[data-field="${key}"]`);
 }
 
-function readNumber(id, fallback = 0) {
-    const el = document.getElementById(id);
-    if (!el) return fallback;
-    const raw = String(el.value ?? "").trim().replace(",", ".");
-    if (raw === "") return fallback;
-    const v = Number(raw);
-    return Number.isFinite(v) ? v : fallback;
-}
-
-function readCheckbox(id) {
-    const el = document.getElementById(id);
-    return !!el && !!el.checked;
-}
-
-function writeValue(id, value) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.value = value ?? "";
-}
-
-function writeCheckbox(id, value) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.checked = !!value;
-}
-
-function setCheckboxValue(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.checked = !!value;
-}
-
-function toIntOrNull(v) {
-    if (v === null || v === undefined) return null;
-    const s = String(v).trim();
-    if (s === "") return null;
-    const n = Number(s);
-    if (!Number.isFinite(n)) return null;
-    return Math.trunc(n);
-}
-
-function clamp(n, min, max) {
-    return Math.min(max, Math.max(min, n));
-}
-
 export function jsonToSheet(data) {
     const d = data || {};
 
-    console.log("=== jsonToSheet DEBUG ===");
-    console.log("PB from JSON:", d.proficiency_bonus);
-    console.log("PB field resolve:", resolveField("proficiency_bonus"));
-
-    setInputValue(resolveField("character_name"), d.character_name);
-    setInputValue(resolveField("class"), d.class);
-    setInputValue(resolveField("race"), d.race);
-    setInputValue(resolveField("level"), d.level);
     setInputValue(resolveField("inspiration"), d.inspiration);
-
     setInputValue(resolveField("speed"), d.speed);
-
     setInputValue(resolveField("str"), d.str);
     setInputValue(resolveField("dex"), d.dex);
     setInputValue(resolveField("con"), d.con);
@@ -99,13 +45,6 @@ export function jsonToSheet(data) {
         setInputValue(resolveField(`save_${a}_prof`), d[`save_${a}_prof`]);
     });
 
-    // Skill-Proficiencies (alle Checkboxen automatisch setzen)
-    document
-        .querySelectorAll('input[type="checkbox"][id^="skill_"][id$="_prof"]')
-        .forEach((el) => {
-            // JSON keys sind exakt die IDs (z.B. "skill_stealth_prof")
-            el.checked = Boolean(d?.[el.id]);
-        });
     // ===== Combat: Death Saves =====
     for (let i = 1; i <= 3; i++) {
         const sId = `death_success_${i}`;
@@ -118,26 +57,10 @@ export function jsonToSheet(data) {
         if (fEl) fEl.checked = Boolean(d?.[fId]);
     }
 
-    // ===== Combat: Angriffe=====
-    for (let i = 1; i <= 5; i++) {
-        setInputValue(resolveField(`attack_${i}_type`), d?.[`attack_${i}_type`] ?? "");
-        setInputValue(resolveField(`attack_${i}_abil`), d?.[`attack_${i}_abil`] ?? "");
-        setInputValue(resolveField(`attack_${i}_range`), d?.[`attack_${i}_range`] ?? "");
-        setInputValue(resolveField(`attack_${i}_bonus`), d?.[`attack_${i}_bonus`] ?? "");
-        setInputValue(resolveField(`attack_${i}_damage`), d?.[`attack_${i}_damage`] ?? "");
-
-        const pEl = document.getElementById(`attack_${i}_prof`);
-        if (pEl) pEl.checked = Boolean(d?.[`attack_${i}_prof`]);
-    }
 }
 
 export function sheetToJson() {
     const out = {};
-    console.log("sheetToJson() VERSION: PB PATCH ACTIVE ✅");
-    out.character_name = getInputValue(resolveField("character_name"));
-    out.class = getInputValue(resolveField("class"));
-    out.race = getInputValue(resolveField("race"));
-    out.level = getInputValue(resolveField("level"));
     out.inspiration = !!resolveField("inspiration")?.checked;
     out.speed = getInputValue(resolveField("speed"));
 
@@ -151,22 +74,6 @@ export function sheetToJson() {
 
     out.proficiency_bonus = Number(getInputValue(resolveField("proficiency_bonus")) || 0);
 
-    // Übungsbonus
-    console.log("PB el:", resolveField("proficiency_bonus"));
-    console.log("PB raw:", resolveField("proficiency_bonus")?.value);
-
-    // Skill-Proficiencies (alle Checkboxen automatisch persistieren)
-    document
-        .querySelectorAll('input[type="checkbox"][id^="skill_"][id$="_prof"]')
-        .forEach((el) => {
-            out[el.id] = el.checked;
-        });
-
-    console.log("=== sheetToJson DEBUG ===");
-    console.log("PB field:", resolveField("proficiency_bonus"));
-    console.log("PB raw value:", resolveField("proficiency_bonus")?.value);
-    console.log("PB in out:", out.proficiency_bonus);
-
     out.notes_adv_dis = getInputValue(resolveField("notes_adv_dis"));
 
     ["str", "dex", "con", "int", "wis", "cha"].forEach(a => {
@@ -176,19 +83,6 @@ export function sheetToJson() {
     for (let i = 1; i <= 3; i++) {
         out[`death_success_${i}`] = !!document.getElementById(`death_success_${i}`)?.checked;
         out[`death_fail_${i}`] = !!document.getElementById(`death_fail_${i}`)?.checked;
-    }
-
-    // ===== Combat: Angriffe=====
-    for (let i = 1; i <= 5; i++) {
-        out[`attack_${i}_type`] = getInputValue(resolveField(`attack_${i}_type`)) ?? "";
-        out[`attack_${i}_abil`] = getInputValue(resolveField(`attack_${i}_abil`)) ?? "";
-        out[`attack_${i}_range`] = getInputValue(resolveField(`attack_${i}_range`)) ?? "";
-        out[`attack_${i}_damage`] = getInputValue(resolveField(`attack_${i}_damage`)) ?? "";
-
-        out[`attack_${i}_misc`] = Number(getInputValue(resolveField(`attack_${i}_misc`)) || 0);
-        out[`attack_${i}_prof`] = !!document.getElementById(`attack_${i}_prof`)?.checked;
-
-        // attack_${i}_bonus NICHT persistieren (derived)
     }
     return out;
 }

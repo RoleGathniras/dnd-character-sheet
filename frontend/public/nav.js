@@ -98,6 +98,9 @@ export function buildSheetNav({
             } else if (groupCfg.key === "notes") {
                 scope = document.querySelector("main.page--notes") ?? document;
             }
+            else if (groupCfg.key === "skills") {
+                scope = document.querySelector("main.page--skills") ?? document;
+            }
 
 
             const domSections = collectSections(scope);

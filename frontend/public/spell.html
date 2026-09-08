@@ -11,26 +11,52 @@
 <body class="app">
     <!-- Topbar -->
     <header class="appbar">
+        <div class="appbar__character">
+            <button id="btnMenu" class="appbar__drawerToggle" type="button" aria-label="Charaktere öffnen"
+                title="Charaktere">
+                ‹
+            </button>
+
+            <button id="btnCharacterInfo" class="appbar__characterInfo" type="button"
+                aria-label="Charakterdaten bearbeiten">
+                <span id="topbarCharacterName" class="appbar__characterName">
+                    Kein Charakter
+                </span>
+
+                <span id="topbarCharacterMeta" class="appbar__characterMeta">
+                    —
+                </span>
+            </button>
+
+            <button id="btnCharacterLevel" class="appbar__levelButton" type="button" aria-label="Stufe ändern"
+                title="Stufe ändern">
+                <span class="appbar__levelLabel">Stufe</span>
+                <span id="topbarCharacterLevel" class="appbar__levelValue">—</span>
+            </button>
+        </div>
+
         <div id="currentCharacterAvatar" class="topbarCharacterAvatar" hidden
             aria-label="Aktuell ausgewählter Charakter" title="Zur Übersicht">
             <img id="currentCharacterAvatarImg" class="topbarCharacterAvatar__img" alt="Charakterbild" hidden />
-            <div id="currentCharacterAvatarFallback" class="topbarCharacterAvatar__fallback">?</div>
-        </div>
-        <div class="appbar__left">
-            <button id="btnMenu" class="btn" aria-label="Menü">Charaktere</button>
+
+            <div id="currentCharacterAvatarFallback" class="topbarCharacterAvatar__fallback">
+                ?
+            </div>
         </div>
 
-        <div class="appbar__right">
-            <button id="btnNavOpen" class="btn" aria-label="Charakterbeschreibung Navigation">Navigation</button>
-            <button id="btnLogout" class="btn" style="display:none">Logout</button>
-        </div>
+        <button id="btnNavOpen" class="appbar__navButton" type="button" aria-label="Navigation öffnen"
+            title="Navigation">
+            ☰
+        </button>
     </header>
 
     <!-- Drawer -->
     <div id="drawer" class="drawer" aria-hidden="true">
         <div class="drawer__header">
             <strong id="drawerUserTitle">Charaktere</strong>
-            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
+            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">
+                ✕
+            </button>
         </div>
 
         <div class="drawer__content">
@@ -38,8 +64,11 @@
                 <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
                     Charaktere
                 </button>
+
                 <div id="listMine" class="drawer__list">
-                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                    <button class="drawer__item" disabled>
+                        (noch keine Daten)
+                    </button>
                 </div>
             </div>
 
@@ -47,8 +76,11 @@
                 <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
                     NPCs
                 </button>
+
                 <div id="listNpcs" class="drawer__list" hidden>
-                    <button class="drawer__item" disabled>(noch keine Daten)</button>
+                    <button class="drawer__item" disabled>
+                        (noch keine Daten)
+                    </button>
                 </div>
             </div>
 
@@ -58,22 +90,40 @@
                 </button>
 
                 <div id="actionsMenu" class="actionsMenu drawer__list" hidden>
-                    <button id="btnCreatePC" class="btn drawer__item" disabled hidden>Neuer Charakter</button>
-                    <button id="btnCreateNPC" class="btn drawer__item" disabled hidden>Neuer NPC</button>
-                    <button id="btnSave" class="btn btn--primary drawer__item" disabled hidden>Speichern</button>
-                    <button id="btnDelete" class="btn btn--danger drawer__item" disabled hidden>Charakter
-                        löschen</button>
+                    <button id="btnCreatePC" class="btn drawer__item" disabled hidden>
+                        Neuer Charakter
+                    </button>
+
+                    <button id="btnCreateNPC" class="btn drawer__item" disabled hidden>
+                        Neuer NPC
+                    </button>
+
+                    <button id="btnSave" class="btn btn--primary drawer__item" disabled hidden>
+                        Speichern
+                    </button>
+
+                    <button id="btnDelete" class="btn btn--danger drawer__item" disabled hidden>
+                        Charakter löschen
+                    </button>
                 </div>
             </div>
+
             <button id="btnPlayerRules" class="drawer__item" type="button">
                 Spielerhandbuch
             </button>
-            <button id="btnAdmin" class="btn drawer__item" hidden>Admin</button>
+
+            <button id="btnAdmin" class="btn drawer__item" hidden>
+                Admin
+            </button>
+
+            <div class="drawer__footer">
+                <button id="btnLogout" class="drawer__item" type="button">
+                    Abmelden
+                </button>
+            </div>
         </div>
     </div>
-
     <div id="backdrop" class="backdrop" hidden></div>
-
     <main class="page page--spells">
         <!-- Zauberangriffe -->
         <section id="sec-spell-attacks" data-nav-label="Zauberangriffe">

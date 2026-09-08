@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>D&D 5E – Aktionen</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="app">
+
+    <!-- Topbar -->
+    <header class="appbar">
+        <div class="appbar__character">
+            <button id="btnMenu" class="appbar__drawerToggle" type="button" aria-label="Charaktere öffnen"
+                title="Charaktere">
+                ‹
+            </button>
+
+            <button id="btnCharacterInfo" class="appbar__characterInfo" type="button"
+                aria-label="Charakterdaten bearbeiten">
+                <span id="topbarCharacterName" class="appbar__characterName">
+                    Kein Charakter
+                </span>
+
+                <span id="topbarCharacterMeta" class="appbar__characterMeta">
+                    —
+                </span>
+            </button>
+
+            <button id="btnCharacterLevel" class="appbar__levelButton" type="button" aria-label="Stufe ändern"
+                title="Stufe ändern">
+                <span class="appbar__levelLabel">Stufe</span>
+                <span id="topbarCharacterLevel" class="appbar__levelValue">
+                    —
+                </span>
+            </button>
+        </div>
+
+        <div id="currentCharacterAvatar" class="topbarCharacterAvatar" hidden
+            aria-label="Aktuell ausgewählter Charakter" title="Zur Übersicht">
+            <img id="currentCharacterAvatarImg" class="topbarCharacterAvatar__img" alt="Charakterbild" hidden />
+
+            <div id="currentCharacterAvatarFallback" class="topbarCharacterAvatar__fallback">
+                ?
+            </div>
+        </div>
+
+        <button id="btnNavOpen" class="appbar__navButton" type="button" aria-label="Navigation öffnen"
+            title="Navigation">
+            ☰
+        </button>
+    </header>
+
+    <!-- Charakter Drawer -->
+    <div id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <strong id="drawerUserTitle">Charaktere</strong>
+
+            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">
+                ✕
+            </button>
+        </div>
+
+        <div class="drawer__content">
+
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
+                    Charaktere
+                </button>
+
+                <div id="listMine" class="drawer__list">
+                    <button class="drawer__item" disabled>
+                        (noch keine Daten)
+                    </button>
+                </div>
+            </div>
+
+            <div class="drawer__section">
+                <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
+                    NPCs
+                </button>
+
+                <div id="listNpcs" class="drawer__list" hidden>
+                    <button class="drawer__item" disabled>
+                        (noch keine Daten)
+                    </button>
+                </div>
+            </div>
+
+            <button id="btnPlayerRules" class="drawer__item" type="button">
+                Spielerhandbuch
+            </button>
+
+            <div class="drawer__footer">
+                <button id="btnLogout" class="drawer__item" type="button">
+                    Abmelden
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="backdrop" class="backdrop" hidden></div>
+
+    <!-- Inhalt -->
+    <main class="page page--actions">
+
+        <!-- Angriffe -->
+        <section id="sec-attacks" class="combatCard" data-nav-label="Angriffe" tabindex="-1">
+            <h3>Angriffe</h3>
+
+            <div class="attacksRow attacksRowGrid">
+                <input id="attack_1_type" maxlength="50" placeholder="Langschwert" />
+
+                <select id="attack_1_abil">
+                    <option value="">Attr</option>
+                    <option value="str">STR</option>
+                    <option value="dex">DEX</option>
+                    <option value="con">CON</option>
+                    <option value="int">INT</option>
+                    <option value="wis">WIS</option>
+                    <option value="cha">CHA</option>
+                </select>
+
+                <label class="atkProf">
+                    <input id="attack_1_prof" type="checkbox" />
+                    <span class="switch" aria-hidden="true"></span>
+                    <span>geübt</span>
+                </label>
+
+                <input id="attack_1_misc" type="number" min="-10" max="20" step="1" placeholder="Bonus" />
+
+                <input id="attack_1_bonus" type="number" min="-10" max="30" readonly placeholder="ATK" />
+
+                <input id="attack_1_range" maxlength="20" placeholder="Reichweite" />
+
+                <input id="attack_1_damage" maxlength="40" placeholder="1d8 + 3 Hieb" />
+            </div>
+
+            <div class="attacksRow attacksRowGrid">
+                <input id="attack_2_type" maxlength="50" placeholder="Langschwert" />
+
+                <select id="attack_2_abil">
+                    <option value="">Attr</option>
+                    <option value="str">STR</option>
+                    <option value="dex">DEX</option>
+                    <option value="con">CON</option>
+                    <option value="int">INT</option>
+                    <option value="wis">WIS</option>
+                    <option value="cha">CHA</option>
+                </select>
+
+                <label class="atkProf">
+                    <input id="attack_2_prof" type="checkbox" />
+                    <span class="switch" aria-hidden="true"></span>
+                    <span>geübt</span>
+                </label>
+
+                <input id="attack_2_misc" type="number" min="-10" max="20" step="1" placeholder="Bonus" />
+                <input id="attack_2_bonus" type="number" min="-10" max="30" readonly placeholder="ATK" />
+                <input id="attack_2_range" maxlength="20" placeholder="Reichweite" />
+                <input id="attack_2_damage" maxlength="40" placeholder="1d8 + 3 Hieb" />
+            </div>
+
+            <div class="attacksRow attacksRowGrid">
+                <input id="attack_3_type" maxlength="50" placeholder="Langschwert" />
+
+                <select id="attack_3_abil">
+                    <option value="">Attr</option>
+                    <option value="str">STR</option>
+                    <option value="dex">DEX</option>
+                    <option value="con">CON</option>
+                    <option value="int">INT</option>
+                    <option value="wis">WIS</option>
+                    <option value="cha">CHA</option>
+                </select>
+
+                <label class="atkProf">
+                    <input id="attack_3_prof" type="checkbox" />
+                    <span class="switch" aria-hidden="true"></span>
+                    <span>geübt</span>
+                </label>
+
+                <input id="attack_3_misc" type="number" min="-10" max="20" step="1" placeholder="Bonus" />
+                <input id="attack_3_bonus" type="number" min="-10" max="30" readonly placeholder="ATK" />
+                <input id="attack_3_range" maxlength="20" placeholder="Reichweite" />
+                <input id="attack_3_damage" maxlength="40" placeholder="1d8 + 3 Hieb" />
+            </div>
+
+            <div class="attacksRow attacksRowGrid">
+                <input id="attack_4_type" maxlength="50" placeholder="Langschwert" />
+
+                <select id="attack_4_abil">
+                    <option value="">Attr</option>
+                    <option value="str">STR</option>
+                    <option value="dex">DEX</option>
+                    <option value="con">CON</option>
+                    <option value="int">INT</option>
+                    <option value="wis">WIS</option>
+                    <option value="cha">CHA</option>
+                </select>
+
+                <label class="atkProf">
+                    <input id="attack_4_prof" type="checkbox" />
+                    <span class="switch" aria-hidden="true"></span>
+                    <span>geübt</span>
+                </label>
+
+                <input id="attack_4_misc" type="number" min="-10" max="20" step="1" placeholder="Bonus" />
+                <input id="attack_4_bonus" type="number" min="-10" max="30" readonly placeholder="ATK" />
+                <input id="attack_4_range" maxlength="20" placeholder="Reichweite" />
+                <input id="attack_4_damage" maxlength="40" placeholder="1d8 + 3 Hieb" />
+            </div>
+
+            <div class="attacksRow attacksRowGrid">
+                <input id="attack_5_type" maxlength="50" placeholder="Langschwert" />
+
+                <select id="attack_5_abil">
+                    <option value="">Attr</option>
+                    <option value="str">STR</option>
+                    <option value="dex">DEX</option>
+                    <option value="con">CON</option>
+                    <option value="int">INT</option>
+                    <option value="wis">WIS</option>
+                    <option value="cha">CHA</option>
+                </select>
+
+                <label class="atkProf">
+                    <input id="attack_5_prof" type="checkbox" />
+                    <span class="switch" aria-hidden="true"></span>
+                    <span>geübt</span>
+                </label>
+
+                <input id="attack_5_misc" type="number" min="-10" max="20" step="1" placeholder="Bonus" />
+                <input id="attack_5_bonus" type="number" min="-10" max="30" readonly placeholder="ATK" />
+                <input id="attack_5_range" maxlength="20" placeholder="Reichweite" />
+                <input id="attack_5_damage" maxlength="40" placeholder="1d8 + 3 Hieb" />
+            </div>
+        </section>
+
+        <!-- Klassenaktionen -->
+        <section id="sec-actions" class="combatCard" data-nav-label="Aktionen" tabindex="-1">
+            <div class="actionsHeader">
+                <h3>Aktionen</h3>
+
+                <button id="btnAddAction" class="btn" type="button">
+                    + Aktion hinzufügen
+                </button>
+            </div>
+
+            <!-- Editor -->
+            <div id="actionEditor" class="actionEditor" hidden>
+                <h4>Neue Aktion</h4>
+
+                <label>
+                    Name
+                    <input id="actionName" type="text" maxlength="100" placeholder="z. B. Kampfrausch" />
+                </label>
+
+                <label>
+                    Art der Aktion
+                    <select id="actionType">
+                        <option value="action">Aktion</option>
+                        <option value="bonus_action">Bonusaktion</option>
+                        <option value="reaction">Reaktion</option>
+                        <option value="free_action">Freie Aktion</option>
+                        <option value="other">Sonstiges</option>
+                    </select>
+                </label>
+
+                <label>
+                    Beschreibung
+                    <textarea id="actionDescription" rows="5" maxlength="3000"
+                        placeholder="Was bewirkt diese Aktion?"></textarea>
+                </label>
+
+                <label class="actionEditor__limited">
+                    <input id="actionLimitedUses" type="checkbox" />
+                    Begrenzte Anwendungen
+                </label>
+
+                <div id="actionUsesOptions" class="actionEditor__uses" hidden>
+                    <label>
+                        Anzahl der Anwendungen
+                        <input id="actionUsesMax" type="number" min="1" max="99" step="1" value="1" />
+                    </label>
+
+                    <label>
+                        Anwendungen regenerieren
+                        <select id="actionResetOn">
+                            <option value="short_rest">
+                                Kurze Rast
+                            </option>
+
+                            <option value="long_rest">
+                                Lange Rast
+                            </option>
+
+                            <option value="manual">
+                                Manuell
+                            </option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="actionEditor__buttons">
+                    <button id="btnSaveAction" class="btn" type="button">
+                        Speichern
+                    </button>
+
+                    <button id="btnCancelAction" class="btn" type="button">
+                        Abbrechen
+                    </button>
+
+                    <button id="btnDeleteAction" class="btn" type="button" hidden>
+                        Löschen
+                    </button>
+                </div>
+            </div>
+
+            <!-- Später erscheinen hier die gespeicherten Aktionen -->
+            <div id="actionsList">
+                <p class="muted">
+                    Noch keine Aktionen angelegt.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Navigation Drawer -->
+    <div id="navBackdrop" class="backdrop" hidden></div>
+
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>Navigation</strong>
+
+            <button id="btnNavClose" class="btn" aria-label="Schließen">
+                ✕
+            </button>
+        </div>
+
+        <div id="navList" class="drawer__content"></div>
+    </aside>
+
+    <script type="module" src="/app.js"></script>
+    <script type="module" src="/actions.js"></script>
+
+</body>
+
+</html>

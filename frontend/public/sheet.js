@@ -46,7 +46,6 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
     let isDirty = false;
     let autosaveTimer = null;
     let isSaving = false;
-    let recalcAttacks = null;
 
     function getNum(id, fallback = 0) {
         const el = document.getElementById(id);
@@ -117,30 +116,6 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
         return Math.floor((score - 10) / 2);
     }
 
-    const SKILLS = [
-        { key: "athletics", ability: "str", profId: "skill_athletics_prof", outId: "skill_athletics" },
-
-        { key: "acrobatics", ability: "dex", profId: "skill_acrobatics_prof", outId: "skill_acrobatics" },
-        { key: "sleight_of_hand", ability: "dex", profId: "skill_sleight_of_hand_prof", outId: "skill_sleight_of_hand" },
-        { key: "stealth", ability: "dex", profId: "skill_stealth_prof", outId: "skill_stealth" },
-
-        { key: "arcana", ability: "int", profId: "skill_arcana_prof", outId: "skill_arcana" },
-        { key: "history", ability: "int", profId: "skill_history_prof", outId: "skill_history" },
-        { key: "investigation", ability: "int", profId: "skill_investigation_prof", outId: "skill_investigation" },
-        { key: "nature", ability: "int", profId: "skill_nature_prof", outId: "skill_nature" },
-        { key: "religion", ability: "int", profId: "skill_religion_prof", outId: "skill_religion" },
-
-        { key: "animal_handling", ability: "wis", profId: "skill_animal_handling_prof", outId: "skill_animal_handling" },
-        { key: "insight", ability: "wis", profId: "skill_insight_prof", outId: "skill_insight" },
-        { key: "medicine", ability: "wis", profId: "skill_medicine_prof", outId: "skill_medicine" },
-        { key: "perception", ability: "wis", profId: "skill_perception_prof", outId: "skill_perception" },
-        { key: "survival", ability: "wis", profId: "skill_survival_prof", outId: "skill_survival" },
-
-        { key: "deception", ability: "cha", profId: "skill_deception_prof", outId: "skill_deception" },
-        { key: "intimidation", ability: "cha", profId: "skill_intimidation_prof", outId: "skill_intimidation" },
-        { key: "performance", ability: "cha", profId: "skill_performance_prof", outId: "skill_performance" },
-        { key: "persuasion", ability: "cha", profId: "skill_persuasion_prof", outId: "skill_persuasion" },
-    ];
 
     const SAVES = [
         { ability: "str", profId: "save_str_prof", outId: "save_str" },
@@ -170,29 +145,23 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
         }
     }
 
-    function recalcSkills() {
-        const pb = getNum("proficiency_bonus", 0);
-
-        const abilityMods = {
-            str: abilityMod(getNum("str", 10)),
-            dex: abilityMod(getNum("dex", 10)),
-            con: abilityMod(getNum("con", 10)),
-            int: abilityMod(getNum("int", 10)),
-            wis: abilityMod(getNum("wis", 10)),
-            cha: abilityMod(getNum("cha", 10)),
-        };
-
-        for (const s of SKILLS) {
-            const base = abilityMods[s.ability] ?? 0;
-            const val = base + (isChecked(s.profId) ? pb : 0);
-            setDerivedVal(s.outId, val);
-        }
-    }
 
     function recalcPassives() {
-        const perception = getNum("skill_perception", 0);
-        const investigation = getNum("skill_investigation", 0);
-        const insight = getNum("skill_insight", 0);
+        const pb = getNum("proficiency_bonus", 0);
+
+        const wisMod = abilityMod(getNum("wis", 10));
+        const intMod = abilityMod(getNum("int", 10));
+
+        const data = currentCharacter?.data ?? {};
+
+        const perception =
+            wisMod + (data.skill_perception_prof ? pb : 0);
+
+        const investigation =
+            intMod + (data.skill_investigation_prof ? pb : 0);
+
+        const insight =
+            wisMod + (data.skill_insight_prof ? pb : 0);
 
         setDerivedVal("passive_perception", 10 + perception);
         setDerivedVal("passive_investigation", 10 + investigation);
@@ -244,16 +213,14 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
 
     function recalcDerived() {
         recalcAbilities();
-        recalcSkills();
         recalcSaves();
         recalcPassives();
     }
 
-    function bindSkillAutoCalc() {
+    function bindDerivedAutoCalc() {
         const ids = [
             "proficiency_bonus",
             "str", "dex", "con", "int", "wis", "cha",
-            ...SKILLS.flatMap((s) => [s.profId]),
             ...SAVES.flatMap((s) => [s.profId]),
         ];
 
@@ -270,37 +237,6 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
         }
 
         recalcDerived();
-    }
-
-    function bindAttackAutoCalc() {
-        const attackCount = 5;
-
-        function recalcAttack(i) {
-            const abil = getVal(`attack_${i}_abil`);
-            const pb = toNum(getVal("proficiency_bonus"));
-            const misc = toNum(getVal(`attack_${i}_misc`));
-            const prof = !!document.getElementById(`attack_${i}_prof`)?.checked;
-            const mod = abil ? toNum(getVal(`${abil}_mod`)) : 0;
-
-            setDerivedVal(`attack_${i}_bonus`, mod + (prof ? pb : 0) + misc);
-        }
-
-        recalcAttacks = function () {
-            for (let i = 1; i <= attackCount; i++) recalcAttack(i);
-        };
-
-        document.getElementById("proficiency_bonus")?.addEventListener("input", recalcAttacks);
-        ["str", "dex", "con", "int", "wis", "cha"].forEach((a) => {
-            document.getElementById(a)?.addEventListener("input", recalcAttacks);
-        });
-
-        for (let i = 1; i <= attackCount; i++) {
-            document.getElementById(`attack_${i}_abil`)?.addEventListener("change", recalcAttacks);
-            document.getElementById(`attack_${i}_prof`)?.addEventListener("change", recalcAttacks);
-            document.getElementById(`attack_${i}_misc`)?.addEventListener("input", recalcAttacks);
-        }
-
-        recalcAttacks();
     }
 
     async function loadCharacter(id) {
@@ -323,7 +259,6 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
 
             jsonToSheet(c.data);
             recalcDerived();
-            recalcAttacks?.();
             syncTopbarAvatarFromCurrentCharacter();
 
             const titleEl = document.getElementById("sheetTitle");
@@ -446,8 +381,7 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
     });
 
     (async function startupSheet() {
-        bindSkillAutoCalc();
-        bindAttackAutoCalc();
+        bindDerivedAutoCalc();
 
         sheetRootEl?.addEventListener("focusin", (e) => {
             const el = e.target;
@@ -547,10 +481,8 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
 
             markDirty();
         });
-
         sheetRootEl?.addEventListener("focusout", (e) => {
             clampInput(e.target);
-            markDirty();
         });
 
         if (API.token) {
