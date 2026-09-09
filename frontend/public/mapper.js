@@ -42,7 +42,15 @@ export function jsonToSheet(data) {
     setInputValue(resolveField("notes_adv_dis"), d.notes_adv_dis);
 
     ["str", "dex", "con", "int", "wis", "cha"].forEach(a => {
-        setInputValue(resolveField(`save_${a}_prof`), d[`save_${a}_prof`]);
+        setInputValue(
+            resolveField(`save_${a}_prof`),
+            d[`save_${a}_prof`]
+        );
+
+        setInputValue(
+            resolveField(`save_${a}_bonus`),
+            d[`save_${a}_bonus`] ?? 0
+        );
     });
 
     // ===== Combat: Death Saves =====
@@ -77,7 +85,15 @@ export function sheetToJson() {
     out.notes_adv_dis = getInputValue(resolveField("notes_adv_dis"));
 
     ["str", "dex", "con", "int", "wis", "cha"].forEach(a => {
-        out[`save_${a}_prof`] = !!resolveField(`save_${a}_prof`)?.checked;
+        out[`save_${a}_prof`] =
+            !!resolveField(`save_${a}_prof`)?.checked;
+
+        out[`save_${a}_bonus`] =
+            Number(
+                getInputValue(
+                    resolveField(`save_${a}_bonus`)
+                ) || 0
+            );
     });
     // ===== Combat: Death Saves =====
     for (let i = 1; i <= 3; i++) {

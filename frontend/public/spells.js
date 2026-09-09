@@ -4,13 +4,11 @@ import { API } from "./api.js";
 import { renderTopbarCharacterAvatar } from "./app.js";
 document.addEventListener("DOMContentLoaded", () => {
     // 0 DOM: Welche HTML-Elemente benutzt werden
-    const tabs = [...document.querySelectorAll(".tab[data-spell-level]")];
     const slotsEl = document.getElementById("spellSlots");
+    const slotsLevelSelect = document.getElementById("spellSlotsLevel");
     const slotsCountInput = document.getElementById("spellSlotsCountInput");
     const spellbookList = document.getElementById("spellbookList");
     const btnAddSpell = document.getElementById("btnAddSpell");
-    const spellPanelRows = document.getElementById("spellPanelRows");
-    const btnUseInPanel = document.getElementById("btnUseInPanel");
     const btnDeleteSpell = document.getElementById("btnDeleteSpell");
     const descBox = document.getElementById("spellDescriptionBox");
     const btnCloseDesc = document.getElementById("btnCloseSpellDesc");
@@ -41,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const spellSelectCard = document.getElementById("spellSelectCard");
     const spellSelectList = document.getElementById("spellSelectList");
     const spellSelectPreview = document.getElementById("spellSelectPreview");
-
+    const spellSelectLevel = document.getElementById("spellSelectLevel");
     // Charakter Drawer
     const btnMenu = document.getElementById("btnMenu");
     const drawer = document.getElementById("drawer");
@@ -54,14 +52,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Defensive
     if (
-        !tabs.length ||
         !slotsEl ||
+        !slotsLevelSelect ||
         !slotsCountInput ||
         !spellbookList ||
         !btnAddSpell ||
         !spellPanelRows ||
-        !btnUseInPanel ||
-        !btnDeleteSpell ||
         !descBox ||
         !btnCloseDesc ||
         !spellDescTitle ||
@@ -87,6 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
         !spellSelectCard ||
         !spellSelectList ||
         !spellSelectPreview ||
+        !spellSelectLevel ||
         !btnMenu ||
         !drawer ||
         !backdrop ||
@@ -147,10 +144,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 1 State: Welche Variablen den Zustand definieren
-    let currentLevel =
-        document.querySelector('.tab.is-active')?.dataset.spellLevel ||
-        "cantrip";
-
+    let currentLevel = "cantrip";
+    let currentSlotLevel = "1";
     let selectedSpellId = null;
 
     const slotCountsByLevel = {
@@ -378,9 +373,9 @@ document.addEventListener("DOMContentLoaded", () => {
             currentCharacter = null;
             console.warn("[spells.js] No selected character id in localStorage. Running in-memory only.");
             applyPersist(emptyPersistSpells());
-            renderSlots(getCountFor(currentLevel));
-            renderSpellbook(currentLevel);
-            renderPanel(currentLevel);
+            renderSlots();
+            renderSpellbook();
+            renderPanel();
             const selectedSpell = getSelectedSpell(currentLevel);
             fillSpellDetails(selectedSpell);
             closeSpellDetails();
@@ -396,9 +391,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const persist = c?.data?.spells ?? emptyPersistSpells();
             applyPersist(persist);
-            renderSlots(getCountFor(currentLevel));
-            renderSpellbook(currentLevel);
-            renderPanel(currentLevel);
+            renderSlots();
+            renderSpellbook();
+            renderPanel();
             const selectedSpell = getSelectedSpell(currentLevel);
             fillSpellDetails(selectedSpell);
             fillSpellAttackStats();
@@ -408,9 +403,9 @@ document.addEventListener("DOMContentLoaded", () => {
             currentCharacter = null;
             console.error("[spells.js] Failed to load character. Running in-memory only.", e);
             applyPersist(emptyPersistSpells());
-            renderSlots(getCountFor(currentLevel));
-            renderSpellbook(currentLevel);
-            renderPanel(currentLevel);
+            renderSlots();
+            renderSpellbook();
+            renderPanel();
             const selectedSpell = getSelectedSpell();
             fillSpellDetails(selectedSpell);
             fillSpellAttackStats();
@@ -660,35 +655,63 @@ document.addEventListener("DOMContentLoaded", () => {
         sb_desc.value = spell.desc || "";
     }
 
-    function renderSlots(n) {
+    function renderSlots() {
+        const level = currentSlotLevel;
+        const n = getCountFor(level);
+
         slotsEl.innerHTML = "";
         slotsCountInput.value = n > 0 ? String(n) : "";
 
         if (n <= 0) {
-            slotsEl.innerHTML =
-                '<span class="muted small">Keine Slots (z.B. Zaubertricks) oder noch nicht definiert.</span>';
+            slotsEl.innerHTML = `
+            <span class="muted small">
+                Für Grad ${level} sind noch keine Zauberslots definiert.
+            </span>
+        `;
             return;
         }
 
-        const usedSet = slotUsedByLevel[currentLevel] ?? new Set();
+        const usedSet =
+            slotUsedByLevel[level] ?? new Set();
 
         for (let i = 1; i <= n; i++) {
-            const id = `slot_${currentLevel}_${i}`;
-            const label = document.createElement("label");
+            const id = `slot_${level}_${i}`;
+
+            const label =
+                document.createElement("label");
+
             label.className = "slot";
 
-            const checked = usedSet.has(i) ? "checked" : "";
+            const checked =
+                usedSet.has(i) ? "checked" : "";
 
             label.innerHTML = `
-        <input type="checkbox" id="${id}" ${checked} data-slot-index="${i}" />
-        <span>${i}</span>
-      `;
+            <input
+                type="checkbox"
+                id="${id}"
+                ${checked}
+                data-slot-index="${i}"
+            />
 
-            const input = label.querySelector("input");
+            <span
+                class="spellSlotDot"
+                aria-hidden="true"
+            ></span>
+        `;
+
+            const input =
+                label.querySelector("input");
+
             input.addEventListener("change", () => {
-                const idx = Number(input.dataset.slotIndex);
-                if (input.checked) usedSet.add(idx);
-                else usedSet.delete(idx);
+                const idx =
+                    Number(input.dataset.slotIndex);
+
+                if (input.checked) {
+                    usedSet.add(idx);
+                } else {
+                    usedSet.delete(idx);
+                }
+
                 writeBackToCharacterData();
                 markDirtyAndScheduleSave();
             });
@@ -696,130 +719,362 @@ document.addEventListener("DOMContentLoaded", () => {
             slotsEl.appendChild(label);
         }
     }
-
-    function renderSpellbook(level) {
-        const list = getSpellsFor(level);
+    function renderSpellbook() {
         spellbookList.innerHTML = "";
 
-        if (!list.length) {
-            spellbookList.innerHTML =
-                '<div class="spellbook__empty muted small">Keine Zauber im aktuellen Grad.</div>';
-            return;
+        let hasSpells = false;
+
+        for (const level of LEVELS) {
+            const list = getSpellsFor(level);
+
+            if (!list.length) continue;
+
+            hasSpells = true;
+
+            // -----------------------------
+            // Überschrift des Zaubergrades
+            // -----------------------------
+            const group = document.createElement("div");
+            group.className = "spellbook__group";
+
+            const title = document.createElement("div");
+            title.className = "spellbook__groupTitle";
+            title.textContent =
+                level === "cantrip"
+                    ? "Zaubertricks"
+                    : `Grad ${level}`;
+
+            group.appendChild(title);
+
+            // -----------------------------
+            // Zauber dieses Grades
+            // -----------------------------
+            for (const spell of list) {
+                const item = document.createElement("div");
+                item.className = "spellbook__item";
+
+                item.dataset.id = spell.id;
+                item.dataset.spellLevel = level;
+
+                const levelLabel =
+                    level === "cantrip" ? "0" : level;
+
+                const inPanel =
+                    (panelSpellsByLevel[level] ?? [])
+                        .some((p) => p.id === spell.id);
+
+                item.innerHTML = `
+                <button
+                    type="button"
+                    class="spellbook__main"
+                    data-spell-open="1"
+                >
+                    <span class="spellbook__level">
+                        ${levelLabel}
+                    </span>
+
+                    <span class="spellbook__name">
+                        ${escapeHtml(
+                    spell.name?.trim() ||
+                    "(Unbenannter Zauber)"
+                )}
+                    </span>
+                </button>
+
+                <div class="spellbook__actions">
+
+                    <button
+                        type="button"
+                        class="spellbook__iconBtn ${inPanel ? "is-active" : ""
+                    }"
+                        data-spell-panel="1"
+                        title="${inPanel
+                        ? "Aus Panel entfernen"
+                        : "Im Panel verwenden"
+                    }"
+                        aria-label="${inPanel
+                        ? "Aus Panel entfernen"
+                        : "Im Panel verwenden"
+                    }"
+                    >
+                        ◆
+                    </button>
+
+                    <button
+                        type="button"
+                        class="spellbook__iconBtn spellbook__iconBtn--delete"
+                        data-spell-delete="1"
+                        title="Zauber löschen"
+                        aria-label="Zauber löschen"
+                    >
+                        ×
+                    </button>
+
+                </div>
+            `;
+
+                // Aktuell ausgewählter Zauber
+                if (spell.id === selectedSpellId) {
+                    item.classList.add("is-active");
+                }
+
+                // =====================================================
+                // Zauber öffnen
+                // =====================================================
+                const openBtn =
+                    item.querySelector("[data-spell-open]");
+
+                openBtn.addEventListener("click", () => {
+                    currentLevel = level;
+                    selectedSpellId = spell.id;
+
+                    renderSpellbook();
+
+                    fillSpellDetails(spell);
+                    openSpellDetails();
+                });
+
+                // =====================================================
+                // Panel ein / aus
+                // =====================================================
+                const panelBtn =
+                    item.querySelector("[data-spell-panel]");
+
+                panelBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+
+                    const panelList =
+                        panelSpellsByLevel[level] ?? [];
+
+                    const existingIndex =
+                        panelList.findIndex(
+                            (p) => p.id === spell.id
+                        );
+
+                    if (existingIndex !== -1) {
+                        // Bereits im Panel -> entfernen
+                        panelList.splice(existingIndex, 1);
+                    } else {
+                        // Noch nicht im Panel -> hinzufügen
+                        panelList.push(spell);
+                    }
+
+                    renderPanel();
+                    renderSpellbook();
+
+                    writeBackToCharacterData();
+                    markDirtyAndScheduleSave();
+                });
+
+                // =====================================================
+                // Zauber löschen
+                // =====================================================
+                const deleteBtn =
+                    item.querySelector("[data-spell-delete]");
+
+                deleteBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const confirmed = window.confirm(
+                        `Möchtest du „${spell.name || "diesen Zauber"}“ wirklich löschen?`
+                    );
+
+                    if (!confirmed) return;
+                    const spellList =
+                        getSpellsFor(level);
+
+                    const index =
+                        spellList.findIndex(
+                            (s) => s.id === spell.id
+                        );
+
+                    if (index === -1) return;
+
+                    // Auch aus dem Panel entfernen
+                    removeSpellFromPanelById(
+                        level,
+                        spell.id
+                    );
+
+                    // Aus Zauberbuch löschen
+                    spellList.splice(index, 1);
+
+                    // Falls gerade dieser Zauber geöffnet war
+                    if (selectedSpellId === spell.id) {
+                        selectedSpellId = null;
+
+                        clearSpellDetails();
+                        closeSpellDetails();
+                    }
+
+                    renderSpellbook();
+                    renderPanel();
+
+                    writeBackToCharacterData();
+                    markDirtyAndScheduleSave();
+                });
+
+                group.appendChild(item);
+            }
+
+            spellbookList.appendChild(group);
         }
 
-        list.forEach((spell) => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "spellbook__item btn btn--ghost";
-            btn.textContent = spell.name?.trim() || "(Unbenannter Zauber)";
-            btn.dataset.id = spell.id;
-
-            if (spell.id === selectedSpellId) btn.classList.add("is-active");
-
-            btn.addEventListener("click", () => {
-                selectedSpellId = spell.id;
-                renderSpellbook(level);
-                fillSpellDetails(spell);
-                openSpellDetails();
-            });
-
-            spellbookList.appendChild(btn);
-        });
+        // -----------------------------
+        // Zauberbuch komplett leer
+        // -----------------------------
+        if (!hasSpells) {
+            spellbookList.innerHTML = `
+            <div class="spellbook__empty muted small">
+                Noch keine Zauber im Zauberbuch.
+            </div>
+        `;
+        }
     }
 
-    /*function renderPanel(level) {
-        const list = panelSpellsByLevel[level] ?? [];
+    function renderPanel() {
         spellPanelRows.innerHTML = "";
 
-        if (!list.length) {
-            spellPanelRows.innerHTML = `
-        <tr class="rowHint">
-          <td colspan="6" class="muted small">
-            Noch leer. Zauber aus dem Zauberbuch hinzufügen.
-          </td>
-        </tr>
-      `;
-            return;
+        let hasSpells = false;
+
+        for (const level of LEVELS) {
+            const list = panelSpellsByLevel[level] ?? [];
+
+            if (!list.length) continue;
+
+            hasSpells = true;
+
+            // Überschrift für den jeweiligen Zaubergrad
+            const groupRow = document.createElement("tr");
+            groupRow.className = "panelGroupRow";
+
+            groupRow.innerHTML = `
+            <td colspan="7" class="panelGroupTitle">
+                ${level === "cantrip" ? "Zaubertricks" : `Grad ${level}`}
+            </td>
+        `;
+
+            spellPanelRows.appendChild(groupRow);
+
+            for (const spell of list) {
+                const tr = document.createElement("tr");
+
+                tr.className = "panel-row";
+                tr.dataset.panelSpellId = spell.id;
+                tr.dataset.panelLevel = level;
+
+                const levelLabel =
+                    level === "cantrip" ? "0" : level;
+
+                tr.innerHTML = `
+                <td colspan="7" class="panelCell">
+                    <div class="panelSpell">
+
+                        <div
+                            class="panelSpell__top"
+                            data-panel-toggle="1"
+                            role="button"
+                            tabindex="0"
+                            aria-expanded="false"
+                        >
+                            <div class="panelSpell__title">
+
+                                <span class="panelSpell__level">
+                                    ${levelLabel}
+                                </span>
+
+                                <span class="panelSpell__name">
+                                    ${escapeHtml(spell.name || "-")}
+                                </span>
+
+                            </div>
+
+                            <span
+                                class="panelSpell__chevron"
+                                aria-hidden="true"
+                            >
+                                ▼
+                            </span>
+                        </div>
+
+                        <div class="panelSpell__bottom" hidden>
+                            <div class="panelSpell__detailGrid">
+                                <div class="panelSpell__detail">
+                                    <span class="panelSpell__detailLabel">
+                                        Zeit
+                                    </span>
+                                    <span>
+                                        ${escapeHtml(spell.time || "-")}
+                                    </span>
+                                </div>
+
+                                <div class="panelSpell__detail">
+                                    <span class="panelSpell__detailLabel">
+                                        Reichweite
+                                    </span>
+                                    <span>
+                                        ${escapeHtml(spell.range || "-")}
+                                    </span>
+                                </div>
+
+                                <div class="panelSpell__detail">
+                                    <span class="panelSpell__detailLabel">
+                                        Treffer / RW
+                                    </span>
+                                    <span>
+                                        ${escapeHtml(spell.hit || "-")}
+                                    </span>
+                                </div>
+
+                                <div class="panelSpell__detail">
+                                    <span class="panelSpell__detailLabel">
+                                        Effekt
+                                    </span>
+                                    <span>
+                                        ${escapeHtml(spell.effect || "-")}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                            <div class="panelSpell__description">
+                                <div class="panelSpell__detailLabel">
+                                    Beschreibung
+                                </div>
+
+                                <div class="panelSpell__descriptionText">
+                                    ${escapeHtml(spell.desc || "Keine Beschreibung vorhanden.")}
+                                </div>
+                            </div>
+
+                            <div class="panelSpell__actions">
+                                <button
+                                    type="button"
+                                    class="btn btn--danger btn--mini"
+                                    data-panel-remove="1"
+                                >
+                                    Aus Panel entfernen
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </td>
+            `;
+
+                spellPanelRows.appendChild(tr);
+            }
         }
 
-        list.forEach((spell, idx) => {
-            const tr = document.createElement("tr");
-            tr.dataset.panelOpen = "1";
-            tr.dataset.panelSpellId = spell.id;
-            tr.innerHTML = `
-        <td>${escapeHtml(spell.name || "-")}</td>
-        <td>${escapeHtml(spell.time || "-")}</td>
-        <td>${escapeHtml(spell.range || "-")}</td>
-        <td>${escapeHtml(spell.hit || "-")}</td>
-        <td>${escapeHtml(spell.kind || "-")}</td>
-        <td>${escapeHtml(spell.effect || "-")}</td>
-        <td class="cell-actions panel-col-delete">
-          <button type="button"
-                    class="btn btn--ghost btn--mini"
-                    data-panel-remove="${idx}"
-                    aria-label="Zauber aus Panel entfernen">✕</button>
-        </td>
-      `;
-            spellPanelRows.appendChild(tr);
-        });
-    }*/
-    function renderPanel(level) {
-        const list = panelSpellsByLevel[level] ?? [];
-        spellPanelRows.innerHTML = "";
-
-        if (!list.length) {
+        if (!hasSpells) {
             spellPanelRows.innerHTML = `
-        <tr class="rowHint">
-          <td colspan="7" class="muted small">
-            Noch leer. Zauber aus dem Zauberbuch hinzufügen.
-          </td>
-        </tr>
-      `;
-            return;
+            <tr class="rowHint">
+                <td colspan="7" class="muted small">
+                    Noch leer. Zauber aus dem Zauberbuch hinzufügen.
+                </td>
+            </tr>
+        `;
         }
-
-        list.forEach((spell, idx) => {
-            const tr = document.createElement("tr");
-            tr.className = "panel-row";
-            tr.dataset.panelOpen = "1";
-            tr.dataset.panelSpellId = spell.id;
-
-            tr.innerHTML = `
-        <td colspan="7" class="panelCell">
-          <div class="panelSpell">
-            
-            <div class="panelSpell__top">
-              <button type="button" class="panelSpell__name" data-panel-open="${idx}">
-                ${escapeHtml(spell.name || "-")}
-              </button>
-
-              <div class="panelSpell__meta">
-                <span>${escapeHtml(spell.time || "-")}</span>
-                <span>${escapeHtml(spell.kind || "-")}</span>
-              </div>
-
-              <button type="button"
-                class="btn btn--ghost btn--mini panelSpell__delete"
-                data-panel-remove="${idx}"
-                aria-label="Zauber aus Panel entfernen">✕</button>
-            </div>
-
-            <div class="panelSpell__bottom">
-              <div class="panelSpell__effect">
-                ${escapeHtml(spell.effect || "-")}
-              </div>
-
-              <div class="panelSpell__sub">
-                <span>RW: ${escapeHtml(spell.range || "-")}</span>
-                <span>TW: ${escapeHtml(spell.hit || "-")}</span>
-              </div>
-            </div>
-
-          </div>
-        </td>
-      `;
-            spellPanelRows.appendChild(tr);
-        });
     }
 
     function writeBackToCharacterData() {
@@ -847,8 +1102,8 @@ document.addEventListener("DOMContentLoaded", () => {
         patchFn(spell);
         syncPanelSpellById(currentLevel, spell.id);
 
-        renderSpellbook(currentLevel);
-        renderPanel(currentLevel);
+        renderSpellbook();
+        renderPanel();
         writeBackToCharacterData();
         markDirtyAndScheduleSave();
     }
@@ -857,6 +1112,11 @@ document.addEventListener("DOMContentLoaded", () => {
             applyPatch((s) => {
                 s.name = limitText(sb_name.value, MAX_SB_NAME_LENGTH);
                 sb_name.value = s.name;
+            })
+        );
+        sb_level.addEventListener("change", () =>
+            applyPatch((s) => {
+                s.level = Number(sb_level.value) || 0;
             })
         );
         sb_school.addEventListener("change", () =>
@@ -941,37 +1201,25 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     }
 
-    function bindTabs() {
-        tabs.forEach((t) => {
-            t.addEventListener("click", () => {
-                currentLevel = t.dataset.spellLevel;
-
-                spellSelectCard.classList.add("is-hidden");
-                spellSelectList.innerHTML = "";
-
-                setActiveTab(t.dataset.spellLevel);
-            });
-
-            t.addEventListener("keydown", (e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    currentLevel = t.dataset.spellLevel;
-
-                    spellSelectCard.classList.add("is-hidden");
-                    spellSelectList.innerHTML = "";
-
-                    setActiveTab(t.dataset.spellLevel);
-                }
-            });
-        });
-    }
     function bindSlotsCountInput() {
         slotsCountInput.addEventListener("input", () => {
-            if (currentLevel === "cantrip") return;
-            setCountFor(currentLevel, slotsCountInput.value);
-            renderSlots(getCountFor(currentLevel));
+            const n =
+                Number(slotsCountInput.value) || 0;
+
+            setCountFor(currentSlotLevel, n);
+
+            renderSlots();
+
             writeBackToCharacterData();
             markDirtyAndScheduleSave();
+        });
+    }
+    function bindSlotsLevelSelect() {
+        slotsLevelSelect.addEventListener("change", () => {
+            currentSlotLevel =
+                slotsLevelSelect.value;
+
+            renderSlots();
         });
     }
 
@@ -1010,7 +1258,7 @@ document.addEventListener("DOMContentLoaded", () => {
             levelList.push(spell);
 
             selectedSpellId = spell.id;
-            renderSpellbook(level);
+            renderSpellbook();
             fillSpellDetails(spell);
             openSpellDetails();
             writeBackToCharacterData();
@@ -1021,211 +1269,260 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    function bindDeleteSpell() {
-        btnDeleteSpell.addEventListener("click", () => {
-            if (!selectedSpellId) return;
-
-            const list = getSpellsFor(currentLevel);
-            const idx = list.findIndex((s) => s.id === selectedSpellId);
-            if (idx === -1) return;
-
-            const deletedId = selectedSpellId;
-
-            list.splice(idx, 1);
-            removeSpellFromPanelById(currentLevel, deletedId);
-
-            selectedSpellId = null;
-
-            renderSpellbook(currentLevel);
-            renderPanel(currentLevel);
-            clearSpellDetails();
-            closeSpellDetails();
-            writeBackToCharacterData();
-            markDirtyAndScheduleSave();
-        });
-    }
     function bindSpellDetailsClose() {
         btnCloseSpellDetails.addEventListener("click", () => {
             selectedSpellId = null;
             spellSelectCard.classList.add("is-hidden");
             spellSelectList.innerHTML = "";
-            renderSpellbook(currentLevel);
+            renderSpellbook();
             clearSpellDetails();
             closeSpellDetails();
         });
     }
 
+    function takeDatabaseSpell(spell) {
+        const oldLevel = currentLevel;
+
+        const newLevel =
+            Number(spell.level) === 0
+                ? "cantrip"
+                : String(spell.level);
+
+        const oldList = spellsByLevel[oldLevel] ?? [];
+
+        const index =
+            oldList.findIndex((s) => s.id === selectedSpellId);
+
+        if (index === -1) return;
+
+        const targetSpell = oldList[index];
+
+        targetSpell.name = spell.name;
+        targetSpell.level = Number(spell.level) || 0;
+        targetSpell.school = spell.school;
+
+        targetSpell.time = spell.time;
+        targetSpell.range = spell.range;
+        targetSpell.components = spell.components;
+        targetSpell.material = spell.material;
+        targetSpell.duration = spell.duration;
+
+        targetSpell.concentration = spell.concentration;
+        targetSpell.ritual = spell.ritual;
+
+        targetSpell.hit = spell.hit;
+        targetSpell.kind = spell.kind;
+        targetSpell.effect = spell.effect;
+
+        targetSpell.desc = spell.desc;
+
+        /*
+         * Falls der ausgesuchte Zauber einen anderen Grad hat,
+         * verschieben wir ihn auch in den richtigen Datenbereich.
+         */
+        if (newLevel !== oldLevel) {
+            oldList.splice(index, 1);
+            spellsByLevel[newLevel].push(targetSpell);
+        }
+
+        currentLevel = newLevel;
+
+        writeBackToCharacterData();
+        markDirtyAndScheduleSave();
+
+        spellSelectCard.classList.add("is-hidden");
+        spellSelectList.innerHTML = "";
+        spellSelectPreview.innerHTML = "";
+
+        renderSpellbook();
+        renderPanel();
+        fillSpellDetails(targetSpell);
+        openSpellDetails();
+
+        requestAnimationFrame(() => {
+            spellDetailsCard.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        });
+    }
+    async function loadSpellSuggestions(level) {
+        const spells = await API.getSpells(Number(level));
+
+        spellSelectList.innerHTML = "";
+        spellSelectPreview.innerHTML = "";
+
+        if (spells.length === 0) {
+            spellSelectList.innerHTML = `
+            <p class="muted small">
+                Keine Zauber für diesen Grad in der Datenbank gefunden.
+            </p>
+        `;
+            return;
+        }
+
+        for (const spell of spells) {
+            const item = document.createElement("button");
+
+            item.type = "button";
+            item.className = "btn btn--ghost";
+            item.textContent = spell.name;
+
+            item.addEventListener("click", () => {
+                spellSelectPreview.innerHTML = `
+                <h3>${spell.name}</h3>
+                <p><strong>Grad:</strong> ${spell.level}</p>
+                <p><strong>Schule:</strong> ${spell.school}</p>
+                <p><strong>Zeit:</strong> ${spell.time}</p>
+                <p><strong>Reichweite:</strong> ${spell.range}</p>
+                <p><strong>Komponenten:</strong> ${spell.components}</p>
+                <p><strong>Dauer:</strong> ${spell.duration}</p>
+                <p><strong>Effekt:</strong> ${spell.effect}</p>
+                <p>${spell.desc}</p>
+
+                <button
+                    class="btn"
+                    id="btnTakeSpell"
+                    type="button"
+                >
+                    Diesen Zauber übernehmen
+                </button>
+            `;
+
+                requestAnimationFrame(() => {
+                    spellSelectPreview.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                    });
+                });
+
+                const btnTakeSpell =
+                    document.getElementById("btnTakeSpell");
+
+                btnTakeSpell.addEventListener("click", () => {
+                    takeDatabaseSpell(spell);
+                });
+            });
+
+            spellSelectList.appendChild(item);
+        }
+    }
     function bindSelectSpell() {
         btnSelectSpell.addEventListener("click", async () => {
-            const level = currentLevel === "cantrip"
-                ? 0
-                : Number(currentLevel);
-
             try {
-                const spells = await API.getSpells(level);
+                const selectedSpell =
+                    getSelectedSpell(currentLevel);
 
-                spellSelectList.innerHTML = "";
-                spellSelectPreview.innerHTML = "";
+                const initialLevel =
+                    selectedSpell
+                        ? Number(selectedSpell.level) || 0
+                        : currentLevel === "cantrip"
+                            ? 0
+                            : Number(currentLevel);
 
-                if (spells.length === 0) {
-                    spellSelectList.innerHTML = `
-                        <p class="muted small">
-                            Keine Zauber für diesen Grad in der Datenbank gefunden.
-                        </p>
-                    `;
-
-                    spellSelectCard.classList.remove("is-hidden");
-                    return;
-                }
-
-                for (const spell of spells) {
-                    const item = document.createElement("button");
-                    item.type = "button";
-                    item.className = "btn btn--ghost";
-                    item.textContent = spell.name;
-
-                    item.addEventListener("click", () => {
-                        spellSelectPreview.innerHTML = `
-                        <h3>${spell.name}</h3>
-                        <p><strong>Grad:</strong> ${spell.level}</p>
-                        <p><strong>Schule:</strong> ${spell.school}</p>
-                        <p><strong>Zeit:</strong> ${spell.time}</p>
-                        <p><strong>Reichweite:</strong> ${spell.range}</p>
-                        <p><strong>Komponenten:</strong> ${spell.components}</p>
-                        <p><strong>Dauer:</strong> ${spell.duration}</p>
-                        <p><strong>Effekt:</strong> ${spell.effect}</p>
-                        <p>${spell.desc}</p>
-                        <button class="btn" id="btnTakeSpell" type="button">
-                        Diesen Zauber übernehmen
-                        </button>
-                    `;
-                        const btnTakeSpell = document.getElementById("btnTakeSpell");
-
-                        btnTakeSpell.addEventListener("click", () => {
-                            applyPatch((s) => {
-                                s.name = spell.name;
-                                s.level = spell.level;
-                                s.school = spell.school;
-
-                                s.time = spell.time;
-                                s.range = spell.range;
-                                s.components = spell.components;
-                                s.material = spell.material;
-                                s.duration = spell.duration;
-
-                                s.concentration = spell.concentration;
-                                s.ritual = spell.ritual;
-
-                                s.hit = spell.hit;
-                                s.kind = spell.kind;
-                                s.effect = spell.effect;
-
-                                s.desc = spell.desc;
-                            });
-                            const selectedSpell = getSelectedSpell(currentLevel);
-
-                            if (selectedSpell) {
-                                fillSpellDetails(selectedSpell);
-                            }
-
-                            spellSelectCard.classList.add("is-hidden");
-                            spellSelectList.innerHTML = "";
-                            spellSelectPreview.innerHTML = "";
-                        });
-                    });
-
-                    spellSelectList.appendChild(item);
-                }
+                spellSelectLevel.value =
+                    String(initialLevel);
 
                 spellSelectCard.classList.remove("is-hidden");
+
+                await loadSpellSuggestions(initialLevel);
+
+                requestAnimationFrame(() => {
+                    spellSelectCard.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                    });
+                });
             } catch (error) {
-                console.error("Zauber konnten nicht geladen werden:", error);
+                console.error(
+                    "Zauber konnten nicht geladen werden:",
+                    error
+                );
+            }
+        });
+
+        spellSelectLevel.addEventListener("change", async () => {
+            try {
+                await loadSpellSuggestions(
+                    Number(spellSelectLevel.value)
+                );
+            } catch (error) {
+                console.error(
+                    "Zauber konnten nicht geladen werden:",
+                    error
+                );
             }
         });
     }
 
-    function bindUseInPanel() {
-        btnUseInPanel.addEventListener("click", () => {
-            const spell = getSelectedSpell(currentLevel);
-            if (!spell) return;
-
-            const list = panelSpellsByLevel[currentLevel];
-            if (list.some(s => s.id === spell.id)) return;
-
-            list.push(spell);
-            renderPanel(currentLevel);
-            writeBackToCharacterData();
-            markDirtyAndScheduleSave();
-        });
-    }
 
     function bindPanelClick() {
         spellPanelRows.addEventListener("click", (e) => {
-            // 1) Remove-Button hat Vorrang
-            const removeBtn = e.target.closest("[data-panel-remove]");
-            if (removeBtn) {
-                const idx = Number(removeBtn.dataset.panelRemove);
-                const list = panelSpellsByLevel[currentLevel] ?? [];
-                if (!Number.isInteger(idx) || idx < 0 || idx >= list.length) return;
+            const row =
+                e.target.closest("tr[data-panel-spell-id]");
 
-                list.splice(idx, 1);
-                renderPanel(currentLevel);
+            if (!row) return;
+
+            const level = row.dataset.panelLevel;
+            const spellId = row.dataset.panelSpellId;
+
+            const list =
+                panelSpellsByLevel[level] ?? [];
+
+            const spell =
+                list.find((s) => s.id === spellId);
+
+            if (!spell) return;
+
+            // Entfernen
+            const removeBtn =
+                e.target.closest("[data-panel-remove]");
+
+            if (removeBtn) {
+                const index =
+                    list.findIndex((s) => s.id === spellId);
+
+                if (index === -1) return;
+
+                list.splice(index, 1);
+
+                renderPanel();
                 hideDesc();
+
                 writeBackToCharacterData();
                 markDirtyAndScheduleSave();
+
                 return;
             }
 
-            // 2) Klick auf Zeile öffnet Beschreibung
-            const row = e.target.closest("tr[data-panel-open='1']");
-            if (!row) return;
+            // Karte auf-/zuklappen
+            const toggle =
+                e.target.closest("[data-panel-toggle]");
 
-            const id = row.dataset.panelSpellId;
-            const list = panelSpellsByLevel[currentLevel] ?? [];
-            const spell = list.find((s) => s.id === id);
-            if (!spell) return;
+            if (!toggle) return;
 
-            showDescFromPanelSpell(spell);
+            const bottom =
+                row.querySelector(".panelSpell__bottom");
+
+            if (!bottom) return;
+
+            bottom.hidden = !bottom.hidden;
+
+            const isOpen = !bottom.hidden;
+
+            toggle.setAttribute(
+                "aria-expanded",
+                isOpen ? "true" : "false"
+            );
+
+            const chevron =
+                row.querySelector(".panelSpell__chevron");
+
+            if (chevron) {
+                chevron.textContent =
+                    isOpen ? "▲" : "▼";
+            }
         });
-    }
-
-    // 7 Startup: App bootet
-    function setActiveTab(level) {
-        if (!level) level = "cantrip";
-        currentLevel = level;
-
-        tabs.forEach((t) => {
-            const isActive = t.dataset.spellLevel === level;
-            t.classList.toggle("is-active", isActive);
-            t.setAttribute("aria-selected", isActive ? "true" : "false");
-            t.tabIndex = isActive ? 0 : -1; // roving tabindex
-        });
-
-        // Wenn der selektierte Spell nicht im neuen Level existiert: reset
-        const existsInLevel = getSpellsFor(level).some((s) => s.id === selectedSpellId);
-        if (!existsInLevel) selectedSpellId = null;
-
-        // Cantrips haben keine Slots
-        const isCantrip = level === "cantrip";
-        slotsCountInput.disabled = isCantrip;
-
-        if (isCantrip) {
-            slotsCountInput.value = 0;
-            renderSlots(0);
-        } else {
-            slotsCountInput.value = String(getCountFor(level));
-            renderSlots(getCountFor(level));
-        }
-
-        hideDesc();
-        renderSpellbook(level);
-        renderPanel(level);
-
-        const selected = getSelectedSpell(level);
-        fillSpellDetails(selected);
-
-        if (selected) openSpellDetails();
-        else closeSpellDetails();
     }
     function openDrawer() {
         drawer.classList.add("is-open");
@@ -1298,19 +1595,17 @@ document.addEventListener("DOMContentLoaded", () => {
     async function startup() {
         bindSpellDetailsInputs();
         bindSpellAttackInputs();
-        bindTabs();
         bindSlotsCountInput();
+        bindSlotsLevelSelect();
         bindDescriptionClose();
         bindAddSpell();
-        bindDeleteSpell();
         bindSpellDetailsClose();
         bindSelectSpell();
-        bindUseInPanel();
         bindPanelClick();
 
+        slotsLevelSelect.value = currentSlotLevel;
 
         await loadCharacterAndHydrate();
-        setActiveTab("cantrip");           // rendert jetzt mit hydriertem state
     }
 
     startup().then(() => {

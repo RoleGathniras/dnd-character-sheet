@@ -1261,33 +1261,319 @@ input[readonly] {
     box-shadow: none;
 }
 
-.skillGroupTitle {
-    margin-bottom: 8px;
-    font-size: 12px;
-    opacity: .75;
+/* ---------- Neues Rettungswürfe-Design ---------- */
+
+.saveList--modern {
+    padding: 0;
+    overflow: hidden;
 }
 
-.skillRow,
-.saveRow {
+.saveEntry {
+    min-height: 58px;
+    padding: 7px 12px;
+
     display: grid;
-    grid-template-columns: 26px 1fr 84px;
+    grid-template-columns: minmax(0, 1fr) 52px 52px;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+}
 
-    padding: 6px 0;
-
+.saveEntry+.saveEntry {
     border-top: 1px solid rgba(255, 255, 255, .06);
 }
 
-.skillRow:first-of-type,
-.saveRow:first-of-type {
-    border-top: 0;
+.saveEntry__profControl {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
 }
 
-.skillName,
-.saveName {
-    font-size: 13px;
-    opacity: .92;
+.saveEntry__prof {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.saveEntry__indicator {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--muted);
+    border-radius: 50%;
+}
+
+.saveEntry__prof:checked+.saveEntry__indicator {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+.saveEntry__prof:checked+.saveEntry__indicator::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--bg);
+}
+
+.saveEntry__name {
+    min-width: 0;
+    color: var(--text);
+    font-size: .92rem;
+    font-weight: 500;
+}
+
+.saveEntry__bonusWrap,
+.saveEntry__valueWrap {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+}
+
+.saveEntry__smallLabel {
+    color: var(--muted);
+    font-size: .55rem;
+    line-height: 1;
+    text-align: center;
+}
+
+.saveEntry__bonus,
+.saveEntry__value {
+    width: 100%;
+    min-width: 0;
+    height: 30px;
+    min-height: 30px;
+    padding: 2px 4px;
+    border-radius: 8px;
+
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+
+    appearance: textfield;
+}
+
+.saveEntry__bonus {
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, .045);
+}
+
+.saveEntry__bonus:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(134, 168, 255, .14);
+}
+
+.saveEntry__value {
+    border: 0;
+    background: transparent !important;
+    pointer-events: none;
+}
+
+.saveEntry__bonus::-webkit-inner-spin-button,
+.saveEntry__bonus::-webkit-outer-spin-button,
+.saveEntry__value::-webkit-inner-spin-button,
+.saveEntry__value::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+}
+
+/* ---------- Neues Fertigkeiten-Kartendesign ---------- */
+
+.skillCard {
+    margin-bottom: 14px;
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+
+    background: rgba(255, 255, 255, .02);
+}
+
+.skillCard__header {
+    padding: 10px 12px 8px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.skillCard__title {
+    color: var(--muted);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* Einzelne Fertigkeit */
+
+.skillEntry {
+    min-height: 58px;
+    padding: 7px 12px;
+
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr) 52px 52px;
+
+    align-items: center;
+    gap: 8px;
+}
+
+.skillEntry:hover {
+    background: rgba(255, 255, 255, .035);
+}
+
+.skillEntry__profControl {
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+
+    cursor: pointer;
+}
+
+.skillEntry__bonusWrap,
+.skillEntry__valueWrap {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+}
+
+.skillEntry__smallLabel {
+    color: var(--muted);
+
+    font-size: .55rem;
+    line-height: 1;
+
+    text-align: center;
+}
+
+
+/* Native Checkbox verstecken */
+
+.skillEntry__prof {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+/* Übungs-Kreis */
+
+.skillEntry__indicator {
+    width: 18px;
+    height: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid var(--muted);
+    border-radius: 50%;
+}
+
+.skillEntry__prof:checked+.skillEntry__indicator {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+.skillEntry__prof:checked+.skillEntry__indicator::after {
+    content: "";
+
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: var(--bg);
+}
+
+
+/* Fertigkeitsname */
+
+.skillEntry__name {
+    min-width: 0;
+
+    color: var(--text);
+
+    font-size: .92rem;
+    font-weight: 500;
+}
+
+
+/* Berechneter Modifikator */
+
+.skillEntry__bonus,
+.skillEntry__value {
+    width: 100%;
+    min-width: 0;
+    height: 30px;
+    min-height: 30px;
+
+    padding: 2px 4px;
+
+    border-radius: 8px;
+
+    color: var(--text);
+
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+
+    text-align: center;
+
+    appearance: textfield;
+}
+
+.skillEntry__bonus {
+    border: 1px solid var(--border);
+
+    background: rgba(255, 255, 255, .045);
+}
+
+.skillEntry__bonus:focus {
+    outline: none;
+
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(134, 168, 255, .14);
+}
+
+.skillEntry__value {
+    border: 0;
+
+    background: transparent !important;
+
+    pointer-events: none;
+}
+
+.skillEntry__bonus::-webkit-inner-spin-button,
+.skillEntry__bonus::-webkit-outer-spin-button,
+.skillEntry__value::-webkit-inner-spin-button,
+.skillEntry__value::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+}
+
+.skillEntry+.skillEntry {
+    border-top: 1px solid rgba(255, 255, 255, .06);
 }
 
 .passiveList {
@@ -1718,9 +2004,182 @@ input[readonly] {
 .slots {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 9px;
 }
 
+.slots label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+}
+
+.slots input[type="checkbox"] {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+    pointer-events: none;
+}
+
+.spellSlotDot {
+    width: 28px;
+    height: 28px;
+
+    display: block;
+
+    border: 2px solid var(--border-strong);
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, .025);
+
+    transition:
+        background .12s ease,
+        border-color .12s ease,
+        transform .08s ease;
+}
+
+.slots label:hover .spellSlotDot {
+    border-color: var(--accent);
+}
+
+.slots label:active .spellSlotDot {
+    transform: scale(.92);
+}
+
+.slots input[type="checkbox"]:checked+.spellSlotDot {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+.spellSlotsCard {
+    padding: 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, .025);
+}
+
+.spellSlotsCard__controls {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) minmax(100px, 140px);
+    gap: 10px;
+
+    align-items: end;
+}
+
+.spellSlotsCard__slots {
+    margin-top: 12px;
+    padding-top: 10px;
+
+    border-top: 1px solid var(--border);
+}
+
+.spellSlotsCard__label {
+    margin-bottom: 7px;
+
+    color: var(--muted);
+    font-size: .68rem;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+#spellSlots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+#spellSlots input[type="checkbox"] {
+    position: absolute !important;
+
+    width: 1px !important;
+    height: 1px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    opacity: 0 !important;
+
+    pointer-events: none;
+}
+
+#spellSlots label {
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+}
+
+.spellSlotDot {
+    width: 28px;
+    height: 28px;
+
+    display: block;
+
+    border: 2px solid var(--border-strong);
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, .025);
+}
+
+#spellSlots input[type="checkbox"]:checked+.spellSlotDot {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+/* ---------- Zauberslot-Steuerung ---------- */
+
+.spellSlotsCard .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    min-width: 0;
+}
+
+.spellSlotsCard .label {
+    color: var(--muted);
+    font-size: .7rem;
+    line-height: 1;
+}
+
+.spellSlotsCard select,
+.spellSlotsCard input[type="number"] {
+    width: 100%;
+    height: 38px;
+    min-height: 38px;
+
+    padding: 6px 10px;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, .045);
+    color: var(--text);
+
+    outline: none;
+}
+
+.spellSlotsCard select:hover,
+.spellSlotsCard input[type="number"]:hover {
+    border-color: var(--border-strong);
+}
+
+.spellSlotsCard select:focus,
+.spellSlotsCard input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(134, 168, 255, .14);
+}
 
 /* =========================================================
    19) SPELLS – ZAUBERTABELLE / PANEL
@@ -1761,154 +2220,118 @@ input[readonly] {
     overflow: hidden;
 }
 
-.panel-row td.panelCell {
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-
-    padding: 0;
-    border: 0;
-
-    overflow: hidden;
+.panelCell {
+    padding: 3px 0 !important;
+    border: 0 !important;
 }
 
 .panelSpell {
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-
-    padding: 12px;
-
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
     overflow: hidden;
-
-    border-bottom: 1px solid rgba(255, 255, 255, .08);
-
-    background: rgba(255, 255, 255, .018);
-}
-
-.panel-row:last-child .panelSpell {
-    border-bottom: 0;
-}
-
-.panelSpell__top {
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-        "name delete"
-        "meta meta";
-
-    gap: 8px;
-    align-items: start;
-
-    overflow: hidden;
-}
-
-.panelSpell__name {
-    grid-area: name;
-
-    display: block;
-
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-
-    padding: 8px 10px;
-    margin: 0;
 
     border: 1px solid var(--border);
     border-radius: 10px;
 
-    background: rgba(255, 255, 255, .035);
-    color: var(--text);
+    background: rgba(255, 255, 255, .025);
+}
 
-    font: inherit;
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.25;
+.panelSpell__top {
+    min-height: 38px;
+    padding: 5px 10px;
 
-    text-align: left;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 
     cursor: pointer;
 }
 
-.panelSpell__name:hover {
-    color: var(--accent);
-    border-color: var(--border-strong);
-    background: rgba(255, 255, 255, .07);
+.panelSpell__title {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.panelSpell__delete {
-    grid-area: delete;
+.panelSpell__level {
+    flex: 0 0 auto;
 
-    width: 32px;
-    height: 32px;
-
-    padding: 0;
-    margin: 0;
+    width: 24px;
+    height: 24px;
 
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
+    border: 1px solid rgba(134, 168, 255, .28);
+    border-radius: 7px;
+
+    background: var(--accent-soft);
+    color: var(--accent);
+
+    font-size: .72rem;
+    font-weight: 700;
 }
 
-.panelSpell__meta {
-    grid-area: meta;
-
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-
+.panelSpell__name {
     min-width: 0;
-    max-width: 100%;
-}
 
-.panelSpell__meta span,
-.panelSpell__sub span,
-.panelSpell__effect {
-    display: block;
+    font-size: .88rem;
+    font-weight: 600;
 
-    min-width: 0;
-    max-width: 100%;
-    min-height: 28px;
-
-    padding: 4px 8px;
-
-    border: 1px solid var(--border);
-    border-radius: 999px;
-
-    background: rgba(255, 255, 255, .04);
-    color: var(--text);
-
-    font-size: .78rem;
-    line-height: 1.2;
-
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.panelSpell__chevron {
+    flex: 0 0 auto;
+
+    color: var(--muted);
+    font-size: .7rem;
 }
 
 .panelSpell__bottom {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 6px;
+    padding: 10px;
 
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
+    border-top: 1px solid var(--border);
 
-    overflow: hidden;
+    background: rgba(0, 0, 0, .08);
+}
+
+.panelSpell__description {
+    margin-top: 12px;
+}
+
+.panelSpell__descriptionText {
+    margin-top: 5px;
+    max-height: 140px;
+
+    overflow-y: auto;
+
+    padding: 8px 10px;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    background: rgba(0, 0, 0, .14);
+
+    font-size: .82rem;
+    line-height: 1.45;
+
+    white-space: pre-wrap;
+}
+
+.panelSpell__actions {
+    margin-top: 10px;
+
+    display: flex;
+    justify-content: flex-end;
+}
+
+.panelSpell__actions .btn {
+    width: auto;
 }
 
 .panelSpell__sub {
@@ -1925,6 +2348,170 @@ input[readonly] {
     min-width: 0;
 }
 
+.panelSpell__detailGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.panelSpell__detail {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.panelSpell__detailLabel {
+    color: var(--muted);
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+@media (max-width: 600px) {
+    .panelSpell__time {
+        display: none;
+    }
+
+    .panelSpell__detailGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.spellbook__group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.spellbook__groupTitle {
+    margin-top: 8px;
+    margin-bottom: 2px;
+
+    color: var(--muted);
+
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.spellbook__item {
+    min-height: 38px;
+
+    display: flex;
+    align-items: center;
+
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, .025);
+}
+
+.spellbook__item.is-active {
+    border-color: var(--accent);
+}
+
+.spellbook__main {
+    flex: 1;
+    min-width: 0;
+    min-height: 38px;
+
+    padding: 5px 8px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    border: 0;
+    background: transparent;
+    color: inherit;
+
+    cursor: pointer;
+    text-align: left;
+}
+
+.spellbook__main:hover {
+    background: rgba(255, 255, 255, .035);
+}
+
+.spellbook__level {
+    flex: 0 0 auto;
+
+    width: 24px;
+    height: 24px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(134, 168, 255, .28);
+    border-radius: 7px;
+
+    background: var(--accent-soft);
+    color: var(--accent);
+
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+.spellbook__name {
+    min-width: 0;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: .88rem;
+    font-weight: 600;
+}
+
+.spellbook__actions {
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    margin-left: auto;
+    padding-right: 4px;
+}
+
+.spellbook__iconBtn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    border-radius: 7px;
+
+    background: transparent;
+    color: var(--muted);
+
+    cursor: pointer;
+    font: inherit;
+}
+
+.spellbook__iconBtn:hover {
+    background: rgba(255, 255, 255, .06);
+    color: var(--text);
+}
+
+.spellbook__iconBtn.is-active {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.spellbook__iconBtn--delete:hover {
+    color: #ff7a7a;
+}
 
 /* =========================================================
    20) SPELLS – BESCHREIBUNG / SPELLBOOK / DETAILS
@@ -2004,22 +2591,17 @@ input[readonly] {
 }
 
 .spellbook__item {
-    display: block;
+    min-height: 38px;
 
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
+    display: flex;
+    align-items: center;
 
-    padding: 12px 14px;
-
-    color: var(--text);
-    font-weight: 600;
-
-    text-align: left;
-
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, .025);
 }
 
 #sec-spellbook,
@@ -3588,4 +4170,5 @@ input[readonly] {
     .page--playerRules .ruleTopicList {
         padding-left: 24px;
     }
+
 }

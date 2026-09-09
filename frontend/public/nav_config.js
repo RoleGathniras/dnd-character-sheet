@@ -15,9 +15,7 @@ export const NAV = [
     key: "skills",
     title: "Fertigkeiten",
     href: "/skills.html",
-    sections: [
-      ["sec-skills", "Fertigkeiten"],
-    ],
+    sections: [],
   },
   {
     key: "actions",
@@ -37,7 +35,6 @@ export const NAV = [
       ["sec-spell-slots", "Zauberslots"],
       ["sec-spell-panel", "Zauberpanel"],
       ["sec-spellbook", "Zauberbuch"],
-      ["sec-spell-details", "Zauber-Details"],
     ],
   },
   {

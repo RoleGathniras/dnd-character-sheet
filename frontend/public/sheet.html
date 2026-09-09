@@ -132,7 +132,7 @@
             <div class="sheetTwoCol">
                 <section id="sec-abilities" class="abilities" tabindex="-1">
                     <section id="sec-attributes" data-nav-label="Attribute" tabindex="-1">
-                        <h3>Attribute</h3>
+                        <h3></h3>
 
                         <div class="abilityCard">
                             <div class="abilityHead">Stärke</div>
@@ -186,42 +186,128 @@
 
                     <section id="sec-saves" data-nav-label="Rettungswürfe" tabindex="-1">
                         <h3>Rettungswürfe</h3>
-                        <div class="saveList">
-                            <div class="saveRow">
-                                <input id="save_str_prof" type="checkbox" />
-                                <div class="saveName">Stärke</div>
-                                <input id="save_str" type="number" readonly />
+                        <div class="saveList saveList--modern">
+
+                            <div class="saveEntry">
+                                <label class="saveEntry__profControl" for="save_str_prof">
+                                    <input id="save_str_prof" class="saveEntry__prof" type="checkbox" />
+                                    <span class="saveEntry__indicator" aria-hidden="true"></span>
+                                    <span class="saveEntry__name">Stärke</span>
+                                </label>
+
+                                <label class="saveEntry__bonusWrap">
+                                    <span class="saveEntry__smallLabel">Bonus</span>
+                                    <input id="save_str_bonus" class="saveEntry__bonus" type="number" value="0"
+                                        step="1" />
+                                </label>
+
+                                <div class="saveEntry__valueWrap">
+                                    <span class="saveEntry__smallLabel">Gesamt</span>
+                                    <input id="save_str" class="saveEntry__value" type="number" readonly
+                                        tabindex="-1" />
+                                </div>
                             </div>
 
-                            <div class="saveRow">
-                                <input id="save_dex_prof" type="checkbox" />
-                                <div class="saveName">Geschicklichkeit</div>
-                                <input id="save_dex" type="number" readonly />
+                            <div class="saveEntry">
+                                <label class="saveEntry__profControl" for="save_dex_prof">
+                                    <input id="save_dex_prof" class="saveEntry__prof" type="checkbox" />
+                                    <span class="saveEntry__indicator" aria-hidden="true"></span>
+                                    <span class="saveEntry__name">Geschicklichkeit</span>
+                                </label>
+
+                                <label class="saveEntry__bonusWrap">
+                                    <span class="saveEntry__smallLabel">Bonus</span>
+                                    <input id="save_dex_bonus" class="saveEntry__bonus" type="number" value="0"
+                                        step="1" />
+                                </label>
+
+                                <div class="saveEntry__valueWrap">
+                                    <span class="saveEntry__smallLabel">Gesamt</span>
+                                    <input id="save_dex" class="saveEntry__value" type="number" readonly
+                                        tabindex="-1" />
+                                </div>
                             </div>
 
-                            <div class="saveRow">
-                                <input id="save_con_prof" type="checkbox" />
-                                <div class="saveName">Konstitution</div>
-                                <input id="save_con" type="number" readonly />
+                            <div class="saveEntry">
+                                <label class="saveEntry__profControl" for="save_con_prof">
+                                    <input id="save_con_prof" class="saveEntry__prof" type="checkbox" />
+                                    <span class="saveEntry__indicator" aria-hidden="true"></span>
+                                    <span class="saveEntry__name">Konstitution</span>
+                                </label>
+
+                                <label class="saveEntry__bonusWrap">
+                                    <span class="saveEntry__smallLabel">Bonus</span>
+                                    <input id="save_con_bonus" class="saveEntry__bonus" type="number" value="0"
+                                        step="1" />
+                                </label>
+
+                                <div class="saveEntry__valueWrap">
+                                    <span class="saveEntry__smallLabel">Gesamt</span>
+                                    <input id="save_con" class="saveEntry__value" type="number" readonly
+                                        tabindex="-1" />
+                                </div>
                             </div>
 
-                            <div class="saveRow">
-                                <input id="save_int_prof" type="checkbox" />
-                                <div class="saveName">Intelligenz</div>
-                                <input id="save_int" type="number" readonly />
+                            <div class="saveEntry">
+                                <label class="saveEntry__profControl" for="save_int_prof">
+                                    <input id="save_int_prof" class="saveEntry__prof" type="checkbox" />
+                                    <span class="saveEntry__indicator" aria-hidden="true"></span>
+                                    <span class="saveEntry__name">Intelligenz</span>
+                                </label>
+
+                                <label class="saveEntry__bonusWrap">
+                                    <span class="saveEntry__smallLabel">Bonus</span>
+                                    <input id="save_int_bonus" class="saveEntry__bonus" type="number" value="0"
+                                        step="1" />
+                                </label>
+
+                                <div class="saveEntry__valueWrap">
+                                    <span class="saveEntry__smallLabel">Gesamt</span>
+                                    <input id="save_int" class="saveEntry__value" type="number" readonly
+                                        tabindex="-1" />
+                                </div>
                             </div>
 
-                            <div class="saveRow">
-                                <input id="save_wis_prof" type="checkbox" />
-                                <div class="saveName">Weisheit</div>
-                                <input id="save_wis" type="number" readonly />
+                            <div class="saveEntry">
+                                <label class="saveEntry__profControl" for="save_wis_prof">
+                                    <input id="save_wis_prof" class="saveEntry__prof" type="checkbox" />
+                                    <span class="saveEntry__indicator" aria-hidden="true"></span>
+                                    <span class="saveEntry__name">Weisheit</span>
+                                </label>
+
+                                <label class="saveEntry__bonusWrap">
+                                    <span class="saveEntry__smallLabel">Bonus</span>
+                                    <input id="save_wis_bonus" class="saveEntry__bonus" type="number" value="0"
+                                        step="1" />
+                                </label>
+
+                                <div class="saveEntry__valueWrap">
+                                    <span class="saveEntry__smallLabel">Gesamt</span>
+                                    <input id="save_wis" class="saveEntry__value" type="number" readonly
+                                        tabindex="-1" />
+                                </div>
                             </div>
 
-                            <div class="saveRow">
-                                <input id="save_cha_prof" type="checkbox" />
-                                <div class="saveName">Charisma</div>
-                                <input id="save_cha" type="number" readonly />
+                            <div class="saveEntry">
+                                <label class="saveEntry__profControl" for="save_cha_prof">
+                                    <input id="save_cha_prof" class="saveEntry__prof" type="checkbox" />
+                                    <span class="saveEntry__indicator" aria-hidden="true"></span>
+                                    <span class="saveEntry__name">Charisma</span>
+                                </label>
+
+                                <label class="saveEntry__bonusWrap">
+                                    <span class="saveEntry__smallLabel">Bonus</span>
+                                    <input id="save_cha_bonus" class="saveEntry__bonus" type="number" value="0"
+                                        step="1" />
+                                </label>
+
+                                <div class="saveEntry__valueWrap">
+                                    <span class="saveEntry__smallLabel">Gesamt</span>
+                                    <input id="save_cha" class="saveEntry__value" type="number" readonly
+                                        tabindex="-1" />
+                                </div>
                             </div>
+
                         </div>
 
                         <h3>Vorteile / Nachteile</h3>

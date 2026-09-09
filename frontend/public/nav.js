@@ -67,17 +67,27 @@ export function buildSheetNav({
         const titleBtn = document.createElement("button");
         titleBtn.type = "button";
         titleBtn.className = "drawer__item drawer__group";
-        titleBtn.setAttribute("aria-expanded", onThisPage ? "true" : "false");
         titleBtn.textContent = groupCfg.title;
 
         const subList = document.createElement("div");
         subList.className = "navSubList";
-        subList.hidden = !onThisPage;
+        subList.hidden = false;
 
         titleBtn.addEventListener("click", () => {
-            const isOpen = titleBtn.getAttribute("aria-expanded") === "true";
-            titleBtn.setAttribute("aria-expanded", String(!isOpen));
-            subList.hidden = isOpen;
+            closeNavDrawer?.();
+
+            if (onThisPage) {
+                history.replaceState(null, "", groupCfg.href);
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                });
+
+                return;
+            }
+
+            window.location.href = groupCfg.href;
         });
 
         group.appendChild(titleBtn);

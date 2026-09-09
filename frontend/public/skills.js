@@ -4,28 +4,136 @@ const currentCharacterId =
     Number(localStorage.getItem("dnd_current_character_id")) || null;
 let currentCharacter = null;
 const SKILLS = [
-    { key: "athletics", ability: "str", profId: "skill_athletics_prof", outId: "skill_athletics" },
+    {
+        key: "athletics",
+        ability: "str",
+        profId: "skill_athletics_prof",
+        bonusId: "skill_athletics_bonus",
+        outId: "skill_athletics",
+    },
 
-    { key: "acrobatics", ability: "dex", profId: "skill_acrobatics_prof", outId: "skill_acrobatics" },
-    { key: "sleight_of_hand", ability: "dex", profId: "skill_sleight_of_hand_prof", outId: "skill_sleight_of_hand" },
-    { key: "stealth", ability: "dex", profId: "skill_stealth_prof", outId: "skill_stealth" },
+    {
+        key: "acrobatics",
+        ability: "dex",
+        profId: "skill_acrobatics_prof",
+        bonusId: "skill_acrobatics_bonus",
+        outId: "skill_acrobatics",
+    },
+    {
+        key: "sleight_of_hand",
+        ability: "dex",
+        profId: "skill_sleight_of_hand_prof",
+        bonusId: "skill_sleight_of_hand_bonus",
+        outId: "skill_sleight_of_hand",
+    },
+    {
+        key: "stealth",
+        ability: "dex",
+        profId: "skill_stealth_prof",
+        bonusId: "skill_stealth_bonus",
+        outId: "skill_stealth",
+    },
 
-    { key: "arcana", ability: "int", profId: "skill_arcana_prof", outId: "skill_arcana" },
-    { key: "history", ability: "int", profId: "skill_history_prof", outId: "skill_history" },
-    { key: "investigation", ability: "int", profId: "skill_investigation_prof", outId: "skill_investigation" },
-    { key: "nature", ability: "int", profId: "skill_nature_prof", outId: "skill_nature" },
-    { key: "religion", ability: "int", profId: "skill_religion_prof", outId: "skill_religion" },
+    {
+        key: "arcana",
+        ability: "int",
+        profId: "skill_arcana_prof",
+        bonusId: "skill_arcana_bonus",
+        outId: "skill_arcana",
+    },
+    {
+        key: "history",
+        ability: "int",
+        profId: "skill_history_prof",
+        bonusId: "skill_history_bonus",
+        outId: "skill_history",
+    },
+    {
+        key: "investigation",
+        ability: "int",
+        profId: "skill_investigation_prof",
+        bonusId: "skill_investigation_bonus",
+        outId: "skill_investigation",
+    },
+    {
+        key: "nature",
+        ability: "int",
+        profId: "skill_nature_prof",
+        bonusId: "skill_nature_bonus",
+        outId: "skill_nature",
+    },
+    {
+        key: "religion",
+        ability: "int",
+        profId: "skill_religion_prof",
+        bonusId: "skill_religion_bonus",
+        outId: "skill_religion",
+    },
 
-    { key: "animal_handling", ability: "wis", profId: "skill_animal_handling_prof", outId: "skill_animal_handling" },
-    { key: "insight", ability: "wis", profId: "skill_insight_prof", outId: "skill_insight" },
-    { key: "medicine", ability: "wis", profId: "skill_medicine_prof", outId: "skill_medicine" },
-    { key: "perception", ability: "wis", profId: "skill_perception_prof", outId: "skill_perception" },
-    { key: "survival", ability: "wis", profId: "skill_survival_prof", outId: "skill_survival" },
+    {
+        key: "animal_handling",
+        ability: "wis",
+        profId: "skill_animal_handling_prof",
+        bonusId: "skill_animal_handling_bonus",
+        outId: "skill_animal_handling",
+    },
+    {
+        key: "insight",
+        ability: "wis",
+        profId: "skill_insight_prof",
+        bonusId: "skill_insight_bonus",
+        outId: "skill_insight",
+    },
+    {
+        key: "medicine",
+        ability: "wis",
+        profId: "skill_medicine_prof",
+        bonusId: "skill_medicine_bonus",
+        outId: "skill_medicine",
+    },
+    {
+        key: "perception",
+        ability: "wis",
+        profId: "skill_perception_prof",
+        bonusId: "skill_perception_bonus",
+        outId: "skill_perception",
+    },
+    {
+        key: "survival",
+        ability: "wis",
+        profId: "skill_survival_prof",
+        bonusId: "skill_survival_bonus",
+        outId: "skill_survival",
+    },
 
-    { key: "deception", ability: "cha", profId: "skill_deception_prof", outId: "skill_deception" },
-    { key: "intimidation", ability: "cha", profId: "skill_intimidation_prof", outId: "skill_intimidation" },
-    { key: "performance", ability: "cha", profId: "skill_performance_prof", outId: "skill_performance" },
-    { key: "persuasion", ability: "cha", profId: "skill_persuasion_prof", outId: "skill_persuasion" },
+    {
+        key: "deception",
+        ability: "cha",
+        profId: "skill_deception_prof",
+        bonusId: "skill_deception_bonus",
+        outId: "skill_deception",
+    },
+    {
+        key: "intimidation",
+        ability: "cha",
+        profId: "skill_intimidation_prof",
+        bonusId: "skill_intimidation_bonus",
+        outId: "skill_intimidation",
+    },
+    {
+        key: "performance",
+        ability: "cha",
+        profId: "skill_performance_prof",
+        bonusId: "skill_performance_bonus",
+        outId: "skill_performance",
+    },
+    {
+        key: "persuasion",
+        ability: "cha",
+        profId: "skill_persuasion_prof",
+        bonusId: "skill_persuasion_bonus",
+        outId: "skill_persuasion",
+    },
 ];
 function abilityMod(score) {
     return Math.floor((score - 10) / 2);
@@ -44,8 +152,22 @@ function recalcSkills(data) {
 
     for (const skill of SKILLS) {
         const base = abilityMods[skill.ability] ?? 0;
-        const proficient = document.getElementById(skill.profId)?.checked ?? false;
-        const value = base + (proficient ? proficiencyBonus : 0);
+
+        const proficient =
+            document.getElementById(skill.profId)?.checked ?? false;
+
+        const bonusInput =
+            skill.bonusId
+                ? document.getElementById(skill.bonusId)
+                : null;
+
+        const additionalBonus =
+            Number(bonusInput?.value ?? 0);
+
+        const value =
+            base
+            + (proficient ? proficiencyBonus : 0)
+            + additionalBonus;
 
         const output = document.getElementById(skill.outId);
 
@@ -67,7 +189,17 @@ async function saveSkills() {
 
         for (const skill of SKILLS) {
             const checkbox = document.getElementById(skill.profId);
-            data[skill.profId] = checkbox?.checked ?? false;
+
+            data[skill.profId] =
+                checkbox?.checked ?? false;
+
+            if (skill.bonusId) {
+                const bonusInput =
+                    document.getElementById(skill.bonusId);
+
+                data[skill.bonusId] =
+                    Number(bonusInput?.value ?? 0);
+            }
         }
 
         const updatedCharacter = await API.updateCharacter(currentCharacterId, {
@@ -111,10 +243,42 @@ async function loadCharacter() {
             .forEach((el) => {
                 el.checked = Boolean(data[el.id]);
             });
+        for (const skill of SKILLS) {
+            if (!skill.bonusId) continue;
+
+            const bonusInput =
+                document.getElementById(skill.bonusId);
+
+            if (bonusInput) {
+                bonusInput.value =
+                    Number(data[skill.bonusId] ?? 0);
+            }
+        }
         recalcSkills(data);
         console.log("Fertigkeiten geladen:", character.name);
     } catch (error) {
         console.error("Fertigkeiten konnten nicht geladen werden:", error);
+    }
+    for (const skill of SKILLS) {
+        if (!skill.bonusId) continue;
+
+        const bonusInput =
+            document.getElementById(skill.bonusId);
+
+        if (!bonusInput) continue;
+
+        bonusInput.addEventListener("change", async () => {
+            if (!currentCharacter) return;
+
+            recalcSkills(currentCharacter.data ?? {});
+            await saveSkills();
+        });
+
+        bonusInput.addEventListener("input", () => {
+            if (!currentCharacter) return;
+
+            recalcSkills(currentCharacter.data ?? {});
+        });
     }
 }
 bindSkillChanges();

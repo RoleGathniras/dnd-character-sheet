@@ -118,12 +118,42 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
 
 
     const SAVES = [
-        { ability: "str", profId: "save_str_prof", outId: "save_str" },
-        { ability: "dex", profId: "save_dex_prof", outId: "save_dex" },
-        { ability: "con", profId: "save_con_prof", outId: "save_con" },
-        { ability: "int", profId: "save_int_prof", outId: "save_int" },
-        { ability: "wis", profId: "save_wis_prof", outId: "save_wis" },
-        { ability: "cha", profId: "save_cha_prof", outId: "save_cha" },
+        {
+            ability: "str",
+            profId: "save_str_prof",
+            bonusId: "save_str_bonus",
+            outId: "save_str",
+        },
+        {
+            ability: "dex",
+            profId: "save_dex_prof",
+            bonusId: "save_dex_bonus",
+            outId: "save_dex",
+        },
+        {
+            ability: "con",
+            profId: "save_con_prof",
+            bonusId: "save_con_bonus",
+            outId: "save_con",
+        },
+        {
+            ability: "int",
+            profId: "save_int_prof",
+            bonusId: "save_int_bonus",
+            outId: "save_int",
+        },
+        {
+            ability: "wis",
+            profId: "save_wis_prof",
+            bonusId: "save_wis_bonus",
+            outId: "save_wis",
+        },
+        {
+            ability: "cha",
+            profId: "save_cha_prof",
+            bonusId: "save_cha_bonus",
+            outId: "save_cha",
+        },
     ];
 
     function recalcSaves() {
@@ -140,7 +170,13 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
 
         for (const s of SAVES) {
             const base = abilityMods[s.ability] ?? 0;
-            const val = base + (isChecked(s.profId) ? pb : 0);
+            const bonus = getNum(s.bonusId, 0);
+
+            const val =
+                base
+                + (isChecked(s.profId) ? pb : 0)
+                + bonus;
+
             setDerivedVal(s.outId, val);
         }
     }
@@ -221,7 +257,7 @@ import { jsonToSheet, sheetToJson } from "./mapper.js";
         const ids = [
             "proficiency_bonus",
             "str", "dex", "con", "int", "wis", "cha",
-            ...SAVES.flatMap((s) => [s.profId]),
+            ...SAVES.flatMap((s) => [s.profId, s.bonusId]),
         ];
 
         for (const id of ids) {
