@@ -14,6 +14,7 @@ import {
     let currentCharacterUpdatedAt = null;
     let attackSaveTimer = null;
     let editingActionId = null;
+    let expandedActionId = null;
 
     function setValue(id, value) {
         const el = document.getElementById(id);
@@ -479,20 +480,94 @@ import {
             }
 
             card.innerHTML = `
-    <div class="actionCard__header">
-        <strong>${escapeActionHtml(action.name)}</strong>
+    <button
+        class="actionCard__header"
+        type="button"
+        aria-expanded="false"
+    >
+        <span class="actionCard__title">
+            <span class="actionCard__chevron">▶</span>
+            <strong>${escapeActionHtml(action.name)}</strong>
+        </span>
+
         <span>${escapeActionHtml(typeLabel)}</span>
-    </div>
+    </button>
 
-    <div class="actionCard__description">
-        ${escapeActionHtml(action.description)}
-    </div>
+    <div class="actionCard__details" hidden>
+        <div class="actionCard__description">
+            ${escapeActionHtml(action.description)}
+        </div>
 
-    ${usesHtml}
+        ${usesHtml}
+
+        <div class="actionCard__buttons">
+            <button
+                class="btn actionCard__edit"
+                type="button"
+            >
+                Bearbeiten
+            </button>
+        </div>
+    </div>
 `;
-            card.addEventListener("click", () => {
-                openActionEditor(action);
+            if (expandedActionId === action.id) {
+                const details =
+                    card.querySelector(".actionCard__details");
+
+                const header =
+                    card.querySelector(".actionCard__header");
+
+                const chevron =
+                    card.querySelector(".actionCard__chevron");
+
+                if (details) {
+                    details.hidden = false;
+                }
+
+                if (header) {
+                    header.setAttribute(
+                        "aria-expanded",
+                        "true"
+                    );
+                }
+
+                if (chevron) {
+                    chevron.textContent = "▼";
+                }
+            }
+            const header =
+                card.querySelector(".actionCard__header");
+
+            const details =
+                card.querySelector(".actionCard__details");
+
+            const chevron =
+                card.querySelector(".actionCard__chevron");
+
+            header?.addEventListener("click", () => {
+                const isOpen = !details.hidden;
+
+                details.hidden = isOpen;
+
+                expandedActionId =
+                    isOpen ? null : action.id;
+
+                header.setAttribute(
+                    "aria-expanded",
+                    isOpen ? "false" : "true"
+                );
+
+                if (chevron) {
+                    chevron.textContent =
+                        isOpen ? "▶" : "▼";
+                }
             });
+
+            card
+                .querySelector(".actionCard__edit")
+                ?.addEventListener("click", () => {
+                    openActionEditor(action);
+                });
             card
                 .querySelectorAll(".actionCard__use")
                 .forEach((button) => {

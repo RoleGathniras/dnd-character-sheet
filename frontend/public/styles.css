@@ -1849,6 +1849,137 @@ input[readonly] {
     outline-offset: 2px;
 }
 
+/* =========================================================
+   Aktionen – Klappkarten
+   ========================================================= */
+
+#actionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.actionCard {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .025);
+}
+
+.actionCard__header {
+    width: 100%;
+    min-height: 46px;
+    padding: 9px 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    border: 0;
+    background: transparent;
+    color: var(--text);
+
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.actionCard__header:hover {
+    background: rgba(255, 255, 255, .035);
+}
+
+.actionCard__title {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.actionCard__title strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.actionCard__chevron {
+    width: 16px;
+    flex: 0 0 16px;
+
+    color: var(--muted);
+    font-size: .75rem;
+    text-align: center;
+    text-indent: -5px;
+}
+
+.actionCard__header>span:last-child {
+    flex: 0 0 auto;
+
+    padding: 3px 7px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    color: var(--muted);
+    background: rgba(255, 255, 255, .035);
+
+    font-size: .72rem;
+}
+
+.actionCard__details {
+    padding: 8px 12px 12px;
+    border-top: 1px solid var(--border);
+}
+
+.actionCard__description {
+    padding: 4px 0 10px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+.actionCard__uses {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+
+    padding: 4px 0;
+}
+
+.actionCard__useDots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.actionCard__use {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+
+    border: 2px solid var(--border-strong);
+    border-radius: 50%;
+
+    background: transparent;
+    cursor: pointer;
+}
+
+.actionCard__use.is-active {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+.actionCard__uses small {
+    width: 100%;
+    color: var(--muted);
+}
+
+.actionCard__buttons {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 6px;
+}
+
 
 /* =========================================================
    16) SPELLS – SEITENLAYOUT / CARDS
