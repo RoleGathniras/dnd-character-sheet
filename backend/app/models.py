@@ -43,6 +43,7 @@ class Character(SQLModel, table=True):
     data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     updated_at: datetime = Field(default_factory=utcnow, nullable=False)
 
+
 class Spell(SQLModel, table=True):
     __tablename__ = "spells"
 
@@ -56,7 +57,7 @@ class Spell(SQLModel, table=True):
     range: str = Field(max_length=500)
 
     components: str = Field(max_length=50)
-    material: str = Field(default="", max_length=300)
+    material: str = Field(default="", max_length=2000)
     duration: str = Field(max_length=100)
 
     concentration: bool = Field(default=False)
