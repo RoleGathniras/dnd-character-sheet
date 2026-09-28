@@ -147,6 +147,43 @@ export const API = {
         });
     },
 
+    // ===== Campaigns =====
+
+    listCampaigns() {
+        return this.request("/campaigns");
+    },
+
+    getCampaign(id) {
+        return this.request(`/campaigns/${id}`);
+    },
+
+    createCampaign(payload) {
+        return this.request("/campaigns", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+    },
+
+    addCharacterToCampaign(campaignId, characterId) {
+        return this.request(
+            `/campaigns/${campaignId}/characters/${characterId}`,
+            {
+                method: "POST",
+            },
+        );
+    },
+
+    removeCharacterFromCampaign(campaignId, characterId) {
+        return this.request(
+            `/campaigns/${campaignId}/characters/${characterId}`,
+            {
+                method: "DELETE",
+            },
+        );
+    },
+
+
     // ===== Spells =====
 
     getSpells(level) {

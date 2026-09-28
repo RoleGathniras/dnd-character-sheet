@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kampagnen</title>
+</head>
+
+<body>
+    <main>
+        <h1>Meine Kampagnen</h1>
+
+        <div id="campaign-list">
+            <p>Kampagnen werden geladen...</p>
+        </div>
+
+        <button id="create-campaign-button" type="button">
+            + Neue Kampagne
+        </button>
+        <div id="create-campaign-form" hidden>
+            <h2>Neue Kampagne</h2>
+
+            <label for="campaign-name">Name</label>
+            <input id="campaign-name" type="text" maxlength="100" required>
+
+            <fieldset>
+                <legend>Spielercharaktere</legend>
+
+                <div id="campaign-character-list">
+                    <p>Charaktere werden geladen...</p>
+                </div>
+            </fieldset>
+            <button id="save-campaign-button" type="button">
+                Erstellen
+            </button>
+
+            <button id="cancel-campaign-button" type="button">
+                Abbrechen
+            </button>
+
+            <p id="create-campaign-error"></p>
+        </div>
+    </main>
+
+    <script type="module" src="campaigns.js"></script>
+</body>
+
+</html>

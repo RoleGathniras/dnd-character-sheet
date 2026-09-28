@@ -28,3 +28,23 @@ class CharacterOut(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class CampaignCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    character_ids: list[int] = Field(default_factory=list)
+
+class CampaignCharacterOut(BaseModel):
+    id: int
+    name: str
+    owner_id: Optional[int]
+    owner_username: Optional[str] = None
+
+class CampaignOut(BaseModel):
+    id: int
+    name: str
+    dm_id: int
+    created_at: datetime
+    updated_at: datetime
+    characters: list[CampaignCharacterOut] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)

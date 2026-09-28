@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kampagne</title>
+</head>
+
+<body>
+    <main>
+        <a href="campaigns.html">← Meine Kampagnen</a>
+
+        <h1 id="campaign-name">Kampagne wird geladen...</h1>
+
+        <section>
+            <h2>Spielercharaktere</h2>
+
+            <div id="campaign-characters">
+                <p>Charaktere werden geladen...</p>
+            </div>
+            <button id="show-add-character-button" type="button">
+                + Spielercharakter hinzufügen
+            </button>
+
+            <div id="add-character-area" hidden>
+                <h3>Spielercharakter hinzufügen</h3>
+
+                <div id="available-characters">
+                    <p>Charaktere werden geladen...</p>
+                </div>
+
+                <button id="cancel-add-character-button" type="button">
+                    Abbrechen
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="campaign.js"></script>
+</body>
+
+</html>

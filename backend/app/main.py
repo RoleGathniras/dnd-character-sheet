@@ -4,10 +4,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
+from app.api.campaigns import router as campaigns_router
 from app.api.characters import router as characters_router
+from app.api.spells import router as spells_router
 from app.api.users import router as users_router
 from app.db import init_db
-from app.api.spells import router as spells_router
 
 app = FastAPI(title="DnD Character Sheet API")
 
@@ -37,6 +38,7 @@ def health():
 
 
 app.include_router(auth_router)
+app.include_router(campaigns_router)
 app.include_router(users_router)
 app.include_router(characters_router)
 app.include_router(spells_router)
