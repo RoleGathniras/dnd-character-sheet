@@ -1,110 +1,127 @@
 <!doctype html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Kampagnen</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="../styles/dm.css" />
-  </head>
+  <title>Kampagnen</title>
 
-  <body>
-    <!-- Linker Drawer -->
-    <div id="backdrop" class="backdrop" hidden></div>
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../styles/dm.css" />
+</head>
 
-    <aside id="drawer" class="drawer" aria-hidden="true">
-      <div class="drawer__header">
-        <strong>DM-Bereich</strong>
+<body>
+  <!-- Linker Drawer -->
+  <div id="backdrop" class="backdrop" hidden></div>
 
-        <button
-          id="btnCloseDrawer"
-          class="btn"
-          type="button"
-          aria-label="Menü schließen"
-        >
-          ✕
-        </button>
-      </div>
+  <aside id="drawer" class="drawer" aria-hidden="true">
+    <div class="drawer__header">
+      <strong>DM-Bereich</strong>
 
-      <div class="drawer__content"></div>
+      <button id="btnCloseDrawer" class="btn" type="button" aria-label="Menü schließen">
+        ✕
+      </button>
+    </div>
 
-      <div class="drawer__footer">
-        <button
-          id="btnAccountSettings"
-          class="drawer__item"
-          type="button"
-          disabled
-        >
-          Accounteinstellungen
-        </button>
+    <div class="drawer__content"></div>
 
-        <button id="btnLogout" class="drawer__item" type="button">
-          Abmelden
-        </button>
-      </div>
-    </aside>
-
-    <!-- Appbar -->
-    <header class="appbar appbar--dm">
-      <button
-        id="btnDrawerOpen"
-        class="btn appbar__menu-btn"
-        type="button"
-        aria-label="Menü öffnen"
-      >
-        ☰
+    <div class="drawer__footer">
+      <button id="btnAccountSettings" class="drawer__item" type="button" disabled>
+        Accounteinstellungen
       </button>
 
-      <div class="appbar__title appbar__title--dm">
-        <strong>DM-Bereich</strong>
-        <span>Kampagnen</span>
-      </div>
+      <button id="btnLogout" class="drawer__item" type="button">
+        Abmelden
+      </button>
+    </div>
+  </aside>
 
-      <!-- Platzhalter hält den Titel mittig -->
-      <div class="appbar__menu-placeholder"></div>
-    </header>
+  <!-- Appbar -->
+  <header class="appbar appbar--dm">
+    <button id="btnDrawerOpen" class="btn appbar__menu-btn" type="button" aria-label="Menü öffnen">
+      ☰
+    </button>
 
-    <!-- Inhalt -->
-    <main class="container">
-      <h1>Meine Kampagnen</h1>
+    <div class="appbar__title appbar__title--dm">
+      <strong>DM-Bereich</strong>
+      <span>Kampagnen</span>
+    </div>
 
+    <!-- Platzhalter hält den Titel mittig -->
+    <div class="appbar__menu-placeholder"></div>
+  </header>
+
+  <!-- Inhalt -->
+  <main class="container">
+    <h1>Meine Kampagnen</h1>
+    <section class="dm-campaigns-panel">
       <div id="campaign-list">
         <p>Kampagnen werden geladen...</p>
       </div>
+    </section>
+    <div id="edit-campaign-form" hidden>
+      <h2>Kampagne bearbeiten</h2>
 
-      <button id="create-campaign-button" class="btn" type="button">
-        + Neue Kampagne
+      <label for="edit-campaign-name">Name</label>
+      <input id="edit-campaign-name" type="text" maxlength="100" required />
+
+      <label for="edit-campaign-image">Kampagnenbild</label>
+      <input id="edit-campaign-image" type="file" accept="image/*" />
+
+      <div id="edit-campaign-image-preview" hidden>
+        <img id="edit-campaign-image-preview-img" alt="Vorschau des Kampagnenbildes" />
+      </div>
+
+      <button id="save-edit-campaign-button" class="btn" type="button">
+        Speichern
       </button>
 
-      <div id="create-campaign-form" hidden>
-        <h2>Neue Kampagne</h2>
+      <button id="cancel-edit-campaign-button" class="btn" type="button">
+        Abbrechen
+      </button>
 
-        <label for="campaign-name">Name</label>
+      <p id="edit-campaign-error"></p>
+    </div>
+    <button id="create-campaign-button" class="btn" type="button">
+      + Neue Kampagne
+    </button>
 
-        <input id="campaign-name" type="text" maxlength="100" required />
+    <div id="create-campaign-form" hidden>
+      <h2>Neue Kampagne</h2>
 
-        <fieldset>
-          <legend>Spielercharaktere</legend>
+      <label for="campaign-name">Name</label>
 
-          <div id="campaign-character-list">
-            <p>Charaktere werden geladen...</p>
-          </div>
-        </fieldset>
+      <input id="campaign-name" type="text" maxlength="100" required />
 
-        <button id="save-campaign-button" class="btn" type="button">
-          Erstellen
-        </button>
+      <label for="campaign-image">Kampagnenbild</label>
+      <input id="campaign-image" type="file" accept="image/*" />
 
-        <button id="cancel-campaign-button" class="btn" type="button">
-          Abbrechen
-        </button>
-
-        <p id="create-campaign-error"></p>
+      <div id="campaign-image-preview" hidden>
+        <img id="campaign-image-preview-img" alt="Vorschau des Kampagnenbildes" />
       </div>
-    </main>
 
-    <script type="module" src="campaigns.js"></script>
-  </body>
+      <fieldset>
+        <legend>Spielercharaktere</legend>
+
+        <div id="campaign-character-list">
+          <p>Charaktere werden geladen...</p>
+        </div>
+      </fieldset>
+
+      <button id="save-campaign-button" class="btn" type="button">
+        Erstellen
+      </button>
+
+      <button id="cancel-campaign-button" class="btn" type="button">
+        Abbrechen
+      </button>
+
+      <p id="create-campaign-error"></p>
+    </div>
+  </main>
+
+  <script type="module" src="campaigns.js"></script>
+</body>
+
 </html>

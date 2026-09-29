@@ -56,6 +56,7 @@ def build_campaign_out(
         id=campaign.id,
         name=campaign.name,
         dm_id=campaign.dm_id,
+        image_data_url=campaign.image_data_url,
         first_session_date=campaign.first_session_date,
         session_number=campaign.session_number,
         ingame_days=campaign.ingame_days,
@@ -102,6 +103,7 @@ def create_campaign(
     campaign = Campaign(
         name=payload.name,
         dm_id=current_user.id,
+        image_data_url=payload.image_data_url,
     )
 
     session.add(campaign)

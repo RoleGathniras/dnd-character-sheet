@@ -43,12 +43,14 @@ class Character(SQLModel, table=True):
     data: Dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     updated_at: datetime = Field(default_factory=utcnow, nullable=False)
 
+
 class Campaign(SQLModel, table=True):
     __tablename__ = "campaigns"
 
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(max_length=100)
     dm_id: int = Field(foreign_key="users.id")
+    image_data_url: Optional[str] = Field(default=None)
 
     first_session_date: Optional[date] = Field(default=None)
     session_number: int = Field(default=0)
@@ -59,6 +61,7 @@ class Campaign(SQLModel, table=True):
 
     created_at: datetime = Field(default_factory=utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=utcnow, nullable=False)
+
 
 class CampaignCharacter(SQLModel, table=True):
     __tablename__ = "campaign_characters"
@@ -72,6 +75,7 @@ class CampaignCharacter(SQLModel, table=True):
         foreign_key="characters.id",
         primary_key=True,
     )
+
 
 class Spell(SQLModel, table=True):
     __tablename__ = "spells"

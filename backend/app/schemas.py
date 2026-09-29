@@ -33,6 +33,7 @@ class CharacterOut(BaseModel):
 class CampaignCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     character_ids: list[int] = Field(default_factory=list)
+    image_data_url: Optional[str] = None
 
 
 class CampaignCharacterOut(BaseModel):
@@ -47,6 +48,7 @@ class CampaignOut(BaseModel):
     id: int
     name: str
     dm_id: int
+    image_data_url: Optional[str] = None
 
     first_session_date: Optional[date] = None
     session_number: int = 0
@@ -63,6 +65,9 @@ class CampaignOut(BaseModel):
 
 
 class CampaignUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    image_data_url: Optional[str] = None
+
     first_session_date: Optional[date] = None
     session_number: Optional[int] = Field(default=None, ge=0)
     ingame_days: Optional[int] = Field(default=None, ge=0)

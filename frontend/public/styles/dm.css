@@ -226,3 +226,126 @@
 .dm-dashboard-status__edit:hover {
   background: rgba(255, 255, 255, 0.06);
 }
+
+/* ========================================
+   DM CREATE CAMPAIGN
+   ======================================== */
+#campaign-image-preview,
+#edit-campaign-image-preview {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+#campaign-image-preview img,
+#edit-campaign-image-preview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* Campaign overview */
+.dm-campaigns-panel {
+  padding: 20px;
+  margin-bottom: 24px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+#campaign-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.dm-campaign-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+}
+
+.dm-campaign-card__image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+
+.dm-campaign-card__image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.dm-campaign-card__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.dm-campaign-card__edit {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  width: 36px;
+  height: 36px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: inherit;
+  cursor: pointer;
+}
+
+.dm-campaign-card__edit svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.dm-campaign-card__content {
+  padding: 16px;
+}
+
+.dm-campaign-card__content h2 {
+  margin: 0 0 14px;
+}
+
+.dm-campaign-card__details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  margin-bottom: 18px;
+}
+
+.dm-campaign-card__details span {
+  font-size: 0.9rem;
+}
+
+.dm-campaign-card__open {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  text-decoration: none;
+}
