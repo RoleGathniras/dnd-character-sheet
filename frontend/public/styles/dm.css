@@ -1,0 +1,228 @@
+/* ========================================
+   DM Appbar
+   ======================================== */
+
+.appbar--dm {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.appbar__title--dm {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.appbar--dm .appbar__menu-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 44px;
+}
+
+.appbar__menu-placeholder {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+}
+
+/* ========================================
+   DM Dashboard
+   ======================================== */
+
+.dm-dashboard-status {
+  margin-bottom: 24px;
+  padding: 16px;
+
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel);
+}
+
+.dm-dashboard-status h2 {
+  margin: 4px 4px 16px;
+}
+
+.dm-dashboard-status__info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dm-dashboard-status__info>div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dm-dashboard-status__info span {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.dm-dashboard-status__info strong {
+  font-size: 1.1rem;
+}
+
+.dm-dashboard-status__info input {
+  width: 100%;
+  max-width: 150px;
+  box-sizing: border-box;
+
+  padding: 7px 8px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: var(--panel);
+  color: inherit;
+}
+
+.dm-level-range-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dm-level-range-edit input {
+  width: 58px;
+}
+
+.dm-dashboard-players {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.dm-dashboard-status__box {
+  padding: 16px;
+
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dm-dashboard-navigation {
+  margin-bottom: 24px;
+  padding: 16px;
+
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel);
+}
+
+.dm-dashboard-navigation h2 {
+  margin: 4px 4px 16px;
+}
+
+.dm-dashboard-navigation__box {
+  padding: 16px;
+
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dm-dashboard {
+  padding-top: 24px;
+}
+
+#campaign-player-portraits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.dm-player-portrait {
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.dm-player-portrait img,
+.dm-player-portrait>span {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+}
+
+.dm-player-portrait img {
+  display: block;
+  object-fit: cover;
+}
+
+.dm-player-portrait>span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: var(--panel);
+}
+
+.dm-player-portrait small {
+  width: 100%;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dm-dashboard-status__box {
+  position: relative;
+
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dm-dashboard-status__edit {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+
+  width: 27px;
+  height: 27px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+
+  cursor: pointer;
+}
+
+.dm-dashboard-status__edit svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.dm-dashboard-status__edit svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.dm-dashboard-status__edit:hover {
+  background: rgba(255, 255, 255, 0.06);
+}

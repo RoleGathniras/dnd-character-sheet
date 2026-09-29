@@ -62,7 +62,9 @@ export const API = {
             } else if (Array.isArray(detail)) {
                 message = detail
                     .map((entry) => {
-                        const loc = Array.isArray(entry?.loc) ? entry.loc.join(".") : "unknown";
+                        const loc = Array.isArray(entry?.loc)
+                            ? entry.loc.join(".")
+                            : "unknown";
                         const msg = entry?.msg || "Ungültige Eingabe";
                         return `${loc}: ${msg}`;
                     })
@@ -74,10 +76,12 @@ export const API = {
             }
 
             if (!message) {
-                if (response.status === 401) message = "Nicht eingeloggt oder Sitzung abgelaufen.";
+                if (response.status === 401)
+                    message = "Nicht eingeloggt oder Sitzung abgelaufen.";
                 else if (response.status === 403) message = "Keine Berechtigung.";
                 else if (response.status === 404) message = "Ressource nicht gefunden.";
-                else if (response.status === 409) message = "Konflikt mit dem aktuellen Datenstand.";
+                else if (response.status === 409)
+                    message = "Konflikt mit dem aktuellen Datenstand.";
                 else if (response.status === 422) message = "Ungültige Eingabedaten.";
                 else message = "Unbekannter Fehler.";
             }
@@ -166,23 +170,23 @@ export const API = {
     },
 
     addCharacterToCampaign(campaignId, characterId) {
-        return this.request(
-            `/campaigns/${campaignId}/characters/${characterId}`,
-            {
-                method: "POST",
-            },
-        );
+        return this.request(`/campaigns/${campaignId}/characters/${characterId}`, {
+            method: "POST",
+        });
     },
 
     removeCharacterFromCampaign(campaignId, characterId) {
-        return this.request(
-            `/campaigns/${campaignId}/characters/${characterId}`,
-            {
-                method: "DELETE",
-            },
-        );
+        return this.request(`/campaigns/${campaignId}/characters/${characterId}`, {
+            method: "DELETE",
+        });
     },
-
+    updateCampaign(id, payload) {
+        return this.request(`/campaigns/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+    },
 
     // ===== Spells =====
 
@@ -209,7 +213,12 @@ export const API = {
         });
     },
 
-    async createUserByAdmin({ username, password, role = "player", isActive = true }) {
+    async createUserByAdmin({
+        username,
+        password,
+        role = "player",
+        isActive = true,
+    }) {
         return this.createUser({ username, password, role, isActive });
     },
 
@@ -250,6 +259,8 @@ export const API = {
     // ===== Legacy / entfernt im Backend =====
 
     async register() {
-        throw new Error("Die offene Registrierung wurde entfernt. User müssen jetzt vom Admin angelegt werden.");
+        throw new Error(
+            "Die offene Registrierung wurde entfernt. User müssen jetzt vom Admin angelegt werden.",
+        );
     },
 };

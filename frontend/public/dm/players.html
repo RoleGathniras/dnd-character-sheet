@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../styles/dm.css" />
+
+    <title>Kampagne</title>
+</head>
+
+<body>
+    <!-- Left drawer -->
+    <div id="backdrop" class="backdrop" hidden></div>
+
+    <aside id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>DM-Bereich</strong>
+
+            <button id="btnCloseDrawer" class="btn" type="button" aria-label="Schließen">
+                ✕
+            </button>
+        </div>
+
+        <div class="drawer__content">
+            <button id="btnCampaigns" class="drawer__item" type="button">
+                ← Kampagnenauswahl
+            </button>
+        </div>
+
+        <div class="drawer__footer">
+            <button id="btnAccountSettings" class="drawer__item" type="button" disabled>
+                Accounteinstellungen
+            </button>
+
+            <button id="btnLogout" class="drawer__item" type="button">
+                Abmelden
+            </button>
+        </div>
+    </aside>
+
+    <!-- Right navigation drawer -->
+    <div id="navBackdrop" class="backdrop" hidden></div>
+
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>Navigation</strong>
+
+            <button id="btnNavClose" class="btn" type="button" aria-label="Schließen">
+                ✕
+            </button>
+        </div>
+
+        <div id="navList" class="drawer__content">
+            <button class="drawer__item" type="button">Übersicht</button>
+
+            <div class="drawer__section">
+                <div class="drawer__title">Spieler</div>
+
+                <div class="drawer__list">
+                    <button class="drawer__item" type="button">
+                        Spielercharaktere
+                    </button>
+                </div>
+            </div>
+
+            <div class="drawer__section">
+                <div class="drawer__title">Welt</div>
+
+                <div class="drawer__list">
+                    <button class="drawer__item" type="button">NPCs</button>
+
+                    <button class="drawer__item" type="button">Gegner</button>
+
+                    <button class="drawer__item" type="button">Items</button>
+                </div>
+            </div>
+
+            <div class="drawer__section">
+                <div class="drawer__title">Spielleitung</div>
+
+                <div class="drawer__list">
+                    <button class="drawer__item" type="button">Notizen</button>
+
+                    <button class="drawer__item" type="button">Kampf</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Appbar -->
+    <header class="appbar appbar--dm">
+        <button id="btnDrawerOpen" class="btn appbar__menu-btn" type="button" aria-label="Menü öffnen">
+            ☰
+        </button>
+
+        <div class="appbar__title appbar__title--dm">
+            <strong id="appbarCampaignName">Kampagne</strong>
+            <span>Kampagne · DM</span>
+        </div>
+
+        <button id="btnNavOpen" class="btn appbar__menu-btn" type="button" aria-label="Kampagnen-Navigation öffnen">
+            ☰
+        </button>
+    </header>
+
+    <!-- Player content -->
+    <main class="container dm-dashboard">
+        <section class="dm-dashboard-status">
+            <h2>Spielercharaktere</h2>
+
+            <div class="dm-dashboard-status__box">
+                <p>
+                    Hier werden die Spielercharaktere dieser Kampagne verwaltet.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="campaign.js"></script>
+</body>
+
+</html>

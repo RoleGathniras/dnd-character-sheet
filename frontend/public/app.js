@@ -1,13 +1,17 @@
 import { API } from "./api.js";
 import { buildSheetNav } from "/nav.js";
-import { initCharacterStatusbar, loadCharacterStatusbar, } from "./character_statusbar.js";
+import {
+  initCharacterStatusbar,
+  loadCharacterStatusbar,
+} from "./character_statusbar.js";
 
-let currentCharacterId = Number(localStorage.getItem("dnd_current_character_id")) || null;
+let currentCharacterId =
+  Number(localStorage.getItem("dnd_current_character_id")) || null;
 let currentUser = null;
 const isIndexPage =
-    location.pathname === "/" ||
-    location.pathname.endsWith("/index") ||
-    location.pathname.endsWith("/index.html");
+  location.pathname === "/" ||
+  location.pathname.endsWith("/index") ||
+  location.pathname.endsWith("/index.html");
 
 const isSheetPage = location.pathname.endsWith("/sheet.html");
 // ============================================================
@@ -52,9 +56,15 @@ const navList = document.getElementById("navList");
 const btnCharacterLevel = document.getElementById("btnCharacterLevel");
 const btnCharacterInfo = document.getElementById("btnCharacterInfo");
 
-const currentCharacterAvatar = document.getElementById("currentCharacterAvatar");
-const currentCharacterAvatarImg = document.getElementById("currentCharacterAvatarImg");
-const currentCharacterAvatarFallback = document.getElementById("currentCharacterAvatarFallback");
+const currentCharacterAvatar = document.getElementById(
+  "currentCharacterAvatar",
+);
+const currentCharacterAvatarImg = document.getElementById(
+  "currentCharacterAvatarImg",
+);
+const currentCharacterAvatarFallback = document.getElementById(
+  "currentCharacterAvatarFallback",
+);
 const topbarCharacterName = document.getElementById("topbarCharacterName");
 const topbarCharacterMeta = document.getElementById("topbarCharacterMeta");
 const topbarCharacterLevel = document.getElementById("topbarCharacterLevel");
@@ -63,174 +73,175 @@ const topbarCharacterLevel = document.getElementById("topbarCharacterLevel");
 // ============================================================
 
 export function getCurrentCharacterId() {
-    return currentCharacterId;
+  return currentCharacterId;
 }
 
 export function getCurrentUser() {
-    return currentUser;
+  return currentUser;
 }
 
 export function setStatus(msg) {
-    if (!statusEl) return;
-    statusEl.textContent = msg;
+  if (!statusEl) return;
+  statusEl.textContent = msg;
 }
 
 export function setCurrentCharacter(id) {
-    currentCharacterId = id ? Number(id) : null;
+  currentCharacterId = id ? Number(id) : null;
 
-    if (currentCharacterId) {
-        localStorage.setItem("dnd_current_character_id", String(currentCharacterId));
-        localStorage.setItem("selectedCharacterId", String(currentCharacterId));
-    } else {
-        localStorage.removeItem("dnd_current_character_id");
-        localStorage.removeItem("selectedCharacterId");
-    }
+  if (currentCharacterId) {
+    localStorage.setItem(
+      "dnd_current_character_id",
+      String(currentCharacterId),
+    );
+    localStorage.setItem("selectedCharacterId", String(currentCharacterId));
+  } else {
+    localStorage.removeItem("dnd_current_character_id");
+    localStorage.removeItem("selectedCharacterId");
+  }
 
-    if (btnSave) btnSave.disabled = true;
-    updateDrawerActions();
+  if (btnSave) btnSave.disabled = true;
+  updateDrawerActions();
 }
 
 export function renderDrawerTitle() {
-    const el = document.getElementById("drawerUserTitle");
-    if (!el) return;
+  const el = document.getElementById("drawerUserTitle");
+  if (!el) return;
 
-    if (!currentUser) {
-        el.textContent = "Charaktere";
-        return;
-    }
+  if (!currentUser) {
+    el.textContent = "Charaktere";
+    return;
+  }
 
-    const username = currentUser.username ?? "???";
-    const role = currentUser.role ?? "";
-    el.textContent = role ? `${username} (${role})` : username;
+  const username = currentUser.username ?? "???";
+  const role = currentUser.role ?? "";
+  el.textContent = role ? `${username} (${role})` : username;
 }
 
 export function applyRoleUI() {
-    updateDrawerActions();
+  updateDrawerActions();
 }
 
 function updateDrawerActions() {
-    const role = currentUser?.role;
-    const isLoggedIn = !!API.token;
-    const isDmOrAdmin = role === "dm" || role === "admin";
-    const isAdmin = role === "admin";
-    const hasSelectedCharacter = !!currentCharacterId;
+  const role = currentUser?.role;
+  const isLoggedIn = !!API.token;
+  const isDmOrAdmin = role === "dm" || role === "admin";
+  const isAdmin = role === "admin";
+  const hasSelectedCharacter = !!currentCharacterId;
 
-    if (drawerActionsSection) {
-        drawerActionsSection.style.display = isIndexPage ? "" : "none";
-    }
+  if (drawerActionsSection) {
+    drawerActionsSection.style.display = isIndexPage ? "" : "none";
+  }
 
-    if (btnCreatePC) {
-        btnCreatePC.style.display = isIndexPage ? "" : "none";
-        btnCreatePC.disabled = !isLoggedIn;
-    }
+  if (btnCreatePC) {
+    btnCreatePC.style.display = isIndexPage ? "" : "none";
+    btnCreatePC.disabled = !isLoggedIn;
+  }
 
-    if (btnCreateNPC) {
-        btnCreateNPC.style.display = isIndexPage && isDmOrAdmin ? "" : "none";
-        btnCreateNPC.disabled = !isDmOrAdmin;
-    }
+  if (btnCreateNPC) {
+    btnCreateNPC.style.display = isIndexPage && isDmOrAdmin ? "" : "none";
+    btnCreateNPC.disabled = !isDmOrAdmin;
+  }
 
-    if (btnDelete) {
-        btnDelete.style.display = isIndexPage && hasSelectedCharacter ? "" : "none";
-        btnDelete.disabled = !isLoggedIn || !hasSelectedCharacter;
-    }
-    if (btnPlayerRules) {
-        btnPlayerRules.style.display = isLoggedIn ? "" : "none";
-        btnPlayerRules.disabled = !isLoggedIn;
-    }
-    if (btnAdmin) {
-        btnAdmin.hidden = !(isIndexPage && isAdmin);
-    }
+  if (btnDelete) {
+    btnDelete.style.display = isIndexPage && hasSelectedCharacter ? "" : "none";
+    btnDelete.disabled = !isLoggedIn || !hasSelectedCharacter;
+  }
+  if (btnPlayerRules) {
+    btnPlayerRules.style.display = isLoggedIn ? "" : "none";
+    btnPlayerRules.disabled = !isLoggedIn;
+  }
+  if (btnAdmin) {
+    btnAdmin.hidden = !(isIndexPage && isAdmin);
+  }
 
+  if (toggleActions && actionsMenu) {
+    const hasVisibleAction =
+      (btnCreatePC && btnCreatePC.style.display !== "none") ||
+      (btnCreateNPC && btnCreateNPC.style.display !== "none") ||
+      (btnDelete && btnDelete.style.display !== "none") ||
+      (btnPlayerRules && btnPlayerRules.style.display !== "none") ||
+      (btnAdmin && !btnAdmin.hidden);
 
-    if (toggleActions && actionsMenu) {
-        const hasVisibleAction =
-            (btnCreatePC && btnCreatePC.style.display !== "none") ||
-            (btnCreateNPC && btnCreateNPC.style.display !== "none") ||
-            (btnDelete && btnDelete.style.display !== "none") ||
-            (btnPlayerRules && btnPlayerRules.style.display !== "none") ||
-            (btnAdmin && !btnAdmin.hidden);
-
-        if (!hasVisibleAction) {
-            setSectionOpen(toggleActions, actionsMenu, false);
-        }
+    if (!hasVisibleAction) {
+      setSectionOpen(toggleActions, actionsMenu, false);
     }
+  }
 }
 
 export function setAdminVisible() {
-    updateDrawerActions();
+  updateDrawerActions();
 }
 
 export function setLoggedInUI(isLoggedIn) {
-    setDisplay(btnLogin, isLoggedIn ? "none" : "inline-block");
-    setDisplay(btnLogout, isLoggedIn ? "inline-block" : "none");
+  setDisplay(btnLogin, isLoggedIn ? "none" : "inline-block");
+  setDisplay(btnLogout, isLoggedIn ? "inline-block" : "none");
 
-    if (btnSave) btnSave.disabled = true;
+  if (btnSave) btnSave.disabled = true;
 
-    setDisplay(btnMenu, isLoggedIn ? "inline-block" : "none");
-    setDisplay(btnActions, isLoggedIn ? "inline-block" : "none");
-    setDisplay(btnNavOpen, isLoggedIn ? "inline-block" : "none");
+  setDisplay(btnMenu, isLoggedIn ? "inline-block" : "none");
+  setDisplay(btnActions, isLoggedIn ? "inline-block" : "none");
+  setDisplay(btnNavOpen, isLoggedIn ? "inline-block" : "none");
 
-    if (currentCharacterAvatar) {
-        currentCharacterAvatar.hidden = !isLoggedIn;
-    }
+  if (currentCharacterAvatar) {
+    currentCharacterAvatar.hidden = !isLoggedIn;
+  }
 
-    if (!isLoggedIn) {
-        closeNavDrawer();
-        closeActionsMenu();
-    }
+  if (!isLoggedIn) {
+    closeNavDrawer();
+    closeActionsMenu();
+  }
 
-    if (sheetRootEl) {
-        sheetRootEl.style.display = isLoggedIn ? "" : "none";
-    }
+  if (sheetRootEl) {
+    sheetRootEl.style.display = isLoggedIn ? "" : "none";
+  }
 
-    updateDrawerActions();
+  updateDrawerActions();
 }
 
 export async function refreshCurrentUserAndUI() {
-    try {
-        currentUser = await API.me();
-        renderDrawerTitle();
-        setAdminVisible();
-        applyRoleUI();
-    } catch (e) {
-        console.error(e);
+  try {
+    currentUser = await API.me();
+    renderDrawerTitle();
+    setAdminVisible();
+    applyRoleUI();
+  } catch (e) {
+    console.error(e);
 
-        currentUser = null;
-        renderDrawerTitle();
-        applyRoleUI();
-        setAdminVisible();
-        throw e;
-    }
+    currentUser = null;
+    renderDrawerTitle();
+    applyRoleUI();
+    setAdminVisible();
+    throw e;
+  }
 }
 
 export async function loadCharacters() {
-    if (!listMine || !listNpcs) return [];
+  if (!listMine || !listNpcs) return [];
 
-    listMine.innerHTML = "";
-    listNpcs.innerHTML = "";
+  listMine.innerHTML = "";
+  listNpcs.innerHTML = "";
 
-    const chars = await API.characters();
+  const chars = await API.characters();
 
-    const currentCharacter = chars.find(
-        (character) =>
-            Number(character.id) === Number(currentCharacterId)
-    );
+  const currentCharacter = chars.find(
+    (character) => Number(character.id) === Number(currentCharacterId),
+  );
 
-    renderTopbarCharacterAvatar(currentCharacter ?? null);
+  renderTopbarCharacterAvatar(currentCharacter ?? null);
 
-    for (const c of chars) {
-        const b = document.createElement("button");
-        b.className = "drawer__item";
+  for (const c of chars) {
+    const b = document.createElement("button");
+    b.className = "drawer__item";
 
-        if (Number(c.id) === Number(currentCharacterId)) {
-            b.classList.add("is-active");
-        }
+    if (Number(c.id) === Number(currentCharacterId)) {
+      b.classList.add("is-active");
+    }
 
-        const name = escapeHtml(c.name ?? "");
-        const kind = escapeHtml((c.kind ?? "").toUpperCase());
-        const ownerName = c.owner_username ? escapeHtml(c.owner_username) : "";
+    const name = escapeHtml(c.name ?? "");
+    const kind = escapeHtml((c.kind ?? "").toUpperCase());
+    const ownerName = c.owner_username ? escapeHtml(c.owner_username) : "";
 
-        b.innerHTML = `
+    b.innerHTML = `
             <span class="drawerItem__main">
                 <span class="drawerItem__name">${name}</span>
                 <span class="drawerItem__kind">${kind}</span>
@@ -238,300 +249,262 @@ export async function loadCharacters() {
             ${ownerName ? `<span class="drawerItem__sub">${ownerName}</span>` : ``}
         `;
 
-        b.addEventListener("click", () => {
-            setCurrentCharacter(c.id);
-            closeDrawer();
+    b.addEventListener("click", () => {
+      setCurrentCharacter(c.id);
+      closeDrawer();
 
-            const onSheet = location.pathname.endsWith("/sheet.html");
-            if (onSheet) {
-                window.dispatchEvent(
-                    new CustomEvent("character:selected", {
-                        detail: { id: c.id },
-                    })
-                );
-                return;
-            }
+      const onSheet = location.pathname.endsWith("/sheet.html");
+      if (onSheet) {
+        window.dispatchEvent(
+          new CustomEvent("character:selected", {
+            detail: { id: c.id },
+          }),
+        );
+        return;
+      }
 
-            window.location.href = "/sheet.html";
-        });
+      window.location.href = "/sheet.html";
+    });
 
-        if (c.kind === "npc") listNpcs.appendChild(b);
-        else listMine.appendChild(b);
-    }
+    if (c.kind === "npc") listNpcs.appendChild(b);
+    else listMine.appendChild(b);
+  }
 
-    updateDrawerActions();
-    setStatus(`Charaktere geladen: ${chars.length}`);
-    return chars;
+  updateDrawerActions();
+  setStatus(`Charaktere geladen: ${chars.length}`);
+  return chars;
 }
 
 export function getCharacterImageDataUrl(character) {
-    return (
-        character?.data?.description?.appearance?.imageDataUrl ||
-        character?.data?.character_description?.appearance?.imageDataUrl ||
-        character?.data?.appearance?.imageDataUrl ||
-        ""
-    );
+  return (
+    character?.data?.description?.appearance?.imageDataUrl ||
+    character?.data?.character_description?.appearance?.imageDataUrl ||
+    character?.data?.appearance?.imageDataUrl ||
+    ""
+  );
 }
 
 export function getCharacterImageCrop(character) {
-    const crop =
-        character?.data?.description?.appearance?.imageCrop ||
-        character?.data?.character_description?.appearance?.imageCrop ||
-        character?.data?.appearance?.imageCrop ||
-        null;
+  const crop =
+    character?.data?.description?.appearance?.imageCrop ||
+    character?.data?.character_description?.appearance?.imageCrop ||
+    character?.data?.appearance?.imageCrop ||
+    null;
 
-    return {
-        x: Number(crop?.x ?? 50),
-        y: Number(crop?.y ?? 50),
-        zoom: Number(crop?.zoom ?? 1),
-    };
+  return {
+    x: Number(crop?.x ?? 50),
+    y: Number(crop?.y ?? 50),
+    zoom: Number(crop?.zoom ?? 1),
+  };
 }
 
 export function renderTopbarCharacterAvatar(character) {
-    if (
-        !currentCharacterAvatar ||
-        !currentCharacterAvatarImg ||
-        !currentCharacterAvatarFallback
-    ) {
-        return;
-    }
+  if (
+    !currentCharacterAvatar ||
+    !currentCharacterAvatarImg ||
+    !currentCharacterAvatarFallback
+  ) {
+    return;
+  }
 
-    currentCharacterAvatar.hidden = false;
+  currentCharacterAvatar.hidden = false;
 
-    if (!character) {
-        currentCharacterAvatarImg.removeAttribute("src");
-        currentCharacterAvatarImg.hidden = true;
+  if (!character) {
+    currentCharacterAvatarImg.removeAttribute("src");
+    currentCharacterAvatarImg.hidden = true;
 
-        currentCharacterAvatarFallback.hidden = false;
-        currentCharacterAvatarFallback.textContent = "?";
-
-        if (topbarCharacterName) {
-            topbarCharacterName.textContent = "Kein Charakter";
-        }
-
-        if (topbarCharacterMeta) {
-            topbarCharacterMeta.textContent = "—";
-        }
-        if (topbarCharacterLevel) {
-            topbarCharacterLevel.textContent = "—";
-        }
-
-        return;
-    }
-
-    const data = character.data ?? {};
-
-    const imageDataUrl = getCharacterImageDataUrl(character);
-    const crop = getCharacterImageCrop(character);
-
-    const name = String(character.name || "Charakter").trim();
-    const fallbackLetter = name ? name.charAt(0).toUpperCase() : "?";
-
-    const race = String(data.race ?? "").trim();
-    const characterClass = String(data.class ?? "").trim();
-    const level = String(data.level ?? "").trim();
+    currentCharacterAvatarFallback.hidden = false;
+    currentCharacterAvatarFallback.textContent = "?";
 
     if (topbarCharacterName) {
-        topbarCharacterName.textContent = name;
+      topbarCharacterName.textContent = "Kein Charakter";
     }
 
     if (topbarCharacterMeta) {
-        const metaParts = [];
-
-        if (race) metaParts.push(race);
-        if (characterClass) metaParts.push(characterClass);
-
-        topbarCharacterMeta.textContent =
-            metaParts.length > 0
-                ? metaParts.join(" · ")
-                : "—";
+      topbarCharacterMeta.textContent = "—";
     }
     if (topbarCharacterLevel) {
-        topbarCharacterLevel.textContent = level || "—";
+      topbarCharacterLevel.textContent = "—";
     }
 
-    if (imageDataUrl) {
-        currentCharacterAvatarImg.src = imageDataUrl;
-        currentCharacterAvatarImg.alt = name;
-        currentCharacterAvatarImg.style.objectPosition = `${crop.x}% ${crop.y}%`;
+    return;
+  }
 
-        currentCharacterAvatarImg.hidden = false;
-        currentCharacterAvatarFallback.hidden = true;
-    } else {
-        currentCharacterAvatarImg.removeAttribute("src");
-        currentCharacterAvatarImg.hidden = true;
+  const data = character.data ?? {};
 
-        currentCharacterAvatarFallback.hidden = false;
-        currentCharacterAvatarFallback.textContent = fallbackLetter;
-    }
+  const imageDataUrl = getCharacterImageDataUrl(character);
+  const crop = getCharacterImageCrop(character);
+
+  const name = String(character.name || "Charakter").trim();
+  const fallbackLetter = name ? name.charAt(0).toUpperCase() : "?";
+
+  const race = String(data.race ?? "").trim();
+  const characterClass = String(data.class ?? "").trim();
+  const level = String(data.level ?? "").trim();
+
+  if (topbarCharacterName) {
+    topbarCharacterName.textContent = name;
+  }
+
+  if (topbarCharacterMeta) {
+    const metaParts = [];
+
+    if (race) metaParts.push(race);
+    if (characterClass) metaParts.push(characterClass);
+
+    topbarCharacterMeta.textContent =
+      metaParts.length > 0 ? metaParts.join(" · ") : "—";
+  }
+  if (topbarCharacterLevel) {
+    topbarCharacterLevel.textContent = level || "—";
+  }
+
+  if (imageDataUrl) {
+    currentCharacterAvatarImg.src = imageDataUrl;
+    currentCharacterAvatarImg.alt = name;
+    currentCharacterAvatarImg.style.objectPosition = `${crop.x}% ${crop.y}%`;
+
+    currentCharacterAvatarImg.hidden = false;
+    currentCharacterAvatarFallback.hidden = true;
+  } else {
+    currentCharacterAvatarImg.removeAttribute("src");
+    currentCharacterAvatarImg.hidden = true;
+
+    currentCharacterAvatarFallback.hidden = false;
+    currentCharacterAvatarFallback.textContent = fallbackLetter;
+  }
 }
 
 export function bindTopbarAvatarNavigation() {
-    if (!currentCharacterAvatar) return;
-    if (currentCharacterAvatar.dataset.bound === "1") return;
+  if (!currentCharacterAvatar) return;
+  if (currentCharacterAvatar.dataset.bound === "1") return;
 
-    currentCharacterAvatar.dataset.bound = "1";
-    currentCharacterAvatar.style.cursor = "pointer";
+  currentCharacterAvatar.dataset.bound = "1";
+  currentCharacterAvatar.style.cursor = "pointer";
 
-    currentCharacterAvatar.addEventListener("click", () => {
-        window.location.href = "/index.html";
-    });
+  currentCharacterAvatar.addEventListener("click", () => {
+    window.location.href = "/index.html";
+  });
 }
 export function bindTopbarLevelEditing() {
-    if (!btnCharacterLevel) return;
-    if (btnCharacterLevel.dataset.bound === "1") return;
+  if (!btnCharacterLevel) return;
+  if (btnCharacterLevel.dataset.bound === "1") return;
 
-    btnCharacterLevel.dataset.bound = "1";
+  btnCharacterLevel.dataset.bound = "1";
 
-    btnCharacterLevel.addEventListener("click", async () => {
-        const currentCharacterId =
-            Number(localStorage.getItem("dnd_current_character_id")) || null;
+  btnCharacterLevel.addEventListener("click", async () => {
+    const currentCharacterId =
+      Number(localStorage.getItem("dnd_current_character_id")) || null;
 
-        if (!currentCharacterId) return;
+    if (!currentCharacterId) return;
 
-        try {
-            const latestCharacter =
-                await API.getCharacter(currentCharacterId);
+    try {
+      const latestCharacter = await API.getCharacter(currentCharacterId);
 
-            const currentLevel =
-                Number(latestCharacter.data?.level ?? 1);
+      const currentLevel = Number(latestCharacter.data?.level ?? 1);
 
-            const input = window.prompt(
-                "Neue Stufe (1–20):",
-                String(currentLevel)
-            );
+      const input = window.prompt("Neue Stufe (1–20):", String(currentLevel));
 
-            if (input === null) return;
+      if (input === null) return;
 
-            const level = Number(input);
+      const level = Number(input);
 
-            if (
-                !Number.isInteger(level) ||
-                level < 1 ||
-                level > 20
-            ) {
-                alert("Die Stufe muss zwischen 1 und 20 liegen.");
-                return;
-            }
+      if (!Number.isInteger(level) || level < 1 || level > 20) {
+        alert("Die Stufe muss zwischen 1 und 20 liegen.");
+        return;
+      }
 
-            const newData = {
-                ...(latestCharacter.data ?? {}),
-                level,
-            };
+      const newData = {
+        ...(latestCharacter.data ?? {}),
+        level,
+      };
 
-            const updatedCharacter =
-                await API.patchCharacter(
-                    latestCharacter.id,
-                    {
-                        data: newData,
-                        updated_at: latestCharacter.updated_at,
-                    }
-                );
+      const updatedCharacter = await API.patchCharacter(latestCharacter.id, {
+        data: newData,
+        updated_at: latestCharacter.updated_at,
+      });
 
-            renderTopbarCharacterAvatar(updatedCharacter);
+      renderTopbarCharacterAvatar(updatedCharacter);
 
-            window.dispatchEvent(
-                new CustomEvent("character:updated", {
-                    detail: {
-                        character: updatedCharacter,
-                    },
-                })
-            );
-        } catch (error) {
-            console.error(
-                "Stufe konnte nicht gespeichert werden:",
-                error
-            );
-        }
-    });
+      window.dispatchEvent(
+        new CustomEvent("character:updated", {
+          detail: {
+            character: updatedCharacter,
+          },
+        }),
+      );
+    } catch (error) {
+      console.error("Stufe konnte nicht gespeichert werden:", error);
+    }
+  });
 }
 export function bindTopbarCharacterInfoEditing() {
-    if (!btnCharacterInfo) return;
-    if (btnCharacterInfo.dataset.bound === "1") return;
+  if (!btnCharacterInfo) return;
+  if (btnCharacterInfo.dataset.bound === "1") return;
 
-    btnCharacterInfo.dataset.bound = "1";
+  btnCharacterInfo.dataset.bound = "1";
 
-    btnCharacterInfo.addEventListener("click", async () => {
-        const currentCharacterId =
-            Number(localStorage.getItem("dnd_current_character_id")) || null;
+  btnCharacterInfo.addEventListener("click", async () => {
+    const currentCharacterId =
+      Number(localStorage.getItem("dnd_current_character_id")) || null;
 
-        if (!currentCharacterId) return;
+    if (!currentCharacterId) return;
 
-        try {
-            const latestCharacter =
-                await API.getCharacter(currentCharacterId);
+    try {
+      const latestCharacter = await API.getCharacter(currentCharacterId);
 
-            const currentName =
-                String(latestCharacter.name ?? "").trim();
+      const currentName = String(latestCharacter.name ?? "").trim();
 
-            const currentRace =
-                String(latestCharacter.data?.race ?? "").trim();
+      const currentRace = String(latestCharacter.data?.race ?? "").trim();
 
-            const currentClass =
-                String(latestCharacter.data?.class ?? "").trim();
+      const currentClass = String(latestCharacter.data?.class ?? "").trim();
 
-            const newName = window.prompt(
-                "Charaktername:",
-                currentName
-            );
+      const newName = window.prompt("Charaktername:", currentName);
 
-            if (newName === null) return;
+      if (newName === null) return;
 
-            const newRace = window.prompt(
-                "Volk:",
-                currentRace
-            );
+      const newRace = window.prompt("Volk:", currentRace);
 
-            if (newRace === null) return;
+      if (newRace === null) return;
 
-            const newClass = window.prompt(
-                "Klasse:",
-                currentClass
-            );
+      const newClass = window.prompt("Klasse:", currentClass);
 
-            if (newClass === null) return;
+      if (newClass === null) return;
 
-            const name = newName.trim();
-            const race = newRace.trim();
-            const characterClass = newClass.trim();
+      const name = newName.trim();
+      const race = newRace.trim();
+      const characterClass = newClass.trim();
 
-            if (!name || !race || !characterClass) {
-                alert("Name, Volk und Klasse dürfen nicht leer sein.");
-                return;
-            }
+      if (!name || !race || !characterClass) {
+        alert("Name, Volk und Klasse dürfen nicht leer sein.");
+        return;
+      }
 
-            const newData = {
-                ...(latestCharacter.data ?? {}),
-                race,
-                class: characterClass,
-            };
+      const newData = {
+        ...(latestCharacter.data ?? {}),
+        race,
+        class: characterClass,
+      };
 
-            const updatedCharacter =
-                await API.patchCharacter(
-                    latestCharacter.id,
-                    {
-                        name,
-                        data: newData,
-                        updated_at: latestCharacter.updated_at,
-                    }
-                );
+      const updatedCharacter = await API.patchCharacter(latestCharacter.id, {
+        name,
+        data: newData,
+        updated_at: latestCharacter.updated_at,
+      });
 
-            renderTopbarCharacterAvatar(updatedCharacter);
+      renderTopbarCharacterAvatar(updatedCharacter);
 
-            window.dispatchEvent(
-                new CustomEvent("character:updated", {
-                    detail: {
-                        character: updatedCharacter,
-                    },
-                })
-            );
-        } catch (error) {
-            console.error(
-                "Charakterdaten konnten nicht gespeichert werden:",
-                error
-            );
-        }
-    });
+      window.dispatchEvent(
+        new CustomEvent("character:updated", {
+          detail: {
+            character: updatedCharacter,
+          },
+        }),
+      );
+    } catch (error) {
+      console.error("Charakterdaten konnten nicht gespeichert werden:", error);
+    }
+  });
 }
 
 // ============================================================
@@ -539,96 +512,96 @@ export function bindTopbarCharacterInfoEditing() {
 // ============================================================
 
 function escapeHtml(s) {
-    return String(s)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function setDisplay(el, value) {
-    if (!el) return;
-    el.style.display = value;
+  if (!el) return;
+  el.style.display = value;
 }
 
 function setSectionOpen(toggleBtn, listEl, open) {
-    if (!toggleBtn || !listEl) return;
-    toggleBtn.setAttribute("aria-expanded", open ? "true" : "false");
-    listEl.hidden = !open;
+  if (!toggleBtn || !listEl) return;
+  toggleBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  listEl.hidden = !open;
 }
 
 function bindSectionToggle(toggleBtn, listEl, defaultOpen) {
-    if (!toggleBtn || !listEl) return;
-    if (toggleBtn.dataset.bound === "1") return;
+  if (!toggleBtn || !listEl) return;
+  if (toggleBtn.dataset.bound === "1") return;
 
-    toggleBtn.dataset.bound = "1";
-    setSectionOpen(toggleBtn, listEl, defaultOpen);
+  toggleBtn.dataset.bound = "1";
+  setSectionOpen(toggleBtn, listEl, defaultOpen);
 
-    toggleBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        const isOpen = toggleBtn.getAttribute("aria-expanded") === "true";
-        setSectionOpen(toggleBtn, listEl, !isOpen);
-    });
+  toggleBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    const isOpen = toggleBtn.getAttribute("aria-expanded") === "true";
+    setSectionOpen(toggleBtn, listEl, !isOpen);
+  });
 }
 
 function openDrawer() {
-    drawer?.classList.add("is-open");
-    drawer?.setAttribute("aria-hidden", "false");
-    if (backdrop) backdrop.hidden = false;
-    document.getElementById("btnCloseDrawer")?.focus();
+  drawer?.classList.add("is-open");
+  drawer?.setAttribute("aria-hidden", "false");
+  if (backdrop) backdrop.hidden = false;
+  document.getElementById("btnCloseDrawer")?.focus();
 }
 
 function closeDrawer() {
-    document.getElementById("btnMenu")?.focus();
-    drawer?.classList.remove("is-open");
-    drawer?.setAttribute("aria-hidden", "true");
-    if (backdrop) backdrop.hidden = true;
+  document.getElementById("btnMenu")?.focus();
+  drawer?.classList.remove("is-open");
+  drawer?.setAttribute("aria-hidden", "true");
+  if (backdrop) backdrop.hidden = true;
 }
 
 function openNavDrawer() {
-    closeDrawer();
-    navDrawer?.classList.add("is-open");
-    navDrawer?.setAttribute("aria-hidden", "false");
-    if (navBackdrop) navBackdrop.hidden = false;
+  closeDrawer();
+  navDrawer?.classList.add("is-open");
+  navDrawer?.setAttribute("aria-hidden", "false");
+  if (navBackdrop) navBackdrop.hidden = false;
 }
 
 function closeNavDrawer() {
-    navDrawer?.classList.remove("is-open");
-    navDrawer?.setAttribute("aria-hidden", "true");
-    if (navBackdrop) navBackdrop.hidden = true;
+  navDrawer?.classList.remove("is-open");
+  navDrawer?.setAttribute("aria-hidden", "true");
+  if (navBackdrop) navBackdrop.hidden = true;
 }
 
 function closeActionsMenu() {
-    // aktuell leer, aber behalten als Hook
+  // aktuell leer, aber behalten als Hook
 }
 
 function scrollToHashIfPresent() {
-    const hash = window.location.hash;
-    if (!hash || hash.length < 2) return;
+  const hash = window.location.hash;
+  if (!hash || hash.length < 2) return;
 
-    const id = decodeURIComponent(hash.slice(1));
-    const target = document.getElementById(id);
-    if (!target) return;
+  const id = decodeURIComponent(hash.slice(1));
+  const target = document.getElementById(id);
+  if (!target) return;
 
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
-    target.focus?.({ preventScroll: true });
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  target.focus?.({ preventScroll: true });
 }
 
 function scrollToHashWithRetry(tries = 20) {
-    const hash = window.location.hash;
-    if (!hash || hash.length < 2) return;
+  const hash = window.location.hash;
+  if (!hash || hash.length < 2) return;
 
-    const id = decodeURIComponent(hash.slice(1));
-    const target = document.getElementById(id);
+  const id = decodeURIComponent(hash.slice(1));
+  const target = document.getElementById(id);
 
-    if (target) {
-        scrollToHashIfPresent();
-        return;
-    }
+  if (target) {
+    scrollToHashIfPresent();
+    return;
+  }
 
-    if (tries <= 0) return;
-    requestAnimationFrame(() => scrollToHashWithRetry(tries - 1));
+  if (tries <= 0) return;
+  requestAnimationFrame(() => scrollToHashWithRetry(tries - 1));
 }
 
 // ============================================================
@@ -636,122 +609,126 @@ function scrollToHashWithRetry(tries = 20) {
 // ============================================================
 
 async function handleCreate(kind) {
-    const name = prompt(
-        kind === "npc"
-            ? "Name des NPC:"
-            : "Name des Charakters:"
-    );
+  const name = prompt(
+    kind === "npc" ? "Name des NPC:" : "Name des Charakters:",
+  );
 
-    if (!name?.trim()) return;
+  if (!name?.trim()) return;
 
-    const data = {
-        schema_version: 1,
-    };
+  const data = {
+    schema_version: 1,
+  };
 
-    if (kind !== "npc") {
-        const race = prompt("Volk:");
-        if (!race?.trim()) return;
+  if (kind !== "npc") {
+    const race = prompt("Volk:");
+    if (!race?.trim()) return;
 
-        const characterClass = prompt("Klasse:");
-        if (!characterClass?.trim()) return;
+    const characterClass = prompt("Klasse:");
+    if (!characterClass?.trim()) return;
 
-        data.race = race.trim();
-        data.class = characterClass.trim();
-        data.level = 1;
+    data.race = race.trim();
+    data.class = characterClass.trim();
+    data.level = 1;
+  }
+
+  const payload = {
+    name: name.trim(),
+    kind,
+    data,
+  };
+
+  try {
+    const created = await API.createCharacter(payload);
+
+    setCurrentCharacter(created.id);
+    await loadCharacters();
+
+    const onSheet = location.pathname.endsWith("/sheet.html");
+
+    if (onSheet) {
+      window.dispatchEvent(
+        new CustomEvent("character:selected", {
+          detail: {
+            id: created.id,
+          },
+        }),
+      );
+    } else {
+      window.location.href = "/sheet.html";
     }
 
-    const payload = {
-        name: name.trim(),
-        kind,
-        data,
-    };
-
-    try {
-        const created = await API.createCharacter(payload);
-
-        setCurrentCharacter(created.id);
-        await loadCharacters();
-
-        const onSheet =
-            location.pathname.endsWith("/sheet.html");
-
-        if (onSheet) {
-            window.dispatchEvent(
-                new CustomEvent("character:selected", {
-                    detail: {
-                        id: created.id,
-                    },
-                })
-            );
-        } else {
-            window.location.href = "/sheet.html";
-        }
-
-        setStatus(`Erstellt: ${created.name}`);
-    } catch (err) {
-        if (err.status === 403) {
-            alert("Nur DM/Admin darf NPCs anlegen.");
-            return;
-        }
-
-        console.error(err);
-
-        alert(
-            err?.message ||
-            "Du kannst max. 10 Charaktere erstellen."
-        );
+    setStatus(`Erstellt: ${created.name}`);
+  } catch (err) {
+    if (err.status === 403) {
+      alert("Nur DM/Admin darf NPCs anlegen.");
+      return;
     }
+
+    console.error(err);
+
+    alert(err?.message || "Du kannst max. 10 Charaktere erstellen.");
+  }
 }
 
 async function doLogin() {
-    const username = prompt("Username");
-    const password = prompt("Passwort");
-    if (!username || !password) return;
+  const username = prompt("Username");
+  const password = prompt("Passwort");
 
-    try {
-        await API.login(username, password);
+  if (!username || !password) return;
 
-        const isIndexPage =
-            location.pathname === "/" ||
-            location.pathname.endsWith("/index") ||
-            location.pathname.endsWith("/index.html");
+  try {
+    await API.login(username, password);
 
-        if (isIndexPage) {
-            updateLandingAuthState(true);
-            window.dispatchEvent(new CustomEvent("auth:login"));
-            setStatus("Eingeloggt ✅");
-            return;
-        }
+    // Benutzer laden, damit wir die Rolle kennen
+    currentUser = await API.me();
 
-        setLoggedInUI(true);
-        await refreshCurrentUserAndUI();
-        applyRoleUI();
-        await loadCharacters();
-
-        setStatus("Eingeloggt ✅");
-    } catch (e) {
-        console.error(e);
-        alert(e?.message || "Login fehlgeschlagen");
-        setStatus(e?.message || "Login fehlgeschlagen ❌");
+    // DM bekommt einen eigenen Arbeitsbereich
+    if (currentUser.role === "dm") {
+      window.location.href = "/dm/campaigns.html";
+      return;
     }
+
+    const isIndexPage =
+      location.pathname === "/" ||
+      location.pathname.endsWith("/index") ||
+      location.pathname.endsWith("/index.html");
+
+    if (isIndexPage) {
+      updateLandingAuthState(true);
+      window.dispatchEvent(new CustomEvent("auth:login"));
+      setStatus("Eingeloggt ✅");
+      return;
+    }
+
+    setLoggedInUI(true);
+    await refreshCurrentUserAndUI();
+    applyRoleUI();
+    await loadCharacters();
+
+    setStatus("Eingeloggt ✅");
+  } catch (e) {
+    console.error(e);
+    alert(e?.message || "Login fehlgeschlagen");
+    setStatus(e?.message || "Login fehlgeschlagen ❌");
+  }
 }
 
 function doLogout() {
-    API.token = null;
-    setCurrentCharacter(null);
-    updateLandingAuthState(false);
-    window.dispatchEvent(new CustomEvent("auth:logout"));
-    window.location.href = "/index.html";
+  API.token = null;
+  setCurrentCharacter(null);
+  updateLandingAuthState(false);
+  window.dispatchEvent(new CustomEvent("auth:logout"));
+  window.location.href = "/index.html";
 }
 
 export function updateLandingAuthState(isLoggedIn) {
-    if (charactersPanel) {
-        charactersPanel.hidden = !isLoggedIn;
-    }
+  if (charactersPanel) {
+    charactersPanel.hidden = !isLoggedIn;
+  }
 
-    if (landingHero) {
-        landingHero.hidden = isLoggedIn;
-    }
+  if (landingHero) {
+    landingHero.hidden = isLoggedIn;
+  }
 }
 
 // ============================================================
@@ -777,106 +754,106 @@ bindSectionToggle(toggleNpcs, listNpcs, false);
 bindSectionToggle(toggleActions, actionsMenu, true);
 
 btnAdmin?.addEventListener("click", () => {
-    closeDrawer();
-    window.location.href = "/admin.html";
+  closeDrawer();
+  window.location.href = "/admin.html";
 });
 btnPlayerRules?.addEventListener("click", () => {
-    closeDrawer();
-    window.location.href = "/player_rules.html";
+  closeDrawer();
+  window.location.href = "/player_rules.html";
 });
 
 window.addEventListener("hashchange", () => {
-    scrollToHashWithRetry();
+  scrollToHashWithRetry();
 });
 btnDelete?.addEventListener("click", async () => {
-    if (!currentCharacterId) return;
+  if (!currentCharacterId) return;
 
-    const ok = window.confirm("Willst du diesen Charakter wirklich löschen?");
-    if (!ok) return;
+  const ok = window.confirm("Willst du diesen Charakter wirklich löschen?");
+  if (!ok) return;
 
-    try {
-        await API.deleteCharacter(currentCharacterId);
-        setCurrentCharacter(null);
-        await loadCharacters();
-        updateDrawerActions();
-        closeDrawer();
-        setStatus("Charakter gelöscht.");
+  try {
+    await API.deleteCharacter(currentCharacterId);
+    setCurrentCharacter(null);
+    await loadCharacters();
+    updateDrawerActions();
+    closeDrawer();
+    setStatus("Charakter gelöscht.");
 
-        if (!isIndexPage) {
-            window.location.href = "/index.html";
-        }
-    } catch (e) {
-        console.error(e);
-        alert(e?.message || "Charakter konnte nicht gelöscht werden.");
+    if (!isIndexPage) {
+      window.location.href = "/index.html";
     }
+  } catch (e) {
+    console.error(e);
+    alert(e?.message || "Charakter konnte nicht gelöscht werden.");
+  }
 });
 // ============================================================
 // STARTUP
 // ============================================================
 
 (function startup() {
-    bindTopbarAvatarNavigation();
-    bindTopbarLevelEditing();
-    bindTopbarCharacterInfoEditing();
+  bindTopbarAvatarNavigation();
+  bindTopbarLevelEditing();
+  bindTopbarCharacterInfoEditing();
 
-    const isSpellPage = location.pathname.endsWith("/spell.html");
-    const isInventoryPage = location.pathname.endsWith("/inventory.html");
-    const isCharacterPage = location.pathname.endsWith("/charakter.html");
-    const isNotesPage = location.pathname.endsWith("/notes.html");
-    const isAdminPage = location.pathname.endsWith("/admin.html");
-    const isSkillsPage = location.pathname.endsWith("/skills.html");
-    const isActionsPage = location.pathname.endsWith("/actions.html");
-    const hasCharacterStatusbar =
-        isSpellPage ||
-        isInventoryPage ||
-        isCharacterPage ||
-        isNotesPage ||
-        isSheetPage ||
-        isSkillsPage ||
-        isActionsPage;
+  const isSpellPage = location.pathname.endsWith("/spell.html");
+  const isInventoryPage = location.pathname.endsWith("/inventory.html");
+  const isCharacterPage = location.pathname.endsWith("/charakter.html");
+  const isNotesPage = location.pathname.endsWith("/notes.html");
+  const isAdminPage = location.pathname.endsWith("/admin.html");
+  const isSkillsPage = location.pathname.endsWith("/skills.html");
+  const isActionsPage = location.pathname.endsWith("/actions.html");
+  const hasCharacterStatusbar =
+    isSpellPage ||
+    isInventoryPage ||
+    isCharacterPage ||
+    isNotesPage ||
+    isSheetPage ||
+    isSkillsPage ||
+    isActionsPage;
 
-    if (hasCharacterStatusbar) {
-        initCharacterStatusbar();
+  if (hasCharacterStatusbar) {
+    initCharacterStatusbar();
 
-        if (currentCharacterId) {
-            loadCharacterStatusbar(currentCharacterId);
-        }
+    if (currentCharacterId) {
+      loadCharacterStatusbar(currentCharacterId);
+    }
+  }
+
+  if (
+    isSpellPage ||
+    isInventoryPage ||
+    isCharacterPage ||
+    isNotesPage ||
+    isSkillsPage ||
+    isActionsPage ||
+    isSheetPage ||
+    isAdminPage
+  ) {
+    buildSheetNav({
+      navList,
+      btnNavOpen,
+      closeNavDrawer,
+      sheetRootEl,
+    });
+
+    scrollToHashWithRetry();
+
+    if (isIndexPage) {
+      setLoggedInUI(!!API.token);
+      renderDrawerTitle();
+      updateDrawerActions();
+      return;
     }
 
-    if (
-        isSpellPage ||
-        isInventoryPage ||
-        isCharacterPage ||
-        isNotesPage ||
-        isSkillsPage ||
-        isActionsPage ||
-        isSheetPage ||
-        isAdminPage
-    ) {
-        buildSheetNav({
-            navList,
-            btnNavOpen,
-            closeNavDrawer,
-            sheetRootEl,
+    if (!isSheetPage) {
+      setLoggedInUI(!!API.token);
+      updateDrawerActions();
+      if (API.token) {
+        loadCharacters().catch((error) => {
+          console.error("Charaktere konnten nicht geladen werden:", error);
         });
-
-        scrollToHashWithRetry();
-
-        if (isIndexPage) {
-            setLoggedInUI(!!API.token);
-            renderDrawerTitle();
-            updateDrawerActions();
-            return;
-        }
-
-        if (!isSheetPage) {
-            setLoggedInUI(!!API.token);
-            updateDrawerActions();
-            if (API.token) {
-                loadCharacters().catch((error) => {
-                    console.error("Charaktere konnten nicht geladen werden:", error);
-                });
-            }
-        }
+      }
     }
+  }
 })();

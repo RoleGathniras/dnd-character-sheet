@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, Optional
-
+from datetime import date, datetime, timezone
 from sqlalchemy import Column, JSON
 from sqlmodel import Field, SQLModel
 
@@ -48,8 +48,14 @@ class Campaign(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(max_length=100)
-
     dm_id: int = Field(foreign_key="users.id")
+
+    first_session_date: Optional[date] = Field(default=None)
+    session_number: int = Field(default=0)
+    ingame_days: int = Field(default=0)
+    book_page: Optional[int] = Field(default=None)
+    level_min: Optional[int] = Field(default=None)
+    level_max: Optional[int] = Field(default=None)
 
     created_at: datetime = Field(default_factory=utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=utcnow, nullable=False)

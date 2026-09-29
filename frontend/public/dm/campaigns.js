@@ -8,24 +8,29 @@ const saveButton = document.getElementById("save-campaign-button");
 const cancelButton = document.getElementById("cancel-campaign-button");
 const errorElement = document.getElementById("create-campaign-error");
 
+const btnDrawerOpen = document.getElementById("btnDrawerOpen");
+const btnCloseDrawer = document.getElementById("btnCloseDrawer");
+const drawer = document.getElementById("drawer");
+const backdrop = document.getElementById("backdrop");
+const btnLogout = document.getElementById("btnLogout");
 
 async function loadCampaigns() {
-    const campaignList = document.getElementById("campaign-list");
+  const campaignList = document.getElementById("campaign-list");
 
-    try {
-        const campaigns = await API.listCampaigns();
+  try {
+    const campaigns = await API.listCampaigns();
 
-        campaignList.innerHTML = "";
+    campaignList.innerHTML = "";
 
-        if (campaigns.length === 0) {
-            campaignList.innerHTML = "<p>Noch keine Kampagnen vorhanden.</p>";
-            return;
-        }
+    if (campaigns.length === 0) {
+      campaignList.innerHTML = "<p>Noch keine Kampagnen vorhanden.</p>";
+      return;
+    }
 
-        for (const campaign of campaigns) {
-            const campaignElement = document.createElement("div");
+    for (const campaign of campaigns) {
+      const campaignElement = document.createElement("div");
 
-            campaignElement.innerHTML = `
+      campaignElement.innerHTML = `
                 <h2>
                     <a href="campaign.html?id=${campaign.id}">
                         ${campaign.name}
@@ -34,37 +39,36 @@ async function loadCampaigns() {
                 <p>${campaign.characters.length} Spielercharaktere</p>
             `;
 
-            campaignList.appendChild(campaignElement);
-        }
-    } catch (error) {
-        console.error(error);
+      campaignList.appendChild(campaignElement);
+    }
+  } catch (error) {
+    console.error(error);
 
-        campaignList.innerHTML = `
+    campaignList.innerHTML = `
             <p>Kampagnen konnten nicht geladen werden: ${error.message}</p>
         `;
-    }
+  }
 }
 
 async function loadAvailableCharacters() {
-    try {
-        const characters = await API.characters();
+  try {
+    const characters = await API.characters();
 
-        const playerCharacters = characters.filter(
-            (character) => character.kind === "pc",
-        );
+    const playerCharacters = characters.filter(
+      (character) => character.kind === "pc",
+    );
 
-        characterList.innerHTML = "";
+    characterList.innerHTML = "";
 
-        if (playerCharacters.length === 0) {
-            characterList.innerHTML =
-                "<p>Keine Spielercharaktere vorhanden.</p>";
-            return;
-        }
+    if (playerCharacters.length === 0) {
+      characterList.innerHTML = "<p>Keine Spielercharaktere vorhanden.</p>";
+      return;
+    }
 
-        for (const character of playerCharacters) {
-            const label = document.createElement("label");
+    for (const character of playerCharacters) {
+      const label = document.createElement("label");
 
-            label.innerHTML = `
+      label.innerHTML = `
                 <input
                     type="checkbox"
                     name="campaign-character"
@@ -74,65 +78,84 @@ async function loadAvailableCharacters() {
                 (${character.owner_username ?? "Kein Besitzer"})
             `;
 
-            characterList.appendChild(label);
-            characterList.appendChild(document.createElement("br"));
-        }
-    } catch (error) {
-        console.error(error);
-        characterList.innerHTML =
-            `<p>Charaktere konnten nicht geladen werden: ${error.message}</p>`;
+      characterList.appendChild(label);
+      characterList.appendChild(document.createElement("br"));
     }
+  } catch (error) {
+    console.error(error);
+    characterList.innerHTML = `<p>Charaktere konnten nicht geladen werden: ${error.message}</p>`;
+  }
 }
 
 createButton.addEventListener("click", async () => {
-    createForm.hidden = false;
-    createButton.hidden = true;
+  createForm.hidden = false;
+  createButton.hidden = true;
 
-    await loadAvailableCharacters();
+  await loadAvailableCharacters();
 
-    nameInput.focus();
+  nameInput.focus();
 });
 
 cancelButton.addEventListener("click", () => {
-    createForm.hidden = true;
-    createButton.hidden = false;
-    nameInput.value = "";
-    errorElement.textContent = "";
+  createForm.hidden = true;
+  createButton.hidden = false;
+  nameInput.value = "";
+  errorElement.textContent = "";
 });
 
 saveButton.addEventListener("click", async () => {
-    const name = nameInput.value.trim();
+  const name = nameInput.value.trim();
 
-    if (!name) {
-        errorElement.textContent = "Bitte einen Kampagnennamen eingeben.";
-        return;
-    }
+  if (!name) {
+    errorElement.textContent = "Bitte einen Kampagnennamen eingeben.";
+    return;
+  }
 
-    try {
-        const selectedCharacters = document.querySelectorAll(
-            'input[name="campaign-character"]:checked',
-        );
+  try {
+    const selectedCharacters = document.querySelectorAll(
+      'input[name="campaign-character"]:checked',
+    );
 
-        const characterIds = Array.from(selectedCharacters).map(
-            (checkbox) => Number(checkbox.value),
-        );
+    const characterIds = Array.from(selectedCharacters).map((checkbox) =>
+      Number(checkbox.value),
+    );
 
-        await API.createCampaign({
-            name,
-            character_ids: characterIds,
-        });
+    await API.createCampaign({
+      name,
+      character_ids: characterIds,
+    });
 
-        nameInput.value = "";
-        errorElement.textContent = "";
+    nameInput.value = "";
+    errorElement.textContent = "";
 
-        createForm.hidden = true;
-        createButton.hidden = false;
+    createForm.hidden = true;
+    createButton.hidden = false;
 
-        await loadCampaigns();
-    } catch (error) {
-        console.error(error);
-        errorElement.textContent = error.message;
-    }
+    await loadCampaigns();
+  } catch (error) {
+    console.error(error);
+    errorElement.textContent = error.message;
+  }
 });
 
 loadCampaigns();
+
+function openDrawer() {
+  drawer.classList.add("is-open");
+  drawer.setAttribute("aria-hidden", "false");
+  backdrop.hidden = false;
+}
+
+function closeDrawer() {
+  drawer.classList.remove("is-open");
+  drawer.setAttribute("aria-hidden", "true");
+  backdrop.hidden = true;
+}
+btnDrawerOpen.addEventListener("click", openDrawer);
+btnCloseDrawer.addEventListener("click", closeDrawer);
+backdrop.addEventListener("click", closeDrawer);
+
+btnLogout.addEventListener("click", () => {
+  localStorage.removeItem("dnd_token");
+  window.location.href = "../index.html";
+});

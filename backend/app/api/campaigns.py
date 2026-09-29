@@ -10,9 +10,16 @@ from app.models import (
     Role,
     User,
 )
-from app.schemas import CampaignCharacterOut, CampaignCreate, CampaignOut
+from app.schemas import (
+    CampaignCharacterOut,
+    CampaignCreate,
+    CampaignOut,
+    CampaignUpdate,
+)
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
+
+
 def build_campaign_out(
     campaign: Campaign,
     session: Session,
@@ -40,6 +47,7 @@ def build_campaign_out(
             name=character.name,
             owner_id=character.owner_id,
             owner_username=owner_username,
+            data=character.data,
         )
         for character, owner_username in rows
     ]
@@ -48,6 +56,12 @@ def build_campaign_out(
         id=campaign.id,
         name=campaign.name,
         dm_id=campaign.dm_id,
+        first_session_date=campaign.first_session_date,
+        session_number=campaign.session_number,
+        ingame_days=campaign.ingame_days,
+        book_page=campaign.book_page,
+        level_min=campaign.level_min,
+        level_max=campaign.level_max,
         created_at=campaign.created_at,
         updated_at=campaign.updated_at,
         characters=characters,
@@ -105,6 +119,7 @@ def create_campaign(
 
     return build_campaign_out(campaign, session)
 
+
 @router.get("", response_model=list[CampaignOut])
 def list_campaigns(
     session: Session = Depends(get_session),
@@ -125,10 +140,8 @@ def list_campaigns(
 
     campaigns = session.exec(statement).all()
 
-    return [
-        build_campaign_out(campaign, session)
-        for campaign in campaigns
-    ]
+    return [build_campaign_out(campaign, session) for campaign in campaigns]
+
 
 @router.get("/{campaign_id}", response_model=CampaignOut)
 def get_campaign(
@@ -151,6 +164,40 @@ def get_campaign(
         )
 
     return build_campaign_out(campaign, session)
+
+
+@router.patch("/{campaign_id}", response_model=CampaignOut)
+def update_campaign(
+    campaign_id: int,
+    payload: CampaignUpdate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    campaign = session.get(Campaign, campaign_id)
+
+    if campaign is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Campaign not found",
+        )
+
+    if current_user.role != Role.admin and campaign.dm_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot modify this campaign",
+        )
+
+    update_data = payload.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(campaign, field, value)
+
+    session.add(campaign)
+    session.commit()
+    session.refresh(campaign)
+
+    return build_campaign_out(campaign, session)
+
 
 @router.post(
     "/{campaign_id}/characters/{character_id}",
@@ -210,6 +257,7 @@ def add_character_to_campaign(
     session.commit()
 
     return build_campaign_out(campaign, session)
+
 
 @router.delete(
     "/{campaign_id}/characters/{character_id}",
