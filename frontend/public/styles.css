@@ -460,6 +460,10 @@ input[readonly] {
   place-items: center;
 }
 
+.topbarCharacterAvatar[hidden] {
+  display: none;
+}
+
 .topbarCharacterAvatar__img,
 .topbarCharacterAvatar__fallback {
   width: 100%;

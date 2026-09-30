@@ -1,80 +1,88 @@
 const params = new URLSearchParams(window.location.search);
 export const campaignId = Number(params.get("id"));
 
+if (campaignId) {
+    sessionStorage.setItem("dnd_dm_campaign_id", String(campaignId));
+}
+import { initDrawer } from "/shared/drawer.js";
+import { DM_NAV } from "./dm-nav-config.js";
+
+
+function createDmNavButton(title, href) {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.className = "drawer__item";
+    button.textContent = title;
+
+    button.addEventListener("click", () => {
+        window.location.href = `${href}?id=${campaignId}`;
+    });
+
+    return button;
+}
+
 export function initDmNavigation() {
-    const routes = {
-        navCampaignOverview: "campaign.html",
-        navCampaignPlayers: "players.html",
-        navCampaignNpcs: "npcs.html",
-        navCampaignEnemies: "enemies.html",
-        navCampaignItems: "items.html",
-        navCampaignNotes: "notes.html",
-        navCampaignCombat: "combat.html",
-    };
+    const navList = document.getElementById("navList");
 
-    for (const [elementId, page] of Object.entries(routes)) {
-        const element = document.getElementById(elementId);
+    if (!navList) {
+        return;
+    }
 
-        if (!element) continue;
+    navList.innerHTML = "";
 
-        element.addEventListener("click", () => {
-            window.location.href = `${page}?id=${campaignId}`;
-        });
+    for (const group of DM_NAV) {
+        // Einzelner Navigationseintrag, z. B. Übersicht
+        if (group.href) {
+            const list = document.createElement("div");
+            list.className = "drawer__list";
+
+            const button = createDmNavButton(group.title, group.href);
+
+            list.appendChild(button);
+            navList.appendChild(list);
+            continue;
+        }
+
+        // Gruppe, z. B. Spieler, Welt oder Spielleitung
+        const section = document.createElement("div");
+        section.className = "drawer__section";
+
+        const title = document.createElement("div");
+        title.className = "drawer__title";
+        title.textContent = group.title;
+
+        const list = document.createElement("div");
+        list.className = "drawer__list";
+
+        for (const item of group.items ?? []) {
+            list.appendChild(
+                createDmNavButton(item.title, item.href)
+            );
+        }
+
+        section.appendChild(title);
+        section.appendChild(list);
+        navList.appendChild(section);
     }
 }
 
 export function initDmNavDrawer() {
-    const btnNavOpen = document.getElementById("btnNavOpen");
-    const btnNavClose = document.getElementById("btnNavClose");
-    const navDrawer = document.getElementById("navDrawer");
-    const navBackdrop = document.getElementById("navBackdrop");
-
-    if (!btnNavOpen || !btnNavClose || !navDrawer || !navBackdrop) {
-        return;
-    }
-
-    function openNavDrawer() {
-        navDrawer.classList.add("is-open");
-        navDrawer.setAttribute("aria-hidden", "false");
-        navBackdrop.hidden = false;
-    }
-
-    function closeNavDrawer() {
-        navDrawer.classList.remove("is-open");
-        navDrawer.setAttribute("aria-hidden", "true");
-        navBackdrop.hidden = true;
-    }
-
-    btnNavOpen.addEventListener("click", openNavDrawer);
-    btnNavClose.addEventListener("click", closeNavDrawer);
-    navBackdrop.addEventListener("click", closeNavDrawer);
+    initDrawer({
+        drawer: document.getElementById("navDrawer"),
+        backdrop: document.getElementById("navBackdrop"),
+        openButton: document.getElementById("btnNavOpen"),
+        closeButton: document.getElementById("btnNavClose"),
+    });
 }
 
 export function initDmMainDrawer() {
-    const btnDrawerOpen = document.getElementById("btnDrawerOpen");
-    const btnCloseDrawer = document.getElementById("btnCloseDrawer");
-    const drawer = document.getElementById("drawer");
-    const backdrop = document.getElementById("backdrop");
-
-    if (!btnDrawerOpen || !btnCloseDrawer || !drawer || !backdrop) {
-        return;
-    }
-
-    function openDrawer() {
-        drawer.classList.add("is-open");
-        drawer.setAttribute("aria-hidden", "false");
-        backdrop.hidden = false;
-    }
-
-    function closeDrawer() {
-        drawer.classList.remove("is-open");
-        drawer.setAttribute("aria-hidden", "true");
-        backdrop.hidden = true;
-    }
-
-    btnDrawerOpen.addEventListener("click", openDrawer);
-    btnCloseDrawer.addEventListener("click", closeDrawer);
-    backdrop.addEventListener("click", closeDrawer);
+    initDrawer({
+        drawer: document.getElementById("drawer"),
+        backdrop: document.getElementById("backdrop"),
+        openButton: document.getElementById("btnDrawerOpen"),
+        closeButton: document.getElementById("btnCloseDrawer"),
+    });
 }
 
 export function initDmMainNavigation() {
@@ -83,14 +91,17 @@ export function initDmMainNavigation() {
 
     if (btnCampaigns) {
         btnCampaigns.addEventListener("click", () => {
-            window.location.href = "campaigns.html";
+            window.location.href = "/dm/campaigns.html";
+        });
+        document.getElementById("btnPlayerRules")?.addEventListener("click", () => {
+            window.location.href = "/player_rules.html";
         });
     }
 
     if (btnLogout) {
         btnLogout.addEventListener("click", () => {
             localStorage.removeItem("dnd_token");
-            window.location.href = "../index.html";
+            window.location.href = "/index.html";
         });
     }
 }

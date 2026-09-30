@@ -5,6 +5,7 @@ import {
     renderTopbarCharacterAvatar,
     setLoggedInUI,
 } from "./app.js";
+import { DM_NAV } from "./dm/dm-nav-config.js";
 
 // ============================================================
 // PLAYER RULES
@@ -274,46 +275,98 @@ function bindSection(sectionElement, sectionData) {
     bindTopicButtons(topicList, sectionData.topics || []);
 }
 
-function buildRulesNav() {
+function buildDmRulesNavigation() {
     const navList = document.getElementById("navList");
-    if (!navList) return;
+    const campaignId = sessionStorage.getItem("dnd_dm_campaign_id");
+
+    if (!navList || !campaignId) {
+        return;
+    }
 
     navList.innerHTML = "";
 
-    const sections = Array.from(document.querySelectorAll(".ruleSection"));
+    for (const group of DM_NAV) {
+        if (group.href) {
+            const list = document.createElement("div");
+            list.className = "drawer__list";
 
-    sections.forEach((section) => {
-        const label =
-            section.dataset.navLabel ||
-            section.querySelector(".ruleSection__title")?.textContent?.trim() ||
-            "Abschnitt";
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "drawer__item";
+            button.textContent = group.title;
 
-        const id = section.id;
-        if (!id) return;
+            button.addEventListener("click", () => {
+                window.location.href = `${group.href}?id=${campaignId}`;
+            });
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "drawer__item";
-        button.textContent = label;
+            list.appendChild(button);
+            navList.appendChild(list);
+            continue;
+        }
 
-        button.addEventListener("click", () => {
-            const target = document.getElementById(id);
-            if (!target) return;
+        const section = document.createElement("div");
+        section.className = "drawer__section";
 
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
+        const title = document.createElement("div");
+        title.className = "drawer__title";
+        title.textContent = group.title;
 
-            const navDrawer = document.getElementById("navDrawer");
-            const navBackdrop = document.getElementById("navBackdrop");
+        const list = document.createElement("div");
+        list.className = "drawer__list";
 
-            navDrawer?.classList.remove("is-open");
-            navDrawer?.setAttribute("aria-hidden", "true");
-            if (navBackdrop) navBackdrop.hidden = true;
-        });
+        for (const item of group.items ?? []) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "drawer__item";
+            button.textContent = item.title;
 
-        navList.appendChild(button);
-    });
+            button.addEventListener("click", () => {
+                window.location.href = `${item.href}?id=${campaignId}`;
+            });
+
+            list.appendChild(button);
+        }
+
+        section.appendChild(title);
+        section.appendChild(list);
+        navList.appendChild(section);
+    }
 }
+function applyRulesRoleUI(user) {
+    const playerCharacterBar = document.getElementById("playerRulesCharacterBar");
+    const characterAvatar = document.getElementById("currentCharacterAvatar");
+    const dmTitle = document.getElementById("dmRulesTitle");
+    const dmMenuButton = document.getElementById("btnDmMenu");
 
+    const isDm = user?.role === "dm";
+    const playerDrawerContent =
+        document.getElementById("playerRulesDrawerContent");
+
+    const dmDrawerContent =
+        document.getElementById("dmRulesDrawerContent");
+
+    if (playerCharacterBar) {
+        playerCharacterBar.hidden = isDm;
+    }
+
+    if (characterAvatar) {
+        characterAvatar.hidden = isDm;
+    }
+
+    if (dmTitle) {
+        dmTitle.hidden = !isDm;
+    }
+    if (playerDrawerContent) {
+        playerDrawerContent.hidden = isDm;
+    }
+
+    if (dmDrawerContent) {
+        dmDrawerContent.hidden = !isDm;
+    }
+    if (dmMenuButton) {
+        dmMenuButton.hidden = !isDm;
+    }
+}
 async function loadCurrentCharacterAvatar() {
     const selectedId =
         localStorage.getItem("dnd_current_character_id") ||
@@ -338,6 +391,22 @@ async function loadCurrentCharacterAvatar() {
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
+    const dmMenuButton = document.getElementById("btnDmMenu");
+    const drawer = document.getElementById("drawer");
+    const backdrop = document.getElementById("backdrop");
+
+    dmMenuButton?.addEventListener("click", () => {
+        drawer?.classList.add("is-open");
+        drawer?.setAttribute("aria-hidden", "false");
+
+        if (backdrop) {
+            backdrop.hidden = false;
+        }
+    });
+    document.getElementById("btnDmCampaigns")?.addEventListener("click", () => {
+        window.location.href = "/dm/campaigns.html";
+    });
+
     const sectionElements = Array.from(document.querySelectorAll(".ruleSection"));
 
     const dataByTitle = new Map(
@@ -356,20 +425,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         bindSection(sectionElement, sectionData);
     });
 
-    buildRulesNav();
-
     const isLoggedIn = !!API.token;
     setLoggedInUI(isLoggedIn);
 
     if (isLoggedIn) {
         try {
-            await refreshCurrentUserAndUI();
-            await loadCharacters();
+            const user = await refreshCurrentUserAndUI();
+
+            applyRulesRoleUI(user);
+
+            if (user.role === "player") {
+                await loadCharacters();
+                await loadCurrentCharacterAvatar();
+            } else {
+                buildDmRulesNavigation();
+            }
         } catch (error) {
             console.warn("[player_rules.js] User/Drawer konnte nicht geladen werden.", error);
         }
-
-        await loadCurrentCharacterAvatar();
     } else {
         renderTopbarCharacterAvatar(null);
     }

@@ -2,223 +2,173 @@
 <html lang="de">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="../styles.css" />
-  <link rel="stylesheet" href="../styles/dm.css" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../styles/dm.css" />
 
-  <title>Kampagne</title>
+    <title>Kampagne</title>
 </head>
 
 <body>
-  <!-- Left drawer -->
-  <div id="backdrop" class="backdrop" hidden></div>
+    <!-- Left drawer -->
+    <div id="backdrop" class="backdrop" hidden></div>
 
-  <aside id="drawer" class="drawer" aria-hidden="true">
-    <div class="drawer__header">
-      <strong>DM-Bereich</strong>
+    <aside id="drawer" class="drawer" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>DM-Bereich</strong>
 
-      <button id="btnCloseDrawer" class="btn" type="button" aria-label="Schließen">
-        ✕
-      </button>
-    </div>
-
-    <div class="drawer__content">
-      <button id="btnCampaigns" class="drawer__item" type="button">
-        ← Kampagnenauswahl
-      </button>
-    </div>
-
-    <div class="drawer__footer">
-      <button id="btnAccountSettings" class="drawer__item" type="button" disabled>
-        Accounteinstellungen
-      </button>
-
-      <button id="btnLogout" class="drawer__item" type="button">
-        Abmelden
-      </button>
-    </div>
-  </aside>
-
-  <!-- Right navigation drawer -->
-  <div id="navBackdrop" class="backdrop" hidden></div>
-
-  <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
-    <div class="drawer__header">
-      <strong>Navigation</strong>
-
-      <button id="btnNavClose" class="btn" type="button" aria-label="Schließen">
-        ✕
-      </button>
-    </div>
-
-    <div id="navList" class="drawer__content">
-
-      <!-- Übersicht -->
-      <div class="drawer__list">
-        <button id="navCampaignOverview" class="drawer__item" type="button">
-          Übersicht
-        </button>
-      </div>
-
-      <!-- Spieler -->
-      <div class="drawer__section">
-        <div class="drawer__title">Spieler</div>
-
-        <div class="drawer__list">
-          <button id="navCampaignPlayers" class="drawer__item" type="button">
-            Spielercharaktere
-          </button>
+            <button id="btnCloseDrawer" class="btn" type="button" aria-label="Schließen">
+                ✕
+            </button>
         </div>
-      </div>
 
-      <!-- Welt -->
-      <div class="drawer__section">
-        <div class="drawer__title">Welt</div>
+        <div class="drawer__content">
+            <button id="btnCampaigns" class="drawer__item" type="button">
+                ← Kampagnenauswahl
+            </button>
 
-        <div class="drawer__list">
-          <button id="navCampaignNpcs" class="drawer__item" type="button">
-            NPCs
-          </button>
-
-          <button id="navCampaignEnemies" class="drawer__item" type="button">
-            Gegner
-          </button>
-
-          <button id="navCampaignItems" class="drawer__item" type="button">
-            Items
-          </button>
+            <button id="btnPlayerRules" class="drawer__item" type="button">
+                Spielerhandbuch
+            </button>
         </div>
-      </div>
 
-      <!-- Spielleitung -->
-      <div class="drawer__section">
-        <div class="drawer__title">Spielleitung</div>
+        <div class="drawer__footer">
+            <button id="btnAccountSettings" class="drawer__item" type="button" disabled>
+                Accounteinstellungen
+            </button>
 
-        <div class="drawer__list">
-          <button id="navCampaignNotes" class="drawer__item" type="button">
-            Notizen
-          </button>
-
-          <button id="navCampaignCombat" class="drawer__item" type="button">
-            Kampf
-          </button>
+            <button id="btnLogout" class="drawer__item" type="button">
+                Abmelden
+            </button>
         </div>
-      </div>
+    </aside>
 
-    </div>
-  </aside>
+    <!-- Right navigation drawer -->
+    <div id="navBackdrop" class="backdrop" hidden></div>
 
-  <!-- Appbar -->
-  <header class="appbar appbar--dm">
-    <button id="btnDrawerOpen" class="btn appbar__menu-btn" type="button" aria-label="Menü öffnen">
-      ☰
-    </button>
+    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
+        <div class="drawer__header">
+            <strong>Navigation</strong>
 
-    <div class="appbar__title appbar__title--dm">
-      <strong id="appbarCampaignName">Kampagne</strong>
-      <span>Kampagne · DM</span>
-    </div>
+            <button id="btnNavClose" class="btn" type="button" aria-label="Schließen">
+                ✕
+            </button>
+        </div>
 
-    <button id="btnNavOpen" class="btn appbar__menu-btn" type="button" aria-label="Kampagnen-Navigation öffnen">
-      ☰
-    </button>
-  </header>
+        <div id="navList" class="drawer__content"></div>
+    </aside>
 
-  <!-- Campaign content -->
-  <main class="container dm-dashboard">
-    <!-- Kampagnenstatus -->
-    <section class="dm-dashboard-status">
-      <h2>Kampagnenstatus</h2>
-
-      <div class="dm-dashboard-status__box">
-
-        <button id="btnEditCampaignStatus" class="dm-dashboard-status__edit" type="button"
-          aria-label="Kampagnenstatus bearbeiten" title="Kampagnenstatus bearbeiten">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 20h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
+    <!-- Appbar -->
+    <header class="appbar appbar--dm">
+        <button id="btnDrawerOpen" class="btn appbar__menu-btn" type="button" aria-label="Menü öffnen">
+            ☰
         </button>
 
-        <div class="dm-dashboard-status__info">
-          <div>
-            <span>Erste Sitzung</span>
-            <strong id="campaign-first-session">–</strong>
-          </div>
-
-          <div>
-            <span>Sitzung</span>
-            <strong id="campaign-session-number">–</strong>
-          </div>
-
-          <div>
-            <span>Ingame-Zeit</span>
-            <strong id="campaign-ingame-days">–</strong>
-          </div>
-
-          <div>
-            <span>Seite im Buch</span>
-            <strong id="campaign-book-page">–</strong>
-          </div>
-
-          <div>
-            <span>Levelbereich</span>
-            <strong id="campaign-level-range">–</strong>
-          </div>
+        <div class="appbar__title appbar__title--dm">
+            <strong id="appbarCampaignName">Kampagne</strong>
+            <span>Kampagne · DM</span>
         </div>
 
-        <div class="dm-dashboard-players">
-          <span>Spielercharaktere</span>
+        <button id="btnNavOpen" class="btn appbar__menu-btn" type="button" aria-label="Kampagnen-Navigation öffnen">
+            ☰
+        </button>
+    </header>
 
-          <div id="campaign-player-portraits">
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- Campaign content -->
+    <main class="container dm-dashboard">
+        <!-- Kampagnenstatus -->
+        <section class="dm-dashboard-status">
+            <h2>Kampagnenstatus</h2>
 
-    <!-- Navigation -->
-    <section class="dm-dashboard-navigation">
-      <div class="dm-dashboard-navigation__box">
-        <div class="dm-dashboard-grid">
+            <div class="dm-dashboard-status__box">
 
-          <a id="linkCampaignPlayers" class="dm-dashboard-tile" href="#">
-            <strong>Spieler</strong>
-            <span>Spielercharaktere verwalten</span>
-          </a>
+                <button id="btnEditCampaignStatus" class="dm-dashboard-status__edit" type="button"
+                    aria-label="Kampagnenstatus bearbeiten" title="Kampagnenstatus bearbeiten">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 20h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
 
-          <a class="dm-dashboard-tile" href="npcs.html">
-            <strong>NPCs</strong>
-            <span>Charaktere der Spielleitung</span>
-          </a>
+                <div class="dm-dashboard-status__info">
+                    <div>
+                        <span>Erste Sitzung</span>
+                        <strong id="campaign-first-session">–</strong>
+                    </div>
 
-          <a class="dm-dashboard-tile" href="enemies.html">
-            <strong>Gegner</strong>
-            <span>Gegner und Kreaturen</span>
-          </a>
+                    <div>
+                        <span>Sitzung</span>
+                        <strong id="campaign-session-number">–</strong>
+                    </div>
 
-          <a class="dm-dashboard-tile" href="items.html">
-            <strong>Items</strong>
-            <span>Gegenstände und Ausrüstung</span>
-          </a>
+                    <div>
+                        <span>Ingame-Zeit</span>
+                        <strong id="campaign-ingame-days">–</strong>
+                    </div>
 
-          <a class="dm-dashboard-tile" href="notes.html">
-            <strong>Notizen</strong>
-            <span>Kampagnennotizen</span>
-          </a>
+                    <div>
+                        <span>Seite im Buch</span>
+                        <strong id="campaign-book-page">–</strong>
+                    </div>
 
-          <a class="dm-dashboard-tile" href="combat.html">
-            <strong>Kampf</strong>
-            <span>Kampfleitung</span>
-          </a>
-        </div>
-      </div>
-    </section>
-  </main>
+                    <div>
+                        <span>Levelbereich</span>
+                        <strong id="campaign-level-range">–</strong>
+                    </div>
+                </div>
 
-  <script type="module" src="campaign.js"></script>
+                <div class="dm-dashboard-players">
+                    <span>Spielercharaktere</span>
+
+                    <div id="campaign-player-portraits">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation -->
+        <section class="dm-dashboard-navigation">
+            <div class="dm-dashboard-navigation__box">
+                <div class="dm-dashboard-grid">
+
+                    <a id="linkCampaignPlayers" class="dm-dashboard-tile" href="#">
+                        <strong>Spieler</strong>
+                        <span>Spielercharaktere verwalten</span>
+                    </a>
+
+                    <a class="dm-dashboard-tile" href="npcs.html">
+                        <strong>NPCs</strong>
+                        <span>Charaktere der Spielleitung</span>
+                    </a>
+
+                    <a class="dm-dashboard-tile" href="enemies.html">
+                        <strong>Gegner</strong>
+                        <span>Gegner und Kreaturen</span>
+                    </a>
+
+                    <a class="dm-dashboard-tile" href="items.html">
+                        <strong>Items</strong>
+                        <span>Gegenstände und Ausrüstung</span>
+                    </a>
+
+                    <a class="dm-dashboard-tile" href="notes.html">
+                        <strong>Notizen</strong>
+                        <span>Kampagnennotizen</span>
+                    </a>
+
+                    <a class="dm-dashboard-tile" href="combat.html">
+                        <strong>Kampf</strong>
+                        <span>Kampfleitung</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="campaign.js"></script>
 </body>
 
 </html>

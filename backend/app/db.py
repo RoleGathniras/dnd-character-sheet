@@ -1,6 +1,6 @@
 import os
 
-from sqlmodel import SQLModel, create_engine
+from sqlmodel import create_engine
 
 from app import models  # noqa: F401
 
@@ -15,7 +15,3 @@ engine = create_engine(
     echo=DB_ECHO,
     pool_pre_ping=True,
 )
-
-
-def init_db() -> None:
-    SQLModel.metadata.create_all(engine)

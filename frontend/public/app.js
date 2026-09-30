@@ -1,5 +1,6 @@
 import { API } from "./api.js";
 import { buildSheetNav } from "/nav.js";
+import { initDrawer } from "/shared/drawer.js";
 import {
   initCharacterStatusbar,
   loadCharacterStatusbar,
@@ -68,6 +69,18 @@ const currentCharacterAvatarFallback = document.getElementById(
 const topbarCharacterName = document.getElementById("topbarCharacterName");
 const topbarCharacterMeta = document.getElementById("topbarCharacterMeta");
 const topbarCharacterLevel = document.getElementById("topbarCharacterLevel");
+const playerNavDrawer = initDrawer({
+  drawer: navDrawer,
+  backdrop: navBackdrop,
+  openButton: btnNavOpen,
+  closeButton: btnNavClose,
+});
+const playerMainDrawer = initDrawer({
+  drawer,
+  backdrop,
+  openButton: btnMenu,
+  closeButton: btnClose,
+});
 // ============================================================
 // EXPORTS
 // ============================================================
@@ -204,6 +217,7 @@ export async function refreshCurrentUserAndUI() {
     renderDrawerTitle();
     setAdminVisible();
     applyRoleUI();
+    return currentUser;
   } catch (e) {
     console.error(e);
 
@@ -545,31 +559,12 @@ function bindSectionToggle(toggleBtn, listEl, defaultOpen) {
   });
 }
 
-function openDrawer() {
-  drawer?.classList.add("is-open");
-  drawer?.setAttribute("aria-hidden", "false");
-  if (backdrop) backdrop.hidden = false;
-  document.getElementById("btnCloseDrawer")?.focus();
-}
-
 function closeDrawer() {
-  document.getElementById("btnMenu")?.focus();
-  drawer?.classList.remove("is-open");
-  drawer?.setAttribute("aria-hidden", "true");
-  if (backdrop) backdrop.hidden = true;
-}
-
-function openNavDrawer() {
-  closeDrawer();
-  navDrawer?.classList.add("is-open");
-  navDrawer?.setAttribute("aria-hidden", "false");
-  if (navBackdrop) navBackdrop.hidden = false;
+  playerMainDrawer?.close();
 }
 
 function closeNavDrawer() {
-  navDrawer?.classList.remove("is-open");
-  navDrawer?.setAttribute("aria-hidden", "true");
-  if (navBackdrop) navBackdrop.hidden = true;
+  playerNavDrawer?.close();
 }
 
 function closeActionsMenu() {
@@ -735,14 +730,6 @@ export function updateLandingAuthState(isLoggedIn) {
 // GLOBAL EVENTS
 // ============================================================
 
-btnMenu?.addEventListener("click", openDrawer);
-btnClose?.addEventListener("click", closeDrawer);
-backdrop?.addEventListener("click", closeDrawer);
-
-btnNavOpen?.addEventListener("click", openNavDrawer);
-btnNavClose?.addEventListener("click", closeNavDrawer);
-navBackdrop?.addEventListener("click", closeNavDrawer);
-
 btnLogin?.addEventListener("click", doLogin);
 btnLogout?.addEventListener("click", doLogout);
 
@@ -803,6 +790,7 @@ btnDelete?.addEventListener("click", async () => {
   const isAdminPage = location.pathname.endsWith("/admin.html");
   const isSkillsPage = location.pathname.endsWith("/skills.html");
   const isActionsPage = location.pathname.endsWith("/actions.html");
+  const isPlayerRulesPage = location.pathname.endsWith("/player_rules.html");
   const hasCharacterStatusbar =
     isSpellPage ||
     isInventoryPage ||
@@ -810,7 +798,7 @@ btnDelete?.addEventListener("click", async () => {
     isNotesPage ||
     isSheetPage ||
     isSkillsPage ||
-    isActionsPage;
+    isActionsPage
 
   if (hasCharacterStatusbar) {
     initCharacterStatusbar();
@@ -828,7 +816,8 @@ btnDelete?.addEventListener("click", async () => {
     isSkillsPage ||
     isActionsPage ||
     isSheetPage ||
-    isAdminPage
+    isAdminPage ||
+    isPlayerRulesPage
   ) {
     buildSheetNav({
       navList,
