@@ -167,7 +167,6 @@ def get_campaign(
 
     return build_campaign_out(campaign, session)
 
-
 @router.patch("/{campaign_id}", response_model=CampaignOut)
 def update_campaign(
     campaign_id: int,
@@ -200,6 +199,41 @@ def update_campaign(
 
     return build_campaign_out(campaign, session)
 
+@router.delete(
+    "/{campaign_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_campaign(
+    campaign_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    campaign = session.get(Campaign, campaign_id)
+
+    if campaign is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Campaign not found",
+        )
+
+    if current_user.role != Role.admin and campaign.dm_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot delete this campaign",
+        )
+
+    statement = select(CampaignCharacter).where(
+        CampaignCharacter.campaign_id == campaign_id
+    )
+
+    links = session.exec(statement).all()
+
+    for link in links:
+        session.delete(link)
+
+    session.flush()
+    session.delete(campaign)
+    session.commit()
 
 @router.post(
     "/{campaign_id}/characters/{character_id}",

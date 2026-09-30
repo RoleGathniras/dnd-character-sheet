@@ -19,6 +19,7 @@ const editCampaignImagePreview = document.getElementById("edit-campaign-image-pr
 const editCampaignImagePreviewImg = document.getElementById("edit-campaign-image-preview-img");
 const saveEditCampaignButton = document.getElementById("save-edit-campaign-button");
 const cancelEditCampaignButton = document.getElementById("cancel-edit-campaign-button");
+const deleteCampaignButton = document.getElementById("delete-campaign-button");
 const editCampaignError = document.getElementById("edit-campaign-error");
 
 let editingCampaignId = null;
@@ -241,13 +242,12 @@ async function loadCampaigns() {
 
         if (editCampaignImageDataUrl) {
           editCampaignImagePreviewImg.src = editCampaignImageDataUrl;
-          card.after(editCampaignForm);
           editCampaignImagePreview.hidden = false;
         } else {
           editCampaignImagePreviewImg.removeAttribute("src");
           editCampaignImagePreview.hidden = true;
         }
-
+        card.after(editCampaignForm);
         editCampaignForm.hidden = false;
       });
 
@@ -369,6 +369,45 @@ cancelButton.addEventListener("click", () => {
   createButton.hidden = false;
   nameInput.value = "";
   errorElement.textContent = "";
+});
+
+deleteCampaignButton.addEventListener("click", async () => {
+  if (!editingCampaignId) {
+    editCampaignError.textContent = "Die Kampagne konnte nicht gefunden werden.";
+    return;
+  }
+
+  const campaignName = editCampaignName.value.trim();
+
+  const confirmed = window.confirm(
+    `Möchtest du die Kampagne "${campaignName}" wirklich löschen?\n\n` +
+    "Die Kampagne wird dauerhaft gelöscht. Die Charaktere selbst bleiben erhalten."
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    editCampaignError.textContent = "";
+
+    await API.deleteCampaign(editingCampaignId);
+
+    editingCampaignId = null;
+    editCampaignImageDataUrl = null;
+
+    editCampaignName.value = "";
+    editCampaignImageInput.value = "";
+    editCampaignImagePreviewImg.removeAttribute("src");
+    editCampaignImagePreview.hidden = true;
+
+    editCampaignForm.hidden = true;
+
+    await loadCampaigns();
+  } catch (error) {
+    console.error(error);
+    editCampaignError.textContent = "Die Kampagne konnte nicht gelöscht werden.";
+  }
 });
 
 saveButton.addEventListener("click", async () => {

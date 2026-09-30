@@ -349,3 +349,13 @@
   text-align: center;
   text-decoration: none;
 }
+
+.dm-danger-button {
+  border-color: #b42318;
+  color: #b42318;
+}
+
+.dm-danger-button:hover {
+  background: #b42318;
+  color: white;
+}

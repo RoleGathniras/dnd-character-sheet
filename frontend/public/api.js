@@ -187,6 +187,11 @@ export const API = {
             body: JSON.stringify(payload),
         });
     },
+    deleteCampaign(id) {
+        return this.request(`/campaigns/${id}`, {
+            method: "DELETE",
+        });
+    },
 
     // ===== Spells =====
 
