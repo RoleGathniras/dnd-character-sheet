@@ -8,7 +8,6 @@ from app.api.campaigns import router as campaigns_router
 from app.api.characters import router as characters_router
 from app.api.spells import router as spells_router
 from app.api.users import router as users_router
-from app.db import init_db
 
 app = FastAPI(title="DnD Character Sheet API")
 
@@ -25,12 +24,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
-
-
-@app.on_event("startup")
-def on_startup():
-    init_db()
-
 
 @app.get("/health")
 def health():
