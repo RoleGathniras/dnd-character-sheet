@@ -9,13 +9,16 @@ RUN pip install --no-cache-dir \
     psycopg[binary] \
     python-jose[cryptography] \
     passlib[argon2] \
-    python-multipart
+    python-multipart \
+    alembic
 
 
 
 
 
 COPY app /app/app
+COPY alembic /app/alembic
+COPY alembic.ini /app/alembic.ini
 
 EXPOSE 8000
 

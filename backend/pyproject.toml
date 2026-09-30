@@ -7,5 +7,6 @@ dependencies = [
     "fastapi",
     "uvicorn[standard]",
     "sqlmodel",
-    "psycopg[binary]"
+    "psycopg[binary]",
+    "alembic"
 ]
