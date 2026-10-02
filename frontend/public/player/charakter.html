@@ -5,7 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>D&D 5E – Charakterbeschreibung</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../styles/shared.css" />
 </head>
 
 <body class="app">
@@ -50,81 +51,10 @@
         </button>
     </header>
 
-    <!-- Drawer -->
-    <div id="drawer" class="drawer" aria-hidden="true">
-        <div class="drawer__header">
-            <strong id="drawerUserTitle">Charaktere</strong>
-            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">
-                ✕
-            </button>
-        </div>
-
-        <div class="drawer__content">
-            <div class="drawer__section">
-                <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
-                    Charaktere
-                </button>
-
-                <div id="listMine" class="drawer__list">
-                    <button class="drawer__item" disabled>
-                        (noch keine Daten)
-                    </button>
-                </div>
-            </div>
-
-            <div class="drawer__section">
-                <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
-                    NPCs
-                </button>
-
-                <div id="listNpcs" class="drawer__list" hidden>
-                    <button class="drawer__item" disabled>
-                        (noch keine Daten)
-                    </button>
-                </div>
-            </div>
-
-            <div class="drawer__section" id="drawerActionsSection" hidden>
-                <button type="button" class="drawer__title drawer__toggle" id="toggleActions" aria-expanded="true">
-                    Aktionen
-                </button>
-
-                <div id="actionsMenu" class="actionsMenu drawer__list" hidden>
-                    <button id="btnCreatePC" class="btn drawer__item" disabled hidden>
-                        Neuer Charakter
-                    </button>
-
-                    <button id="btnCreateNPC" class="btn drawer__item" disabled hidden>
-                        Neuer NPC
-                    </button>
-
-                    <button id="btnSave" class="btn btn--primary drawer__item" disabled hidden>
-                        Speichern
-                    </button>
-
-                    <button id="btnDelete" class="btn btn--danger drawer__item" disabled hidden>
-                        Charakter löschen
-                    </button>
-                </div>
-            </div>
-
-            <button id="btnPlayerRules" class="drawer__item" type="button">
-                Spielerhandbuch
-            </button>
-
-            <button id="btnAdmin" class="btn drawer__item" hidden>
-                Admin
-            </button>
-
-            <div class="drawer__footer">
-                <button id="btnLogout" class="drawer__item" type="button">
-                    Abmelden
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="backdrop" class="backdrop" hidden></div>
+    <!-- linkerDrawer -->
+    <div id="playerDrawerMount"></div>
+    <!-- rechterDrawer -->
+    <div id="playerNavDrawerMount"></div>
 
     <main class="page page--charakter">
         <!-- Aussehen -->
@@ -277,22 +207,14 @@
             </section>
         </section>
     </main>
+    <script type="module">
+        import { mountPlayerDrawers } from "/player/player-drawer.js";
 
-    <!-- Navigation Drawer -->
-    <div id="navBackdrop" class="backdrop" hidden></div>
+        mountPlayerDrawers();
 
-    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
-        <div class="drawer__header">
-            <strong>Navigation</strong>
-            <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
-        </div>
-        <div id="navList" class="drawer__content">
-            <!-- Items kommen per JS -->
-        </div>
-    </aside>
-
-    <script type="module" src="/app.js"></script>
-    <script type="module" src="/charakter.js"></script>
+        await import("/app.js");
+        await import("/player/charakter.js");
+    </script>
 </body>
 
 </html>

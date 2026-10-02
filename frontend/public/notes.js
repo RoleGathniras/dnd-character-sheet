@@ -1,17 +1,10 @@
 import { API } from "./api.js";
 import { renderTopbarCharacterAvatar } from "./app.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+function initNotes() {
     // =========================================================
     // DOM
     // =========================================================
-    const btnMenu = document.getElementById("btnMenu");
-    const drawer = document.getElementById("drawer");
-    const backdrop = document.getElementById("backdrop");
-    const btnCloseDrawer = document.getElementById("btnCloseDrawer");
-    const listMine = document.getElementById("listMine");
-    const listNpcs = document.getElementById("listNpcs");
-
     const notes_npcs = document.getElementById("notes_npcs");
     const notes_quests = document.getElementById("notes_quests");
     const notes_places = document.getElementById("notes_places");
@@ -19,9 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     const required = [
-        btnMenu, drawer, backdrop, btnCloseDrawer, listMine, listNpcs,
-        notes_npcs, notes_quests, notes_places, notes_story,
-        currentCharacterAvatar, currentCharacterAvatarImg, currentCharacterAvatarFallback
+        notes_npcs,
+        notes_quests,
+        notes_places,
+        notes_story
     ];
 
     if (required.some((el) => !el)) {
@@ -78,16 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     }
 
-    function setSelectedCharacterId(id) {
-        if (id) {
-            localStorage.setItem("dnd_current_character_id", String(id));
-            localStorage.setItem("selectedCharacterId", String(id));
-        } else {
-            localStorage.removeItem("dnd_current_character_id");
-            localStorage.removeItem("selectedCharacterId");
-        }
-    }
-
     function syncTopbarAvatarFromCurrentCharacter() {
         renderTopbarCharacterAvatar(currentCharacter);
     }
@@ -120,15 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!data) return;
         data.notes = toPersistNotes();
     }
-
-    function escapeHtml(str) {
-        return String(str)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;");
-    }
-
 
     function markDirtyAndScheduleSave() {
         writeStateIntoCharacter();
@@ -262,69 +237,6 @@ document.addEventListener("DOMContentLoaded", () => {
             toggleCollapsible(toggleBtn);
         });
     }
-
-    // =========================================================
-    // Drawer
-    // =========================================================
-    function openDrawer() {
-        drawer.classList.add("is-open");
-        drawer.setAttribute("aria-hidden", "false");
-        backdrop.hidden = false;
-    }
-
-    function closeDrawer() {
-        drawer.classList.remove("is-open");
-        drawer.setAttribute("aria-hidden", "true");
-        backdrop.hidden = true;
-    }
-
-    async function loadCharactersForDrawer() {
-        listMine.innerHTML = "";
-        listNpcs.innerHTML = "";
-
-        let chars = [];
-        try {
-            chars = await API.characters();
-        } catch (e) {
-            console.warn("[notes.js] Failed to load characters", e);
-            return;
-        }
-
-        const currentId = Number(localStorage.getItem("selectedCharacterId"));
-
-        for (const c of chars) {
-            const b = document.createElement("button");
-            b.className = "drawer__item";
-
-            if (Number(c.id) === currentId) {
-                b.classList.add("is-active");
-            }
-
-            const name = c.name ?? "";
-            const kind = (c.kind ?? "").toUpperCase();
-            const owner = c.owner_username ?? "";
-
-            b.innerHTML = `
-                <span class="drawerItem__main">
-                    <span class="drawerItem__name">${escapeHtml(name)}</span>
-                    <span class="drawerItem__kind">${escapeHtml(kind)}</span>
-                </span>
-                ${owner ? `<span class="drawerItem__sub">${escapeHtml(owner)}</span>` : ``}
-            `;
-
-            b.addEventListener("click", async () => {
-                setSelectedCharacterId(c.id);
-                closeDrawer();
-                await loadCharacterAndHydrate();
-                syncTopbarAvatarFromCurrentCharacter();
-                await loadCharactersForDrawer();
-            });
-
-            if (c.kind === "npc") listNpcs.appendChild(b);
-            else listMine.appendChild(b);
-        }
-    }
-
     // =========================================================
     // Load / Hydrate
     // =========================================================
@@ -370,15 +282,11 @@ document.addEventListener("DOMContentLoaded", () => {
         bindInputs();
         bindCollapsibleSections();
 
-        btnMenu.addEventListener("click", openDrawer);
-        btnCloseDrawer.addEventListener("click", closeDrawer);
-        backdrop.addEventListener("click", closeDrawer);
-
         return loadCharacterAndHydrate();
     }
 
-    startup().then(() => {
-        syncTopbarAvatarFromCurrentCharacter();
-        loadCharactersForDrawer();
-    });
-});
+    startup()
+
+}
+
+initNotes();

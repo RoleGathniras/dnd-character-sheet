@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>DnD Character Sheet</title>
     <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="../styles/shared.css" />
 </head>
 
 <body>
@@ -48,61 +49,9 @@
         </button>
     </header>
 
-    <!-- Drawer -->
-    <div id="drawer" class="drawer" aria-hidden="true">
-        <div class="drawer__header">
-            <strong id="drawerUserTitle">Charaktere</strong>
-            <button id="btnCloseDrawer" class="btn" aria-label="Schließen">✕</button>
-        </div>
-
-        <div class="drawer__content">
-            <div class="drawer__section">
-                <button type="button" class="drawer__title drawer__toggle" id="toggleMine" aria-expanded="true">
-                    Charaktere
-                </button>
-
-                <div id="listMine" class="drawer__list">
-                    <button class="drawer__item" disabled>
-                        (noch keine Daten)
-                    </button>
-                </div>
-            </div>
-
-            <div class="drawer__section">
-                <button type="button" class="drawer__title drawer__toggle" id="toggleNpcs" aria-expanded="false">
-                    NPCs
-                </button>
-
-                <div id="listNpcs" class="drawer__list" hidden>
-                    <button class="drawer__item" disabled>
-                        (noch keine Daten)
-                    </button>
-                </div>
-            </div>
-
-            <button id="btnPlayerRules" class="drawer__item" type="button">
-                Spielerhandbuch
-            </button>
-
-            <div class="drawer__footer">
-                <button id="btnLogout" class="drawer__item" type="button">
-                    Abmelden
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="backdrop" class="backdrop" hidden></div>
-
-    <!-- Right nav drawer -->
-    <div id="navBackdrop" class="backdrop" hidden></div>
-    <aside id="navDrawer" class="drawer drawer--right" aria-hidden="true">
-        <div class="drawer__header">
-            <strong>Navigation</strong>
-            <button id="btnNavClose" class="btn" aria-label="Schließen">✕</button>
-        </div>
-        <div id="navList" class="drawer__content"></div>
-    </aside>
+    <div id="playerDrawerMount"></div>
+    <!-- rechterDrawer -->
+    <div id="playerNavDrawerMount"></div>
 
     <!-- Content -->
     <main class="page--sheet">
@@ -371,9 +320,14 @@
             </section>
         </section>
     </main>
+    <script type="module">
+        import { mountPlayerDrawers } from "/player/player-drawer.js";
 
-    <script type="module" src="/sheet.js"></script>
-    <script type="module" src="/app.js"></script>
+        mountPlayerDrawers();
+
+        await import("/app.js");
+        await import("/sheet.js");
+    </script>
 </body>
 
 </html>

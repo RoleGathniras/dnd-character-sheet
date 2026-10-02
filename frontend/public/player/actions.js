@@ -1,5 +1,5 @@
-import { API } from "./api.js";
-import { getCurrentCharacterId, setStatus } from "./app.js";
+import { API } from "../api.js";
+import { getCurrentCharacterId, setStatus } from "../app.js";
 
 (function () {
   const isActionsPage = location.pathname.endsWith("/actions.html");
@@ -7,7 +7,6 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
   if (!isActionsPage) return;
 
   let currentCharacter = null;
-  let currentCharacterUpdatedAt = null;
   let attackSaveTimer = null;
   let editingActionId = null;
   let expandedActionId = null;
@@ -118,7 +117,6 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
       });
 
       currentCharacter = updatedCharacter;
-      currentCharacterUpdatedAt = updatedCharacter.updated_at;
 
       window.dispatchEvent(
         new CustomEvent("character:updated", {
@@ -268,8 +266,6 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
 
       currentCharacter = updatedCharacter;
 
-      currentCharacterUpdatedAt = updatedCharacter.updated_at;
-
       renderActions();
 
       window.dispatchEvent(
@@ -331,7 +327,6 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
       });
 
       currentCharacter = updatedCharacter;
-      currentCharacterUpdatedAt = updatedCharacter.updated_at;
 
       renderActions();
 
@@ -585,8 +580,6 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
 
           const index = Number(button.dataset.useIndex);
 
-          console.log("[actions] Anwendung geklickt", action.id, index);
-
           toggleActionUse(action.id, index);
         });
       });
@@ -600,7 +593,6 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
 
     if (!characterId) {
       currentCharacter = null;
-      currentCharacterUpdatedAt = null;
 
       setStatus("Kein Charakter ausgewählt.");
       return;
@@ -610,7 +602,6 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
       const character = await API.getCharacter(characterId);
 
       currentCharacter = character;
-      currentCharacterUpdatedAt = character.updated_at;
 
       const data = character.data ?? {};
 
@@ -661,7 +652,7 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
       damage?.addEventListener("input", scheduleAttackSave);
     }
   }
-  async function saveNewAction() {
+  async function saveAction() {
     if (!currentCharacter) {
       setStatus("Kein Charakter ausgewählt.");
       return;
@@ -681,12 +672,12 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
 
     const usesMax = limitedUses
       ? Math.max(
-          1,
-          Math.min(
-            99,
-            Number.isFinite(usesMaxRaw) ? Math.trunc(usesMaxRaw) : 1,
-          ),
-        )
+        1,
+        Math.min(
+          99,
+          Number.isFinite(usesMaxRaw) ? Math.trunc(usesMaxRaw) : 1,
+        ),
+      )
       : 0;
 
     const resetOn = limitedUses
@@ -760,8 +751,6 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
       });
 
       currentCharacter = updatedCharacter;
-
-      currentCharacterUpdatedAt = updatedCharacter.updated_at;
 
       renderActions();
       resetActionEditor();
@@ -855,8 +844,6 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
 
       currentCharacter = updatedCharacter;
 
-      currentCharacterUpdatedAt = updatedCharacter.updated_at;
-
       renderActions();
       resetActionEditor();
 
@@ -896,7 +883,7 @@ import { getCurrentCharacterId, setStatus } from "./app.js";
       editor.hidden = false;
     });
 
-    btnSave?.addEventListener("click", saveNewAction);
+    btnSave?.addEventListener("click", saveAction);
 
     btnCancel?.addEventListener("click", () => {
       resetActionEditor();

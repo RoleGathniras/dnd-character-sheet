@@ -1,6 +1,6 @@
 import { API } from "./api.js";
 import { renderTopbarCharacterAvatar } from "./app.js";
-document.addEventListener("DOMContentLoaded", () => {
+function initInventory() {
     // =========================================================
     // DOM
     // =========================================================
@@ -29,13 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnToggleAddItem = document.getElementById("btnToggleAddItem");
     const addItemBody = document.getElementById("addItemBody");
 
-    const btnMenu = document.getElementById("btnMenu");
-    const drawer = document.getElementById("drawer");
-    const backdrop = document.getElementById("backdrop");
-    const btnCloseDrawer = document.getElementById("btnCloseDrawer");
-    const listMine = document.getElementById("listMine");
-    const listNpcs = document.getElementById("listNpcs");
-
     const MAX_MONEY_VALUE = 99999999;
     const MAX_ITEM_NAME_LENGTH = 80;
     const MAX_ITEM_DESC_LENGTH = 1000;
@@ -47,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
         !currentCarryWeight || !maxCarryWeight ||
         !item_name || !item_count || !item_type || !item_weight || !item_desc || !btnAddItem ||
         !inventoryWeaponsRows || !inventoryArmorRows || !inventoryIngredientsRows || !inventoryQuestRows || !inventoryOtherRows ||
-        !btnMenu || !drawer || !backdrop || !btnCloseDrawer || !listMine || !listNpcs || !addItemCard || !btnToggleAddItem || !addItemBody
+        !addItemCard || !btnToggleAddItem || !addItemBody
     ) {
         console.warn("[inventory.js] Missing required DOM elements. Script skipped.");
         return;
@@ -716,68 +709,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================================================
-    // Drawer
-    // =========================================================
-    function openDrawer() {
-        drawer.classList.add("is-open");
-        drawer.setAttribute("aria-hidden", "false");
-        backdrop.hidden = false;
-    }
-
-    function closeDrawer() {
-        drawer.classList.remove("is-open");
-        drawer.setAttribute("aria-hidden", "true");
-        backdrop.hidden = true;
-    }
-
-    async function loadCharactersForDrawer() {
-        listMine.innerHTML = "";
-        listNpcs.innerHTML = "";
-
-        let chars = [];
-        try {
-            chars = await API.characters();
-        } catch (e) {
-            console.warn("[inventory.js] Failed to load characters", e);
-            return;
-        }
-
-        const currentId = Number(localStorage.getItem("selectedCharacterId"));
-
-        for (const c of chars) {
-            const b = document.createElement("button");
-            b.className = "drawer__item";
-
-            if (Number(c.id) === currentId) {
-                b.classList.add("is-active");
-            }
-
-            const name = c.name ?? "";
-            const kind = (c.kind ?? "").toUpperCase();
-            const owner = c.owner_username ?? "";
-
-            b.innerHTML = `
-                <span class="drawerItem__main">
-                    <span class="drawerItem__name">${escapeHtml(name)}</span>
-                    <span class="drawerItem__kind">${escapeHtml(kind)}</span>
-                </span>
-                ${owner ? `<span class="drawerItem__sub">${escapeHtml(owner)}</span>` : ``}
-            `;
-
-            b.addEventListener("click", async () => {
-                setSelectedCharacterId(c.id);
-                closeDrawer();
-                await loadCharacterAndHydrate();
-                syncTopbarAvatarFromCurrentCharacter();
-                await loadCharactersForDrawer();
-            });
-
-            if (c.kind === "npc") listNpcs.appendChild(b);
-            else listMine.appendChild(b);
-        }
-    }
-
-    // =========================================================
     // Load / Hydrate
     // =========================================================
     async function loadCharacterAndHydrate() {
@@ -829,14 +760,9 @@ document.addEventListener("DOMContentLoaded", () => {
         bindCollapsibleSections();
         bindInventoryTableEvents();
 
-        btnMenu.addEventListener("click", openDrawer);
-        btnCloseDrawer.addEventListener("click", closeDrawer);
-        backdrop.addEventListener("click", closeDrawer);
-
         return loadCharacterAndHydrate();
     }
 
-    startup().then(() => {
-        loadCharactersForDrawer();
-    });
-});
+    startup();
+}
+initInventory();

@@ -44,6 +44,12 @@ docker compose run --rm api alembic upgrade head
 echo "✓ Datenbank ist aktuell"
 
 echo
+echo "Aktualisiere Zauberdaten..."
+docker compose run --rm api python3 -m app.import_spells
+
+echo "✓ Zauberdaten sind aktuell"
+
+echo
 echo "Starte Anwendung..."
 docker compose up -d
 

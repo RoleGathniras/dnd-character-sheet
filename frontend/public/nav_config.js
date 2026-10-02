@@ -20,7 +20,7 @@ export const NAV = [
   {
     key: "actions",
     title: "Aktionen",
-    href: "/actions.html",
+    href: "/player/actions.html",
     sections: [
       ["sec-attacks", "Angriffe"],
       ["sec-actions", "Aktionen"],
@@ -29,7 +29,7 @@ export const NAV = [
   {
     key: "spells",
     title: "Zauber",
-    href: "/spell.html",
+    href: "/spells.html",
     sections: [
       ["sec-spell-attacks", "Zauberangriffe"],
       ["sec-spell-slots", "Zauberslots"],
@@ -55,7 +55,7 @@ export const NAV = [
   {
     key: "charakter",
     title: "Charakterbeschreibung",
-    href: "/charakter.html",
+    href: "/player/charakter.html",
     sections: [
       ["sec-appearance", "Aussehen"],
       ["sec-proficiencies-languages", "Übungen & Sprache"],

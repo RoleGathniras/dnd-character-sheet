@@ -33,9 +33,7 @@ const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
 
 const listMine = document.getElementById("listMine");
-const listNpcs = document.getElementById("listNpcs");
 const toggleMine = document.getElementById("toggleMine");
-const toggleNpcs = document.getElementById("toggleNpcs");
 const toggleActions = document.getElementById("toggleActions");
 const drawerActionsSection = document.getElementById("drawerActionsSection");
 const sheetRootEl = document.getElementById("sheetRoot");
@@ -230,10 +228,9 @@ export async function refreshCurrentUserAndUI() {
 }
 
 export async function loadCharacters() {
-  if (!listMine || !listNpcs) return [];
+  if (!listMine) return [];
 
   listMine.innerHTML = "";
-  listNpcs.innerHTML = "";
 
   const chars = await API.characters();
 
@@ -280,13 +277,14 @@ export async function loadCharacters() {
       window.location.href = "/sheet.html";
     });
 
-    if (c.kind === "npc") listNpcs.appendChild(b);
-    else listMine.appendChild(b);
-  }
+    if (c.kind !== "npc") {
+      listMine.appendChild(b);
+    }
 
-  updateDrawerActions();
-  setStatus(`Charaktere geladen: ${chars.length}`);
-  return chars;
+    updateDrawerActions();
+    setStatus(`Charaktere geladen: ${chars.length}`);
+    return chars;
+  }
 }
 
 export function getCharacterImageDataUrl(character) {
@@ -737,7 +735,7 @@ btnCreatePC?.addEventListener("click", () => handleCreate("pc"));
 btnCreateNPC?.addEventListener("click", () => handleCreate("npc"));
 
 bindSectionToggle(toggleMine, listMine, true);
-bindSectionToggle(toggleNpcs, listNpcs, false);
+
 bindSectionToggle(toggleActions, actionsMenu, true);
 
 btnAdmin?.addEventListener("click", () => {
@@ -783,7 +781,7 @@ btnDelete?.addEventListener("click", async () => {
   bindTopbarLevelEditing();
   bindTopbarCharacterInfoEditing();
 
-  const isSpellPage = location.pathname.endsWith("/spell.html");
+  const isSpellPage = location.pathname.endsWith("/spells.html");
   const isInventoryPage = location.pathname.endsWith("/inventory.html");
   const isCharacterPage = location.pathname.endsWith("/charakter.html");
   const isNotesPage = location.pathname.endsWith("/notes.html");
