@@ -210,7 +210,7 @@ import {
                 card.addEventListener("click", () => {
                     setCurrentCharacter(c.id);
                     renderTopbarCharacterAvatar(c);
-                    window.location.href = "/sheet.html";
+                    window.location.href = "/player/sheet.html";
                 });
 
                 characterGrid.appendChild(card);

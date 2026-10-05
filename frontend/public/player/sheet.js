@@ -1,4 +1,4 @@
-import { API } from "./api.js";
+import { API } from "../api.js";
 import {
     applyRoleUI,
     getCurrentCharacterId,
@@ -10,8 +10,8 @@ import {
     setCurrentCharacter,
     setLoggedInUI,
     setStatus,
-} from "./app.js";
-import { jsonToSheet, sheetToJson } from "./mapper.js";
+} from "../app.js";
+import { jsonToSheet, sheetToJson } from "../mapper.js";
 
 
 (function () {

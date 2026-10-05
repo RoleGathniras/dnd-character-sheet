@@ -1,5 +1,5 @@
-import { API } from "./api.js";
-import { renderTopbarCharacterAvatar } from "./app.js";
+import { API } from "../api.js";
+import { renderTopbarCharacterAvatar } from "../app.js";
 function initInventory() {
     // =========================================================
     // DOM

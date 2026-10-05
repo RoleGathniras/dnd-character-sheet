@@ -1,4 +1,4 @@
-import { API } from "./api.js";
+import { API } from "../api.js";
 
 const currentCharacterId =
     Number(localStorage.getItem("dnd_current_character_id")) || null;

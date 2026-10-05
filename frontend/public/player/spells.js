@@ -1,7 +1,7 @@
 // frontend/public/spells.js
 // UI-only: Spell Tabs + Slots + Spellbook + Panel + Description (In-Memory)
-import { API } from "./api.js";
-import { renderTopbarCharacterAvatar } from "./app.js";
+import { API } from "../api.js";
+import { renderTopbarCharacterAvatar } from "../app.js";
 
 function initSpells() {
     // 0 DOM: Welche HTML-Elemente benutzt werden

@@ -2,7 +2,7 @@ export const NAV = [
   {
     key: "sheet",
     title: "Charakterbogen",
-    href: "/sheet.html",
+    href: "/player/sheet.html",
     sections: [
       ["sec-values", "Werte"],
       ["sec-abilities", "Attribute"],
@@ -14,7 +14,7 @@ export const NAV = [
   {
     key: "skills",
     title: "Fertigkeiten",
-    href: "/skills.html",
+    href: "/player/skills.html",
     sections: [],
   },
   {
@@ -29,7 +29,7 @@ export const NAV = [
   {
     key: "spells",
     title: "Zauber",
-    href: "/spells.html",
+    href: "/player/spells.html",
     sections: [
       ["sec-spell-attacks", "Zauberangriffe"],
       ["sec-spell-slots", "Zauberslots"],
@@ -40,7 +40,7 @@ export const NAV = [
   {
     key: "inventory",
     title: "Inventar",
-    href: "/inventory.html",
+    href: "/player/inventory.html",
     sections: [
       ["sec-money", "Geld"],
       ["sec-weight", "Traglast"],
@@ -65,7 +65,7 @@ export const NAV = [
   {
     key: "notes",
     title: "Notizen",
-    href: "/notes.html",
+    href: "/player/notes.html",
     sections: [
       ["sec-notes-npcs", "NPCs"],
       ["sec-notes-quests", "Quests"],

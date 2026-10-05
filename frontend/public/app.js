@@ -274,7 +274,7 @@ export async function loadCharacters() {
         return;
       }
 
-      window.location.href = "/sheet.html";
+      window.location.href = "/player/sheet.html";
     });
 
     if (c.kind !== "npc") {
@@ -647,7 +647,7 @@ async function handleCreate(kind) {
         }),
       );
     } else {
-      window.location.href = "/sheet.html";
+      window.location.href = "/player/sheet.html";
     }
 
     setStatus(`Erstellt: ${created.name}`);
