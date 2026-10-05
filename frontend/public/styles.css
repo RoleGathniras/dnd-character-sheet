@@ -372,6 +372,8 @@ input[readonly] {
 }
 
 .appbar__drawerToggle {
+  grid-column: 1;
+  justify-self: start;
   font-size: 2rem;
 }
 
@@ -518,6 +520,24 @@ input[readonly] {
 .appbar__levelValue {
   font-size: 1rem;
   font-weight: 700;
+}
+
+.appbar__createCharacter {
+  border: 0;
+  background: transparent;
+  color: var(--text);
+
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.appbar__right {
+  grid-column: 3;
+  justify-self: end;
+
+  display: flex;
+  align-items: center;
 }
 
 /* =========================================================

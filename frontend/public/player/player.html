@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DnD Character Sheet</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="../styles/shared.css" />
+    <link rel="stylesheet" href="../styles/player.css" />
+</head>
+
+<body>
+    <!-- Appbar -->
+    <div class="appbar">
+        <button id="btnMenu" class="appbar__drawerToggle" type="button" aria-label="Charaktere öffnen"
+            title="Charaktere">
+            ‹
+        </button>
+
+        <div class="appbar__right">
+            <button id="btnCreateCharacter" class="appbar__createCharacter" type="button"
+                aria-label="Neuen Charakter erstellen" title="Neuer Charakter">
+                +
+            </button>
+        </div>
+    </div>
+
+    <!-- Drawer -->
+    <div id="playerDrawerMount"></div>
+    <div id="playerNavDrawerMount"></div>
+    <!-- Content -->
+    <main class="page--landing">
+        <section id="landingHero" class="panel landingHero">
+            <h1>DnD Character Sheet</h1>
+        </section>
+
+        <section id="charactersPanel" class="panel" hidden>
+            <div class="landingSectionHead">
+                <h2>Deine Charaktere</h2>
+            </div>
+
+            <div id="characterEmptyState" class="emptyState">
+                Bitte einloggen, um deine Charaktere zu sehen.
+            </div>
+
+            <div id="characterGrid" class="characterGrid"></div>
+
+            <div id="editCharacterForm" class="characterEdit" hidden>
+                <h3>Charakter bearbeiten</h3>
+
+                <label>
+                    Name
+                    <input id="editCharacterName" type="text" maxlength="100" />
+                </label>
+
+                <label>
+                    Volk
+                    <input id="editCharacterRace" type="text" maxlength="100" />
+                </label>
+
+                <label>
+                    Klasse
+                    <input id="editCharacterClass" type="text" maxlength="100" />
+                </label>
+
+                <div class="characterEdit__image">
+                    <label for="editCharacterImage">
+                        Charakterbild
+                    </label>
+
+                    <div id="editCharacterImagePreview" hidden>
+                        <img id="editCharacterImagePreviewImg" alt="Vorschau Charakterbild" />
+                    </div>
+
+                    <input id="editCharacterImage" type="file" accept="image/*" hidden />
+
+                    <button id="selectEditCharacterImage" class="btn" type="button">
+                        Bild auswählen
+                    </button>
+
+                    <button id="removeEditCharacterImage" class="btn" type="button">
+                        Bild entfernen
+                    </button>
+                </div>
+
+                <div class="characterEdit__actions">
+                    <button id="saveEditCharacter" class="btn" type="button">
+                        Speichern
+                    </button>
+
+                    <button id="cancelEditCharacter" class="btn" type="button">
+                        Abbrechen
+                    </button>
+                </div>
+
+                <button id="deleteEditCharacter" class="btn danger" type="button">
+                    Charakter löschen
+                </button>
+
+                <p id="editCharacterError" class="muted"></p>
+            </div>
+        </section>
+    </main>
+    <script type="module">
+        import { mountPlayerDrawers } from "/player/player-drawer.js";
+
+        mountPlayerDrawers();
+
+        await import("/app.js");
+        await import("/player/player.js");
+    </script>
+</body>
+
+</html>

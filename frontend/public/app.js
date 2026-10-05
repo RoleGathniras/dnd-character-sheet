@@ -264,27 +264,25 @@ export async function loadCharacters() {
       setCurrentCharacter(c.id);
       closeDrawer();
 
-      const onSheet = location.pathname.endsWith("/sheet.html");
-      if (onSheet) {
-        window.dispatchEvent(
-          new CustomEvent("character:selected", {
-            detail: { id: c.id },
-          }),
-        );
+      if (location.pathname.endsWith("/sheet.html")) {
+        window.location.reload();
         return;
       }
 
       window.location.href = "/player/sheet.html";
     });
 
-    if (c.kind !== "npc") {
+    if (
+      c.kind !== "npc" &&
+      Number(c.id) !== Number(currentCharacterId)
+    ) {
       listMine.appendChild(b);
     }
-
-    updateDrawerActions();
-    setStatus(`Charaktere geladen: ${chars.length}`);
-    return chars;
   }
+
+  updateDrawerActions();
+  setStatus(`Charaktere geladen: ${chars.length}`);
+  return chars;
 }
 
 export function getCharacterImageDataUrl(character) {
@@ -395,7 +393,7 @@ export function bindTopbarAvatarNavigation() {
   currentCharacterAvatar.style.cursor = "pointer";
 
   currentCharacterAvatar.addEventListener("click", () => {
-    window.location.href = "/index.html";
+    window.location.href = "/player/player.html";
   });
 }
 export function bindTopbarLevelEditing() {
@@ -601,7 +599,7 @@ function scrollToHashWithRetry(tries = 20) {
 // CHARACTERS / AUTH
 // ============================================================
 
-async function handleCreate(kind) {
+export async function handleCreate(kind) {
   const name = prompt(
     kind === "npc" ? "Name des NPC:" : "Name des Charakters:",
   );
@@ -765,7 +763,7 @@ btnDelete?.addEventListener("click", async () => {
     setStatus("Charakter gelöscht.");
 
     if (!isIndexPage) {
-      window.location.href = "/index.html";
+      window.location.href = "/player/player.html";
     }
   } catch (e) {
     console.error(e);

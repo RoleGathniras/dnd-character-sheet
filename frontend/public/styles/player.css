@@ -1,0 +1,94 @@
+.characterCard__edit {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    width: 36px;
+    height: 36px;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+
+    color: var(--text);
+    cursor: pointer;
+}
+
+.characterCard__edit svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+.characterEdit {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 18px;
+
+    display: grid;
+    gap: 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    background: var(--panel);
+}
+
+.characterEdit h3 {
+    margin: 0;
+}
+
+.characterEdit>label {
+    display: grid;
+    gap: 6px;
+
+    font-weight: 700;
+}
+
+.characterEdit>label input {
+    width: 100%;
+    min-width: 0;
+}
+
+.characterEdit__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.characterEdit__image {
+    display: grid;
+    gap: 10px;
+}
+
+#editCharacterImagePreview {
+    width: 340px;
+    max-width: 100%;
+
+    aspect-ratio: var(--character-card-image-ratio);
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#editCharacterImagePreviewImg {
+    width: 100%;
+    height: 100%;
+    display: block;
+
+    object-fit: cover;
+}
+
+.characterEdit__actions .btn {
+    width: 100%;
+}
+
+#deleteEditCharacter {
+    width: 100%;
+}
