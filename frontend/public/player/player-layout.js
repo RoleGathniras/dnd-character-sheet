@@ -10,6 +10,27 @@ import {
 } from "/player/player-topbar.js";
 
 export function initPlayerLayout() {
+    // Linker Player-Drawer
+    const drawer = document.getElementById("drawer");
+    const backdrop = document.getElementById("backdrop");
+    const btnMenu = document.getElementById("btnMenu");
+    const btnClose = document.getElementById("btnCloseDrawer");
+
+    const playerMainDrawer = initDrawer({
+        drawer,
+        backdrop,
+        openButton: btnMenu,
+        closeButton: btnClose,
+    });
+
+    const btnPlayerRules = document.getElementById("btnPlayerRules");
+
+    btnPlayerRules?.addEventListener("click", () => {
+        playerMainDrawer?.close();
+        window.location.href = "/player_rules.html";
+    });
+
+    // Rechter Navigationsdrawer
     const navDrawer = document.getElementById("navDrawer");
     const navBackdrop = document.getElementById("navBackdrop");
     const btnNavOpen = document.getElementById("btnNavOpen");
@@ -17,13 +38,14 @@ export function initPlayerLayout() {
     const navList = document.getElementById("navList");
     const sheetRootEl = document.getElementById("sheetRoot");
 
-    if (
-        !navDrawer ||
-        !navBackdrop ||
-        !btnNavOpen ||
-        !btnNavClose ||
-        !navList
-    ) {
+    const hasSheetNavigation =
+        navDrawer &&
+        navBackdrop &&
+        btnNavOpen &&
+        btnNavClose &&
+        navList;
+
+    if (!hasSheetNavigation) {
         return;
     }
 
@@ -40,6 +62,7 @@ export function initPlayerLayout() {
         closeNavDrawer: () => playerNavDrawer?.close(),
         sheetRootEl,
     });
+
     const currentCharacterId =
         Number(localStorage.getItem("dnd_current_character_id")) || null;
 

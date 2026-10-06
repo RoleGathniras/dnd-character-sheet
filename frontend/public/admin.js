@@ -4,7 +4,6 @@ import {
     loadCharacters,
     refreshCurrentUserAndUI,
     renderDrawerTitle,
-    renderTopbarCharacterAvatar,
     setLoggedInUI,
     setStatus,
 } from "./app.js";
@@ -44,10 +43,6 @@ import { buildSheetNav } from "./nav.js";
             .replaceAll(">", "&gt;")
             .replaceAll('"', "&quot;")
             .replaceAll("'", "&#039;");
-    }
-
-    function syncTopbarAvatar() {
-        renderTopbarCharacterAvatar(currentCharacter);
     }
 
     function renderUserRow(u) {
@@ -241,8 +236,7 @@ import { buildSheetNav } from "./nav.js";
                 }
             }
 
-            syncTopbarAvatar();
-            await loadUsersIntoAdmin();
+                await loadUsersIntoAdmin();
             setStatus("Adminbereich bereit ✅");
         } catch (e) {
             console.error(e);
