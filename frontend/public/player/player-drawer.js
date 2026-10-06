@@ -26,43 +26,6 @@ export function createPlayerDrawer() {
                         </button>
                     </div>
                 </div>
-
-                <div
-                    class="drawer__section"
-                    id="drawerActionsSection"
-                    hidden
-                >
-                    <button
-                        type="button"
-                        class="drawer__title drawer__toggle"
-                        id="toggleActions"
-                        aria-expanded="false"
-                    >
-                        Aktionen
-                    </button>
-
-                    <div id="actionsMenu" class="drawer__list" hidden>
-                        <button id="btnCreatePC" class="drawer__item" type="button">
-                            Neuer Charakter
-                        </button>
-
-                        <button id="btnCreateNPC" class="drawer__item" type="button">
-                            Neuer NPC
-                        </button>
-
-                        <button id="btnSave" class="drawer__item" type="button">
-                            Speichern
-                        </button>
-
-                        <button id="btnDelete" class="drawer__item" type="button">
-                            Charakter löschen
-                        </button>
-                    </div>
-                </div>
-
-                <button id="btnAdmin" class="drawer__item" type="button" hidden>
-                    Admin
-                </button>
             </div>
 
             <div class="drawer__footer">

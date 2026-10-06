@@ -1,12 +1,10 @@
 import { API } from "../api.js";
 import {
-    applyRoleUI,
     getCurrentCharacterId,
     loadCharacters,
     refreshCurrentUserAndUI,
     renderDrawerTitle,
     renderTopbarCharacterAvatar,
-    setAdminVisible,
     setCurrentCharacter,
     setLoggedInUI,
     setStatus,
@@ -19,8 +17,6 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
     if (!isSheetPage) return;
 
     const sheetRootEl = document.getElementById("sheetRoot");
-    const btnSave = document.getElementById("btnSave");
-    const btnDelete = document.getElementById("btnDelete");
 
     let currentCharacter = null;
     let currentCharacterUpdatedAt = null;
@@ -92,7 +88,6 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
     function markDirty() {
         if (!getCurrentCharacterId()) return;
         isDirty = true;
-        if (btnSave) btnSave.disabled = false;
         setStatus("Ungespeicherte Änderungen ⚠");
         scheduleAutoSave();
     }
@@ -301,7 +296,6 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
             if (titleEl) titleEl.textContent = c.name;
 
             isDirty = false;
-            if (btnSave) btnSave.disabled = true;
 
             setStatus(`Geladen: ${c.name}`);
         } catch (e) {
@@ -344,8 +338,6 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
             currentCharacterUpdatedAt = res.updated_at;
             syncTopbarAvatarFromCurrentCharacter();
             isDirty = false;
-            if (btnSave) btnSave.disabled = true;
-
             setStatus(silent ? "Auto-Save ✅" : "Gespeichert ✅");
 
             setTimeout(() => {
@@ -379,32 +371,7 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
 
         isDirty = false;
         currentCharacterUpdatedAt = null;
-        if (btnSave) btnSave.disabled = true;
-        if (btnDelete) btnDelete.disabled = true;
     }
-
-    btnSave?.addEventListener("click", async () => {
-        await saveCurrentCharacter({ silent: false });
-    });
-
-    btnDelete?.addEventListener("click", async () => {
-        const currentCharacterId = getCurrentCharacterId();
-        if (!currentCharacterId) return;
-
-        const confirmed = confirm("Willst du diesen Charakter wirklich löschen?");
-        if (!confirmed) return;
-
-        try {
-            await API.deleteCharacter(currentCharacterId);
-            setCurrentCharacter(null);
-            resetSheetUI();
-            await loadCharacters();
-            setStatus("Charakter gelöscht.");
-        } catch (e) {
-            console.error(e);
-            setStatus(e?.message || "Löschen fehlgeschlagen.");
-        }
-    });
 
     window.addEventListener("character:selected", async (e) => {
         const id = e.detail?.id;
@@ -525,7 +492,6 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
             try {
                 setLoggedInUI(true);
                 await refreshCurrentUserAndUI();
-                applyRoleUI();
                 await loadCharacters();
 
                 const currentCharacterId = getCurrentCharacterId();
@@ -545,13 +511,10 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
                 }
 
                 setLoggedInUI(false);
-                setAdminVisible(false);
                 renderDrawerTitle();
             }
         } else {
             setLoggedInUI(false);
-            applyRoleUI();
-            setAdminVisible(false);
             renderDrawerTitle();
             setStatus("UI bereit ✅");
         }

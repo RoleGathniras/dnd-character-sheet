@@ -25,27 +25,16 @@ const btnMenu = document.getElementById("btnMenu");
 const btnClose = document.getElementById("btnCloseDrawer");
 
 const btnActions = document.getElementById("btnActions");
-const actionsMenu = document.getElementById("actionsMenu");
 
 const statusEl = document.getElementById("appStatus");
-const btnSave = document.getElementById("btnSave");
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
 
 const listMine = document.getElementById("listMine");
-const toggleMine = document.getElementById("toggleMine");
-const toggleActions = document.getElementById("toggleActions");
-const drawerActionsSection = document.getElementById("drawerActionsSection");
 const sheetRootEl = document.getElementById("sheetRoot");
 
-const btnDelete = document.getElementById("btnDelete");
-const btnCreatePC = document.getElementById("btnCreatePC");
-const btnCreateNPC = document.getElementById("btnCreateNPC");
 const btnAdmin = document.getElementById("btnAdmin");
 const btnPlayerRules = document.getElementById("btnPlayerRules");
-
-const charactersPanel = document.getElementById("charactersPanel");
-const landingHero = document.getElementById("landingHero");
 
 const navDrawer = document.getElementById("navDrawer");
 const navBackdrop = document.getElementById("navBackdrop");
@@ -109,9 +98,6 @@ export function setCurrentCharacter(id) {
     localStorage.removeItem("dnd_current_character_id");
     localStorage.removeItem("selectedCharacterId");
   }
-
-  if (btnSave) btnSave.disabled = true;
-  updateDrawerActions();
 }
 
 export function renderDrawerTitle() {
@@ -128,67 +114,9 @@ export function renderDrawerTitle() {
   el.textContent = role ? `${username} (${role})` : username;
 }
 
-export function applyRoleUI() {
-  updateDrawerActions();
-}
-
-function updateDrawerActions() {
-  const role = currentUser?.role;
-  const isLoggedIn = !!API.token;
-  const isDmOrAdmin = role === "dm" || role === "admin";
-  const isAdmin = role === "admin";
-  const hasSelectedCharacter = !!currentCharacterId;
-
-  if (drawerActionsSection) {
-    drawerActionsSection.style.display = isIndexPage ? "" : "none";
-  }
-
-  if (btnCreatePC) {
-    btnCreatePC.style.display = isIndexPage ? "" : "none";
-    btnCreatePC.disabled = !isLoggedIn;
-  }
-
-  if (btnCreateNPC) {
-    btnCreateNPC.style.display = isIndexPage && isDmOrAdmin ? "" : "none";
-    btnCreateNPC.disabled = !isDmOrAdmin;
-  }
-
-  if (btnDelete) {
-    btnDelete.style.display = isIndexPage && hasSelectedCharacter ? "" : "none";
-    btnDelete.disabled = !isLoggedIn || !hasSelectedCharacter;
-  }
-  if (btnPlayerRules) {
-    btnPlayerRules.style.display = isLoggedIn ? "" : "none";
-    btnPlayerRules.disabled = !isLoggedIn;
-  }
-  if (btnAdmin) {
-    btnAdmin.hidden = !(isIndexPage && isAdmin);
-  }
-
-  if (toggleActions && actionsMenu) {
-    const hasVisibleAction =
-      (btnCreatePC && btnCreatePC.style.display !== "none") ||
-      (btnCreateNPC && btnCreateNPC.style.display !== "none") ||
-      (btnDelete && btnDelete.style.display !== "none") ||
-      (btnPlayerRules && btnPlayerRules.style.display !== "none") ||
-      (btnAdmin && !btnAdmin.hidden);
-
-    if (!hasVisibleAction) {
-      setSectionOpen(toggleActions, actionsMenu, false);
-    }
-  }
-}
-
-export function setAdminVisible() {
-  updateDrawerActions();
-}
-
 export function setLoggedInUI(isLoggedIn) {
   setDisplay(btnLogin, isLoggedIn ? "none" : "inline-block");
   setDisplay(btnLogout, isLoggedIn ? "inline-block" : "none");
-
-  if (btnSave) btnSave.disabled = true;
-
   setDisplay(btnMenu, isLoggedIn ? "inline-block" : "none");
   setDisplay(btnActions, isLoggedIn ? "inline-block" : "none");
   setDisplay(btnNavOpen, isLoggedIn ? "inline-block" : "none");
@@ -206,23 +134,18 @@ export function setLoggedInUI(isLoggedIn) {
     sheetRootEl.style.display = isLoggedIn ? "" : "none";
   }
 
-  updateDrawerActions();
 }
 
 export async function refreshCurrentUserAndUI() {
   try {
     currentUser = await API.me();
     renderDrawerTitle();
-    setAdminVisible();
-    applyRoleUI();
     return currentUser;
   } catch (e) {
     console.error(e);
 
     currentUser = null;
     renderDrawerTitle();
-    applyRoleUI();
-    setAdminVisible();
     throw e;
   }
 }
@@ -279,8 +202,6 @@ export async function loadCharacters() {
       listMine.appendChild(b);
     }
   }
-
-  updateDrawerActions();
   setStatus(`Charaktere geladen: ${chars.length}`);
   return chars;
 }
@@ -685,7 +606,6 @@ async function doLogin() {
       location.pathname.endsWith("/index.html");
 
     if (isIndexPage) {
-      updateLandingAuthState(true);
       window.dispatchEvent(new CustomEvent("auth:login"));
       setStatus("Eingeloggt ✅");
       return;
@@ -693,7 +613,6 @@ async function doLogin() {
 
     setLoggedInUI(true);
     await refreshCurrentUserAndUI();
-    applyRoleUI();
     await loadCharacters();
 
     setStatus("Eingeloggt ✅");
@@ -707,19 +626,8 @@ async function doLogin() {
 function doLogout() {
   API.token = null;
   setCurrentCharacter(null);
-  updateLandingAuthState(false);
   window.dispatchEvent(new CustomEvent("auth:logout"));
   window.location.href = "/index.html";
-}
-
-export function updateLandingAuthState(isLoggedIn) {
-  if (charactersPanel) {
-    charactersPanel.hidden = !isLoggedIn;
-  }
-
-  if (landingHero) {
-    landingHero.hidden = isLoggedIn;
-  }
 }
 
 // ============================================================
@@ -728,13 +636,6 @@ export function updateLandingAuthState(isLoggedIn) {
 
 btnLogin?.addEventListener("click", doLogin);
 btnLogout?.addEventListener("click", doLogout);
-
-btnCreatePC?.addEventListener("click", () => handleCreate("pc"));
-btnCreateNPC?.addEventListener("click", () => handleCreate("npc"));
-
-bindSectionToggle(toggleMine, listMine, true);
-
-bindSectionToggle(toggleActions, actionsMenu, true);
 
 btnAdmin?.addEventListener("click", () => {
   closeDrawer();
@@ -747,28 +648,6 @@ btnPlayerRules?.addEventListener("click", () => {
 
 window.addEventListener("hashchange", () => {
   scrollToHashWithRetry();
-});
-btnDelete?.addEventListener("click", async () => {
-  if (!currentCharacterId) return;
-
-  const ok = window.confirm("Willst du diesen Charakter wirklich löschen?");
-  if (!ok) return;
-
-  try {
-    await API.deleteCharacter(currentCharacterId);
-    setCurrentCharacter(null);
-    await loadCharacters();
-    updateDrawerActions();
-    closeDrawer();
-    setStatus("Charakter gelöscht.");
-
-    if (!isIndexPage) {
-      window.location.href = "/player/player.html";
-    }
-  } catch (e) {
-    console.error(e);
-    alert(e?.message || "Charakter konnte nicht gelöscht werden.");
-  }
 });
 // ============================================================
 // STARTUP
@@ -827,13 +706,11 @@ btnDelete?.addEventListener("click", async () => {
     if (isIndexPage) {
       setLoggedInUI(!!API.token);
       renderDrawerTitle();
-      updateDrawerActions();
       return;
     }
 
     if (!isSheetPage) {
       setLoggedInUI(!!API.token);
-      updateDrawerActions();
       if (API.token) {
         loadCharacters().catch((error) => {
           console.error("Charaktere konnten nicht geladen werden:", error);

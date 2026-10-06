@@ -1,15 +1,12 @@
 import { API } from "../api.js";
 import {
-    applyRoleUI,
     handleCreate,
     loadCharacters,
     refreshCurrentUserAndUI,
     renderDrawerTitle,
-    setAdminVisible,
     setCurrentCharacter,
     setLoggedInUI,
     setStatus,
-    updateLandingAuthState,
 } from "../app.js";
 import { resizeImageFile } from "./image-utils.js";
 
@@ -20,6 +17,8 @@ import { resizeImageFile } from "./image-utils.js";
     if (!isPlayerPage) return;
 
     const characterGrid = document.getElementById("characterGrid");
+    const charactersPanel = document.getElementById("charactersPanel");
+    const landingHero = document.getElementById("landingHero");
     const emptyState = document.getElementById("characterEmptyState");
     const btnCreateCharacter = document.getElementById("btnCreateCharacter");
     const currentCharacterAvatar = document.getElementById("currentCharacterAvatar");
@@ -60,6 +59,16 @@ import { resizeImageFile } from "./image-utils.js";
     };
 
     let editingCharacterId = null;
+
+    function updateLandingAuthState(isLoggedIn) {
+        if (charactersPanel) {
+            charactersPanel.hidden = !isLoggedIn;
+        }
+
+        if (landingHero) {
+            landingHero.hidden = isLoggedIn;
+        }
+    }
 
     function escapeHtml(s) {
         return String(s)
@@ -327,7 +336,6 @@ import { resizeImageFile } from "./image-utils.js";
             setLoggedInUI(true);
             updateLandingAuthState(true);
             await refreshCurrentUserAndUI();
-            applyRoleUI();
             await loadCharacters();
             await renderCharacterCards();
         } catch (e) {
@@ -541,8 +549,6 @@ import { resizeImageFile } from "./image-utils.js";
         if (!API.token) {
             setLoggedInUI(false);
             updateLandingAuthState(false);
-            applyRoleUI();
-            setAdminVisible(false);
             renderDrawerTitle();
 
             if (emptyState) {
@@ -558,7 +564,6 @@ import { resizeImageFile } from "./image-utils.js";
             setLoggedInUI(true);
             updateLandingAuthState(true);
             await refreshCurrentUserAndUI();
-            applyRoleUI();
             await loadCharacters();
             await renderCharacterCards();
         } catch (e) {
@@ -567,7 +572,6 @@ import { resizeImageFile } from "./image-utils.js";
             if (e?.status === 401) {
                 API.token = null;
                 setLoggedInUI(false);
-                setAdminVisible(false);
                 setStatus("Token ungültig – bitte neu einloggen");
             } else {
                 setStatus("Startup-Fehler – bitte Konsole prüfen");

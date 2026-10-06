@@ -1,12 +1,10 @@
 import { API } from "./api.js";
 import {
-    applyRoleUI,
     getCurrentCharacterId,
     loadCharacters,
     refreshCurrentUserAndUI,
     renderDrawerTitle,
     renderTopbarCharacterAvatar,
-    setAdminVisible,
     setLoggedInUI,
     setStatus,
 } from "./app.js";
@@ -215,7 +213,6 @@ import { buildSheetNav } from "./nav.js";
 
         if (!API.token) {
             setLoggedInUI(false);
-            setAdminVisible(false);
             renderDrawerTitle();
             setStatus("Nicht eingeloggt ❌");
             window.location.href = "/index.html";
@@ -225,7 +222,6 @@ import { buildSheetNav } from "./nav.js";
         try {
             setLoggedInUI(true);
             await refreshCurrentUserAndUI();
-            applyRoleUI();
             await loadCharacters();
 
             const me = await API.me();
@@ -254,7 +250,6 @@ import { buildSheetNav } from "./nav.js";
             if (e?.status === 401) {
                 API.token = null;
                 setLoggedInUI(false);
-                setAdminVisible(false);
                 setStatus("Token ungültig – bitte neu einloggen");
             } else {
                 setStatus("Admin-Startup fehlgeschlagen ❌");
