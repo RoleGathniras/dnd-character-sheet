@@ -1,5 +1,4 @@
 import { API } from "../api.js";
-import { renderTopbarCharacterAvatar } from "../app.js";
 function initInventory() {
     // =========================================================
     // DOM
@@ -231,7 +230,6 @@ function initInventory() {
             };
 
             currentCharacter = await API.patchCharacter(id, payload);
-            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             if (isConflict409(e)) {
                 try {
@@ -247,7 +245,6 @@ function initInventory() {
                     };
 
                     currentCharacter = await API.patchCharacter(id, payload2);
-                    syncTopbarAvatarFromCurrentCharacter();
                 } catch (e2) {
                     console.error("[inventory.js] Save failed after 409 retry.", e2);
                 }
@@ -282,10 +279,6 @@ function initInventory() {
         if (!Number.isFinite(n) || n < 0) return 0;
         return Math.min(n, MAX_ITEM_WEIGHT);
     }
-    function syncTopbarAvatarFromCurrentCharacter() {
-        renderTopbarCharacterAvatar(currentCharacter);
-    }
-
     // =========================================================
     // Character / Strength / Carry
     // =========================================================
@@ -721,7 +714,6 @@ function initInventory() {
             fillMoneyInputs();
             renderAllInventoryTables();
             renderCarryStats();
-            syncTopbarAvatarFromCurrentCharacter();
             return;
         }
 
@@ -736,7 +728,6 @@ function initInventory() {
             fillMoneyInputs();
             renderAllInventoryTables();
             renderCarryStats();
-            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             console.error("[inventory.js] Failed to load character. Running in-memory only.", e);
 
@@ -747,7 +738,6 @@ function initInventory() {
             fillMoneyInputs();
             renderAllInventoryTables();
             renderCarryStats();
-            syncTopbarAvatarFromCurrentCharacter();
         }
     }
 

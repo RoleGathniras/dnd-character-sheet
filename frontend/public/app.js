@@ -1,10 +1,6 @@
 import { API } from "./api.js";
 import { buildSheetNav } from "/nav.js";
 import { initDrawer } from "/shared/drawer.js";
-import {
-  initCharacterStatusbar,
-  loadCharacterStatusbar,
-} from "./character_statusbar.js";
 
 let currentCharacterId =
   Number(localStorage.getItem("dnd_current_character_id")) || null;
@@ -14,36 +10,25 @@ const isIndexPage =
   location.pathname.endsWith("/index") ||
   location.pathname.endsWith("/index.html");
 
-const isSheetPage = location.pathname.endsWith("/sheet.html");
 // ============================================================
 // DOM
 // ============================================================
-
 const drawer = document.getElementById("drawer");
 const backdrop = document.getElementById("backdrop");
 const btnMenu = document.getElementById("btnMenu");
 const btnClose = document.getElementById("btnCloseDrawer");
-
-const btnActions = document.getElementById("btnActions");
-
 const statusEl = document.getElementById("appStatus");
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
-
 const listMine = document.getElementById("listMine");
 const sheetRootEl = document.getElementById("sheetRoot");
-
 const btnAdmin = document.getElementById("btnAdmin");
 const btnPlayerRules = document.getElementById("btnPlayerRules");
-
 const navDrawer = document.getElementById("navDrawer");
 const navBackdrop = document.getElementById("navBackdrop");
 const btnNavOpen = document.getElementById("btnNavOpen");
 const btnNavClose = document.getElementById("btnNavClose");
 const navList = document.getElementById("navList");
-const btnCharacterLevel = document.getElementById("btnCharacterLevel");
-const btnCharacterInfo = document.getElementById("btnCharacterInfo");
-
 const currentCharacterAvatar = document.getElementById(
   "currentCharacterAvatar",
 );
@@ -118,7 +103,6 @@ export function setLoggedInUI(isLoggedIn) {
   setDisplay(btnLogin, isLoggedIn ? "none" : "inline-block");
   setDisplay(btnLogout, isLoggedIn ? "inline-block" : "none");
   setDisplay(btnMenu, isLoggedIn ? "inline-block" : "none");
-  setDisplay(btnActions, isLoggedIn ? "inline-block" : "none");
   setDisplay(btnNavOpen, isLoggedIn ? "inline-block" : "none");
 
   if (currentCharacterAvatar) {
@@ -127,7 +111,6 @@ export function setLoggedInUI(isLoggedIn) {
 
   if (!isLoggedIn) {
     closeNavDrawer();
-    closeActionsMenu();
   }
 
   if (sheetRootEl) {
@@ -305,139 +288,6 @@ export function renderTopbarCharacterAvatar(character) {
     currentCharacterAvatarFallback.textContent = fallbackLetter;
   }
 }
-
-export function bindTopbarAvatarNavigation() {
-  if (!currentCharacterAvatar) return;
-  if (currentCharacterAvatar.dataset.bound === "1") return;
-
-  currentCharacterAvatar.dataset.bound = "1";
-  currentCharacterAvatar.style.cursor = "pointer";
-
-  currentCharacterAvatar.addEventListener("click", () => {
-    window.location.href = "/player/player.html";
-  });
-}
-export function bindTopbarLevelEditing() {
-  if (!btnCharacterLevel) return;
-  if (btnCharacterLevel.dataset.bound === "1") return;
-
-  btnCharacterLevel.dataset.bound = "1";
-
-  btnCharacterLevel.addEventListener("click", async () => {
-    const currentCharacterId =
-      Number(localStorage.getItem("dnd_current_character_id")) || null;
-
-    if (!currentCharacterId) return;
-
-    try {
-      const latestCharacter = await API.getCharacter(currentCharacterId);
-
-      const currentLevel = Number(latestCharacter.data?.level ?? 1);
-
-      const input = window.prompt("Neue Stufe (1–20):", String(currentLevel));
-
-      if (input === null) return;
-
-      const level = Number(input);
-
-      if (!Number.isInteger(level) || level < 1 || level > 20) {
-        alert("Die Stufe muss zwischen 1 und 20 liegen.");
-        return;
-      }
-
-      const newData = {
-        ...(latestCharacter.data ?? {}),
-        level,
-      };
-
-      const updatedCharacter = await API.patchCharacter(latestCharacter.id, {
-        data: newData,
-        updated_at: latestCharacter.updated_at,
-      });
-
-      renderTopbarCharacterAvatar(updatedCharacter);
-
-      window.dispatchEvent(
-        new CustomEvent("character:updated", {
-          detail: {
-            character: updatedCharacter,
-          },
-        }),
-      );
-    } catch (error) {
-      console.error("Stufe konnte nicht gespeichert werden:", error);
-    }
-  });
-}
-export function bindTopbarCharacterInfoEditing() {
-  if (!btnCharacterInfo) return;
-  if (btnCharacterInfo.dataset.bound === "1") return;
-
-  btnCharacterInfo.dataset.bound = "1";
-
-  btnCharacterInfo.addEventListener("click", async () => {
-    const currentCharacterId =
-      Number(localStorage.getItem("dnd_current_character_id")) || null;
-
-    if (!currentCharacterId) return;
-
-    try {
-      const latestCharacter = await API.getCharacter(currentCharacterId);
-
-      const currentName = String(latestCharacter.name ?? "").trim();
-
-      const currentRace = String(latestCharacter.data?.race ?? "").trim();
-
-      const currentClass = String(latestCharacter.data?.class ?? "").trim();
-
-      const newName = window.prompt("Charaktername:", currentName);
-
-      if (newName === null) return;
-
-      const newRace = window.prompt("Volk:", currentRace);
-
-      if (newRace === null) return;
-
-      const newClass = window.prompt("Klasse:", currentClass);
-
-      if (newClass === null) return;
-
-      const name = newName.trim();
-      const race = newRace.trim();
-      const characterClass = newClass.trim();
-
-      if (!name || !race || !characterClass) {
-        alert("Name, Volk und Klasse dürfen nicht leer sein.");
-        return;
-      }
-
-      const newData = {
-        ...(latestCharacter.data ?? {}),
-        race,
-        class: characterClass,
-      };
-
-      const updatedCharacter = await API.patchCharacter(latestCharacter.id, {
-        name,
-        data: newData,
-        updated_at: latestCharacter.updated_at,
-      });
-
-      renderTopbarCharacterAvatar(updatedCharacter);
-
-      window.dispatchEvent(
-        new CustomEvent("character:updated", {
-          detail: {
-            character: updatedCharacter,
-          },
-        }),
-      );
-    } catch (error) {
-      console.error("Charakterdaten konnten nicht gespeichert werden:", error);
-    }
-  });
-}
-
 // ============================================================
 // HELPERS
 // ============================================================
@@ -456,36 +306,12 @@ function setDisplay(el, value) {
   el.style.display = value;
 }
 
-function setSectionOpen(toggleBtn, listEl, open) {
-  if (!toggleBtn || !listEl) return;
-  toggleBtn.setAttribute("aria-expanded", open ? "true" : "false");
-  listEl.hidden = !open;
-}
-
-function bindSectionToggle(toggleBtn, listEl, defaultOpen) {
-  if (!toggleBtn || !listEl) return;
-  if (toggleBtn.dataset.bound === "1") return;
-
-  toggleBtn.dataset.bound = "1";
-  setSectionOpen(toggleBtn, listEl, defaultOpen);
-
-  toggleBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    const isOpen = toggleBtn.getAttribute("aria-expanded") === "true";
-    setSectionOpen(toggleBtn, listEl, !isOpen);
-  });
-}
-
 function closeDrawer() {
   playerMainDrawer?.close();
 }
 
 function closeNavDrawer() {
   playerNavDrawer?.close();
-}
-
-function closeActionsMenu() {
-  // aktuell leer, aber behalten als Hook
 }
 
 function scrollToHashIfPresent() {
@@ -654,43 +480,10 @@ window.addEventListener("hashchange", () => {
 // ============================================================
 
 (function startup() {
-  bindTopbarAvatarNavigation();
-  bindTopbarLevelEditing();
-  bindTopbarCharacterInfoEditing();
-
-  const isSpellPage = location.pathname.endsWith("/spells.html");
-  const isInventoryPage = location.pathname.endsWith("/inventory.html");
-  const isCharacterPage = location.pathname.endsWith("/charakter.html");
-  const isNotesPage = location.pathname.endsWith("/notes.html");
   const isAdminPage = location.pathname.endsWith("/admin.html");
-  const isSkillsPage = location.pathname.endsWith("/skills.html");
-  const isActionsPage = location.pathname.endsWith("/actions.html");
   const isPlayerRulesPage = location.pathname.endsWith("/player_rules.html");
-  const hasCharacterStatusbar =
-    isSpellPage ||
-    isInventoryPage ||
-    isCharacterPage ||
-    isNotesPage ||
-    isSheetPage ||
-    isSkillsPage ||
-    isActionsPage
-
-  if (hasCharacterStatusbar) {
-    initCharacterStatusbar();
-
-    if (currentCharacterId) {
-      loadCharacterStatusbar(currentCharacterId);
-    }
-  }
 
   if (
-    isSpellPage ||
-    isInventoryPage ||
-    isCharacterPage ||
-    isNotesPage ||
-    isSkillsPage ||
-    isActionsPage ||
-    isSheetPage ||
     isAdminPage ||
     isPlayerRulesPage
   ) {
@@ -703,19 +496,12 @@ window.addEventListener("hashchange", () => {
 
     scrollToHashWithRetry();
 
-    if (isIndexPage) {
-      setLoggedInUI(!!API.token);
-      renderDrawerTitle();
-      return;
-    }
+    setLoggedInUI(!!API.token);
 
-    if (!isSheetPage) {
-      setLoggedInUI(!!API.token);
-      if (API.token) {
-        loadCharacters().catch((error) => {
-          console.error("Charaktere konnten nicht geladen werden:", error);
-        });
-      }
+    if (API.token) {
+      loadCharacters().catch((error) => {
+        console.error("Charaktere konnten nicht geladen werden:", error);
+      });
     }
   }
 })();

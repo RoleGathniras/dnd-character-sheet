@@ -1,5 +1,4 @@
 import { API } from "../api.js";
-import { renderTopbarCharacterAvatar } from "../app.js";
 
 function initNotes() {
     // =========================================================
@@ -72,10 +71,6 @@ function initNotes() {
         );
     }
 
-    function syncTopbarAvatarFromCurrentCharacter() {
-        renderTopbarCharacterAvatar(currentCharacter);
-    }
-
     function getHttpStatus(err) {
         return (
             err?.status ??
@@ -142,7 +137,6 @@ function initNotes() {
             };
 
             currentCharacter = await API.patchCharacter(id, payload);
-            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             if (isConflict409(e)) {
                 try {
@@ -158,7 +152,6 @@ function initNotes() {
                     };
 
                     currentCharacter = await API.patchCharacter(id, payload2);
-                    syncTopbarAvatarFromCurrentCharacter();
                 } catch (e2) {
                     console.error("[notes.js] Save failed after 409 retry.", e2);
                 }
@@ -249,7 +242,6 @@ function initNotes() {
 
             applyPersistNotes(emptyPersistNotes());
             fillInputs();
-            syncTopbarAvatarFromCurrentCharacter();
             return;
         }
 
@@ -262,7 +254,6 @@ function initNotes() {
             applyPersistNotes(persist);
 
             fillInputs();
-            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             console.error("[notes.js] Failed to load character. Running in-memory only.", e);
 
@@ -271,7 +262,6 @@ function initNotes() {
 
             applyPersistNotes(emptyPersistNotes());
             fillInputs();
-            syncTopbarAvatarFromCurrentCharacter();
         }
     }
 

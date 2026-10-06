@@ -1,5 +1,5 @@
 import { API } from "../api.js";
-import { renderTopbarCharacterAvatar } from "../app.js";
+import { renderTopbarCharacterAvatar } from "/player/player-topbar.js";
 import { resizeImageFile } from "./image-utils.js";
 
 function initCharacter() {
@@ -145,10 +145,6 @@ function initCharacter() {
             localStorage.removeItem("selectedCharacterId");
         }
     }
-    function syncTopbarAvatarFromCurrentCharacter() {
-        renderTopbarCharacterAvatar(currentCharacter);
-    }
-
     function getHttpStatus(err) {
         return (
             err?.status ??
@@ -225,7 +221,6 @@ function initCharacter() {
 
             currentCharacter = await API.patchCharacter(id, payload);
             console.log("[charakter.js] PATCH response", structuredClone(currentCharacter));
-            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             if (isConflict409(e)) {
                 try {
@@ -241,7 +236,6 @@ function initCharacter() {
                     };
 
                     currentCharacter = await API.patchCharacter(id, payload2);
-                    syncTopbarAvatarFromCurrentCharacter();
                 } catch (e2) {
                     console.error("[charakter.js] Save failed after 409 retry.", e2);
                 }
@@ -437,7 +431,6 @@ function initCharacter() {
             fillAppearanceInputs();
             fillProficienciesAndLanguages();
             fillPersonalityInputs();
-            syncTopbarAvatarFromCurrentCharacter();
             return;
         }
 
@@ -452,7 +445,6 @@ function initCharacter() {
             fillAppearanceInputs();
             fillProficienciesAndLanguages();
             fillPersonalityInputs();
-            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             console.error("[charakter.js] Failed to load character. Running in-memory only.", e);
 
@@ -463,7 +455,6 @@ function initCharacter() {
             fillAppearanceInputs();
             fillProficienciesAndLanguages();
             fillPersonalityInputs();
-            syncTopbarAvatarFromCurrentCharacter();
         }
     }
 
@@ -479,7 +470,6 @@ function initCharacter() {
     }
 
     startup().then(() => {
-        syncTopbarAvatarFromCurrentCharacter();
     });
 }
 

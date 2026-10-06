@@ -4,7 +4,6 @@ import {
     loadCharacters,
     refreshCurrentUserAndUI,
     renderDrawerTitle,
-    renderTopbarCharacterAvatar,
     setCurrentCharacter,
     setLoggedInUI,
     setStatus,
@@ -15,9 +14,7 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
 (function () {
     const isSheetPage = location.pathname.endsWith("/sheet.html");
     if (!isSheetPage) return;
-
     const sheetRootEl = document.getElementById("sheetRoot");
-
     let currentCharacter = null;
     let currentCharacterUpdatedAt = null;
     window.addEventListener("character:updated", (event) => {
@@ -91,10 +88,6 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
         setStatus("Ungespeicherte Änderungen ⚠");
         scheduleAutoSave();
     }
-    function syncTopbarAvatarFromCurrentCharacter() {
-        renderTopbarCharacterAvatar(currentCharacter);
-    }
-
     function scheduleAutoSave() {
         if (!getCurrentCharacterId()) return;
         if (!isDirty) return;
@@ -274,7 +267,6 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
         const cid = Number(id);
         if (!cid) {
             currentCharacter = null;
-            syncTopbarAvatarFromCurrentCharacter();
             setStatus("Kein Charakter ausgewählt.");
             return;
         }
@@ -290,7 +282,6 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
 
             jsonToSheet(c.data);
             recalcDerived();
-            syncTopbarAvatarFromCurrentCharacter();
 
             const titleEl = document.getElementById("sheetTitle");
             if (titleEl) titleEl.textContent = c.name;
@@ -301,7 +292,6 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
         } catch (e) {
             console.error(e);
             currentCharacter = null;
-            syncTopbarAvatarFromCurrentCharacter();
             setStatus("Fehler beim Laden des Charakters ❌");
             alert("Fehler beim Laden des Charakters.");
         }
@@ -336,7 +326,6 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
 
             currentCharacter = res;
             currentCharacterUpdatedAt = res.updated_at;
-            syncTopbarAvatarFromCurrentCharacter();
             isDirty = false;
             setStatus(silent ? "Auto-Save ✅" : "Gespeichert ✅");
 
@@ -367,7 +356,6 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
         if (titleEl) titleEl.textContent = "Kein Charakter geladen";
 
         currentCharacter = null;
-        syncTopbarAvatarFromCurrentCharacter();
 
         isDirty = false;
         currentCharacterUpdatedAt = null;

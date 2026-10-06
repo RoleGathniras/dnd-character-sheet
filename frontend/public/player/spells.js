@@ -1,10 +1,8 @@
 // frontend/public/spells.js
 // UI-only: Spell Tabs + Slots + Spellbook + Panel + Description (In-Memory)
 import { API } from "../api.js";
-import { renderTopbarCharacterAvatar } from "../app.js";
 
 function initSpells() {
-    // 0 DOM: Welche HTML-Elemente benutzt werden
     const slotsEl = document.getElementById("spellSlots");
     const slotsLevelSelect = document.getElementById("spellSlotsLevel");
     const slotsCountInput = document.getElementById("spellSlotsCountInput");
@@ -232,10 +230,6 @@ function initSpells() {
             ""
         );
     }
-    function syncTopbarAvatarFromCurrentCharacter() {
-        renderTopbarCharacterAvatar(currentCharacter);
-    }
-
     // Character cache for optimistic locking
     let currentCharacter = null; // { id, data, updated_at, ... }
     let boundCharacterId = null; // Number | null
@@ -358,7 +352,6 @@ function initSpells() {
             fillSpellDetails(selectedSpell);
             closeSpellDetails();
             fillSpellAttackStats();
-            syncTopbarAvatarFromCurrentCharacter();
             return;
         }
 
@@ -375,7 +368,6 @@ function initSpells() {
             const selectedSpell = getSelectedSpell(currentLevel);
             fillSpellDetails(selectedSpell);
             fillSpellAttackStats();
-            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             boundCharacterId = null;
             currentCharacter = null;
@@ -387,7 +379,6 @@ function initSpells() {
             const selectedSpell = getSelectedSpell();
             fillSpellDetails(selectedSpell);
             fillSpellAttackStats();
-            syncTopbarAvatarFromCurrentCharacter();
         }
     }
 
@@ -416,7 +407,6 @@ function initSpells() {
             };
 
             currentCharacter = await API.patchCharacter(id, payload);
-            syncTopbarAvatarFromCurrentCharacter();
         } catch (e) {
             if (isConflict409(e)) {
                 try {
@@ -428,7 +418,6 @@ function initSpells() {
 
                     const payload2 = { data: latest.data, updated_at: latest.updated_at };
                     currentCharacter = await API.patchCharacter(id, payload2);
-                    syncTopbarAvatarFromCurrentCharacter();
                 } catch (e2) {
                     console.error("[spells.js] Save failed after 409 retry.", e2);
                 }

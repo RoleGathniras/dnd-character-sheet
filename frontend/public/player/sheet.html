@@ -322,8 +322,10 @@
     </main>
     <script type="module">
         import { mountPlayerDrawers } from "/player/player-drawer.js";
+        import { initPlayerLayout } from "/player/player-layout.js";
 
         mountPlayerDrawers();
+        initPlayerLayout();
 
         await import("/app.js");
         await import("/player/sheet.js");
