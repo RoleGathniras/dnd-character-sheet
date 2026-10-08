@@ -1,68 +1,77 @@
-import { API } from "./api.js";
+import { API } from "/api.js";
 import {
-    refreshCurrentUserAndUI,
-    setLoggedInUI,
-    setStatus,
-} from "./app.js";
+    login,
+    refreshCurrentUser,
+} from "/shared/auth.js";
 
-(function () {
-    const isIndexPage =
-        location.pathname === "/" ||
-        location.pathname.endsWith("/index") ||
-        location.pathname.endsWith("/index.html");
+const btnLogin = document.getElementById("btnLogin");
 
-    if (!isIndexPage) return;
+function setStatus(message) {
+    let statusEl = document.getElementById("appStatus");
 
-    function redirectForRole(user) {
-        if (user?.role === "player") {
-            window.location.href = "/player/player.html";
-            return true;
-        }
-
-        if (user?.role === "dm") {
-            window.location.href = "/dm/campaigns.html";
-            return true;
-        }
-
-        if (user?.role === "admin") {
-            window.location.href = "/admin.html";
-            return true;
-        }
-
-        setStatus("Unbekannte Benutzerrolle ❌");
-        return false;
+    if (!statusEl) {
+        statusEl = document.createElement("p");
+        statusEl.id = "appStatus";
+        btnLogin.after(statusEl);
     }
 
-    window.addEventListener("auth:login", async () => {
-        try {
-            const user = await refreshCurrentUserAndUI();
-            redirectForRole(user);
-        } catch (e) {
-            console.error("[index.js] Fehler nach Login", e);
-            setStatus("Login ok, aber Weiterleitung fehlgeschlagen ❌");
-        }
-    });
+    statusEl.textContent = message;
+}
 
-    (async function startupIndex() {
-        if (!API.token) {
-            setLoggedInUI(false);
-            setStatus("Bereit");
-            return;
-        }
+function redirectForRole(user) {
+    if (user?.role === "player") {
+        window.location.href = "/player/player.html";
+        return;
+    }
 
-        try {
-            const user = await refreshCurrentUserAndUI();
-            redirectForRole(user);
-        } catch (e) {
-            console.error("[index.js] Startup fehlgeschlagen", e);
+    if (user?.role === "dm") {
+        window.location.href = "/dm/campaigns.html";
+        return;
+    }
 
-            if (e?.status === 401) {
-                API.token = null;
-                setLoggedInUI(false);
-                setStatus("Token ungültig – bitte neu einloggen");
-            } else {
-                setStatus("Startup-Fehler – bitte Konsole prüfen");
-            }
+    if (user?.role === "admin") {
+        window.location.href = "/admin.html";
+        return;
+    }
+
+    setStatus("Unbekannte Benutzerrolle ❌");
+}
+
+async function handleLogin() {
+    const username = prompt("Username");
+    const password = prompt("Passwort");
+
+    if (!username || !password) return;
+
+    try {
+        const user = await login(username, password);
+        redirectForRole(user);
+    } catch (error) {
+        console.error(error);
+        setStatus(error?.message || "Login fehlgeschlagen");
+    }
+}
+
+btnLogin?.addEventListener("click", handleLogin);
+
+async function startupIndex() {
+    if (!API.token) {
+        return;
+    }
+
+    try {
+        const user = await refreshCurrentUser();
+        redirectForRole(user);
+    } catch (error) {
+        console.error(error);
+
+        if (error?.status === 401) {
+            API.clearToken();
+            setStatus("Token ungültig – bitte neu einloggen");
+        } else {
+            setStatus("Startup-Fehler – bitte Konsole prüfen");
         }
-    })();
-})();
+    }
+}
+
+startupIndex();

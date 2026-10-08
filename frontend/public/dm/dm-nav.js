@@ -6,7 +6,7 @@ if (campaignId) {
 }
 import { initDrawer } from "/shared/drawer.js";
 import { DM_NAV } from "./dm-nav-config.js";
-
+import { logout } from "/shared/auth.js";
 
 function createDmNavButton(title, href) {
     const button = document.createElement("button");
@@ -100,7 +100,11 @@ export function initDmMainNavigation() {
 
     if (btnLogout) {
         btnLogout.addEventListener("click", () => {
-            localStorage.removeItem("dnd_token");
+            logout();
+
+            localStorage.removeItem("dnd_current_character_id");
+            localStorage.removeItem("selectedCharacterId");
+
             window.location.href = "/index.html";
         });
     }

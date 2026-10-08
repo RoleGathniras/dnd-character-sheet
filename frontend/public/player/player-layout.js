@@ -8,6 +8,7 @@ import {
     initPlayerTopbar,
     loadPlayerTopbar,
 } from "/player/player-topbar.js";
+import { logout } from "/shared/auth.js";
 
 export function initPlayerLayout() {
     // Linker Player-Drawer
@@ -28,6 +29,17 @@ export function initPlayerLayout() {
     btnPlayerRules?.addEventListener("click", () => {
         playerMainDrawer?.close();
         window.location.href = "/player_rules.html";
+    });
+
+    const btnLogout = document.getElementById("btnLogout");
+
+    btnLogout?.addEventListener("click", () => {
+        logout();
+
+        localStorage.removeItem("dnd_current_character_id");
+        localStorage.removeItem("selectedCharacterId");
+
+        window.location.href = "/index.html";
     });
 
     // Rechter Navigationsdrawer

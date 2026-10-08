@@ -8,10 +8,21 @@ import {
     setStatus,
 } from "./app.js";
 import { buildSheetNav } from "./nav.js";
+import { logout } from "/shared/auth.js";
 
 (function () {
     const isAdminPage = location.pathname.endsWith("/admin.html");
     if (!isAdminPage) return;
+    const btnLogout = document.getElementById("btnLogout");
+
+    btnLogout?.addEventListener("click", () => {
+        logout();
+
+        localStorage.removeItem("dnd_current_character_id");
+        localStorage.removeItem("selectedCharacterId");
+
+        window.location.href = "/index.html";
+    });
 
     const navList = document.getElementById("navList");
     const btnNavOpen = document.getElementById("btnNavOpen");
@@ -236,7 +247,7 @@ import { buildSheetNav } from "./nav.js";
                 }
             }
 
-                await loadUsersIntoAdmin();
+            await loadUsersIntoAdmin();
             setStatus("Adminbereich bereit ✅");
         } catch (e) {
             console.error(e);

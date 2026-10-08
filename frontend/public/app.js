@@ -1,15 +1,13 @@
 import { API } from "./api.js";
 import { buildSheetNav } from "/nav.js";
 import { initDrawer } from "/shared/drawer.js";
+import {
+  getCurrentUser as getAuthUser,
+  refreshCurrentUser, login, logout,
+} from "/shared/auth.js";
 
 let currentCharacterId =
   Number(localStorage.getItem("dnd_current_character_id")) || null;
-let currentUser = null;
-const isIndexPage =
-  location.pathname === "/" ||
-  location.pathname.endsWith("/index") ||
-  location.pathname.endsWith("/index.html");
-
 // ============================================================
 // DOM
 // ============================================================
@@ -18,7 +16,6 @@ const backdrop = document.getElementById("backdrop");
 const btnMenu = document.getElementById("btnMenu");
 const btnClose = document.getElementById("btnCloseDrawer");
 const statusEl = document.getElementById("appStatus");
-const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
 const listMine = document.getElementById("listMine");
 const sheetRootEl = document.getElementById("sheetRoot");
@@ -62,7 +59,7 @@ export function getCurrentCharacterId() {
 }
 
 export function getCurrentUser() {
-  return currentUser;
+  return getAuthUser();
 }
 
 export function setStatus(msg) {
@@ -87,6 +84,7 @@ export function setCurrentCharacter(id) {
 
 export function renderDrawerTitle() {
   const el = document.getElementById("drawerUserTitle");
+  const currentUser = getAuthUser();
   if (!el) return;
 
   if (!currentUser) {
@@ -100,7 +98,6 @@ export function renderDrawerTitle() {
 }
 
 export function setLoggedInUI(isLoggedIn) {
-  setDisplay(btnLogin, isLoggedIn ? "none" : "inline-block");
   setDisplay(btnLogout, isLoggedIn ? "inline-block" : "none");
   setDisplay(btnMenu, isLoggedIn ? "inline-block" : "none");
   setDisplay(btnNavOpen, isLoggedIn ? "inline-block" : "none");
@@ -121,15 +118,13 @@ export function setLoggedInUI(isLoggedIn) {
 
 export async function refreshCurrentUserAndUI() {
   try {
-    currentUser = await API.me();
+    const user = await refreshCurrentUser();
     renderDrawerTitle();
-    return currentUser;
-  } catch (e) {
-    console.error(e);
-
-    currentUser = null;
+    return user;
+  } catch (error) {
+    console.error(error);
     renderDrawerTitle();
-    throw e;
+    throw error;
   }
 }
 
@@ -408,60 +403,18 @@ export async function handleCreate(kind) {
   }
 }
 
-async function doLogin() {
-  const username = prompt("Username");
-  const password = prompt("Passwort");
-
-  if (!username || !password) return;
-
-  try {
-    await API.login(username, password);
-
-    // Benutzer laden, damit wir die Rolle kennen
-    currentUser = await API.me();
-
-    // DM bekommt einen eigenen Arbeitsbereich
-    if (currentUser.role === "dm") {
-      window.location.href = "/dm/campaigns.html";
-      return;
-    }
-
-    const isIndexPage =
-      location.pathname === "/" ||
-      location.pathname.endsWith("/index") ||
-      location.pathname.endsWith("/index.html");
-
-    if (isIndexPage) {
-      window.dispatchEvent(new CustomEvent("auth:login"));
-      setStatus("Eingeloggt ✅");
-      return;
-    }
-
-    setLoggedInUI(true);
-    await refreshCurrentUserAndUI();
-    await loadCharacters();
-
-    setStatus("Eingeloggt ✅");
-  } catch (e) {
-    console.error(e);
-    alert(e?.message || "Login fehlgeschlagen");
-    setStatus(e?.message || "Login fehlgeschlagen ❌");
-  }
-}
-
-function doLogout() {
-  API.token = null;
+export function doLogout() {
+  logout();
   setCurrentCharacter(null);
-  window.dispatchEvent(new CustomEvent("auth:logout"));
   window.location.href = "/index.html";
 }
 
 // ============================================================
 // GLOBAL EVENTS
 // ============================================================
-
-btnLogin?.addEventListener("click", doLogin);
-btnLogout?.addEventListener("click", doLogout);
+if (!location.pathname.startsWith("/player/")) {
+  btnLogout?.addEventListener("click", doLogout);
+}
 
 btnAdmin?.addEventListener("click", () => {
   closeDrawer();
