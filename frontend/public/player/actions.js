@@ -1,5 +1,6 @@
 import { API } from "../api.js";
-import { getCurrentCharacterId, setStatus } from "../app.js";
+import { getCurrentCharacterId } from "../app.js";
+import { setStatus } from "/shared/status.js";
 
 (function () {
   const isActionsPage = location.pathname.endsWith("/actions.html");

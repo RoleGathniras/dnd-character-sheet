@@ -1,14 +1,19 @@
+import { API } from "/api.js";
 import { buildSheetNav } from "/nav.js";
 import { initDrawer } from "/shared/drawer.js";
+import {
+    logout,
+    refreshCurrentUser,
+} from "/shared/auth.js";
 import {
     initCharacterStatusbar,
     loadCharacterStatusbar,
 } from "/character_statusbar.js";
+import { renderPlayerCharacters } from "/player/player-characters.js";
 import {
     initPlayerTopbar,
     loadPlayerTopbar,
 } from "/player/player-topbar.js";
-import { logout } from "/shared/auth.js";
 
 export function initPlayerLayout() {
     // Linker Player-Drawer
@@ -86,4 +91,38 @@ export function initPlayerLayout() {
 
     initPlayerTopbar();
     loadPlayerTopbar();
+}
+
+export async function authenticatePlayer() {
+    if (!API.token) {
+        return null;
+    }
+
+    try {
+        const user = await refreshCurrentUser();
+
+        if (user.role !== "player") {
+            throw new Error("Diese Seite ist nur für Spieler vorgesehen.");
+        }
+
+        return user;
+    } catch (error) {
+        if (error?.status === 401) {
+            API.clearToken();
+        }
+
+        throw error;
+    }
+}
+
+export async function startPlayerSession() {
+    const user = await authenticatePlayer();
+
+    if (!user) {
+        return null;
+    }
+
+    await renderPlayerCharacters();
+
+    return user;
 }

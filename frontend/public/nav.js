@@ -44,6 +44,33 @@ function scrollToSection(id, closeNavDrawer) {
     target.focus?.({ preventScroll: true });
 }
 
+function scrollToHashIfPresent() {
+    const hash = window.location.hash;
+    if (!hash || hash.length < 2) return;
+
+    const id = decodeURIComponent(hash.slice(1));
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    target.focus?.({ preventScroll: true });
+}
+
+export function scrollToHashWithRetry(tries = 20) {
+    const hash = window.location.hash;
+    if (!hash || hash.length < 2) return;
+
+    const id = decodeURIComponent(hash.slice(1));
+    const target = document.getElementById(id);
+
+    if (target) {
+        scrollToHashIfPresent();
+        return;
+    }
+
+    if (tries <= 0) return;
+    requestAnimationFrame(() => scrollToHashWithRetry(tries - 1));
+}
 /**
  * Konfig-basierte rechte Navigation.
  * DOM-Scan ist optional: wenn aktiv, überschreibt er Labels aus NAV.

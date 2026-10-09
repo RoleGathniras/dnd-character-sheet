@@ -1,15 +1,13 @@
 import { API } from "../api.js";
 import {
     getCurrentCharacterId,
-    loadCharacters,
-    refreshCurrentUserAndUI,
-    renderDrawerTitle,
     setCurrentCharacter,
     setLoggedInUI,
-    setStatus,
 } from "../app.js";
 import { jsonToSheet, sheetToJson } from "../mapper.js";
-
+import { startPlayerSession } from "/player/player-layout.js";
+import { setStatus } from "/shared/status.js";
+import { renderDrawerTitle } from "/shared/drawer-user.js";
 
 (function () {
     const isSheetPage = location.pathname.endsWith("/sheet.html");
@@ -478,9 +476,13 @@ import { jsonToSheet, sheetToJson } from "../mapper.js";
 
         if (API.token) {
             try {
+                const user = await startPlayerSession();
+
+                if (!user) {
+                    return;
+                }
+
                 setLoggedInUI(true);
-                await refreshCurrentUserAndUI();
-                await loadCharacters();
 
                 const currentCharacterId = getCurrentCharacterId();
                 if (currentCharacterId) {

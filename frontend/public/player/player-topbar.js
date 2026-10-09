@@ -1,4 +1,8 @@
 import { API } from "/api.js";
+import {
+    getCharacterImageDataUrl,
+    getCharacterImageCrop,
+} from "/shared/character-image.js";
 
 export function initPlayerTopbar() {
     bindTopbarAvatarNavigation();
@@ -165,29 +169,6 @@ function bindTopbarCharacterInfoEditing() {
             );
         }
     });
-}
-
-function getCharacterImageDataUrl(character) {
-    return (
-        character?.data?.description?.appearance?.imageDataUrl ||
-        character?.data?.character_description?.appearance?.imageDataUrl ||
-        character?.data?.appearance?.imageDataUrl ||
-        ""
-    );
-}
-
-function getCharacterImageCrop(character) {
-    const crop =
-        character?.data?.description?.appearance?.imageCrop ||
-        character?.data?.character_description?.appearance?.imageCrop ||
-        character?.data?.appearance?.imageCrop ||
-        null;
-
-    return {
-        x: Number(crop?.x ?? 50),
-        y: Number(crop?.y ?? 50),
-        zoom: Number(crop?.zoom ?? 1),
-    };
 }
 
 export function renderTopbarCharacterAvatar(character) {

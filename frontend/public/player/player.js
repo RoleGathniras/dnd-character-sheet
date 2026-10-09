@@ -1,14 +1,18 @@
 import { API } from "../api.js";
 import {
-    handleCreate,
     loadCharacters,
-    refreshCurrentUserAndUI,
-    renderDrawerTitle,
     setCurrentCharacter,
     setLoggedInUI,
-    setStatus,
 } from "../app.js";
 import { resizeImageFile } from "./image-utils.js";
+import { renderPlayerCharacters } from "/player/player-characters.js";
+import { startPlayerSession } from "/player/player-layout.js";
+import { setStatus } from "/shared/status.js";
+import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.js";
+import {
+    getCharacterImageDataUrl,
+    getCharacterImageCrop,
+} from "/shared/character-image.js";
 
 (function () {
     const isPlayerPage =
@@ -87,36 +91,6 @@ import { resizeImageFile } from "./image-utils.js";
         );
     }
 
-    function getCharacterImageDataUrl(character) {
-        const image =
-            character?.data?.description?.appearance?.imageDataUrl ||
-            character?.data?.character_description?.appearance?.imageDataUrl ||
-            character?.data?.appearance?.imageDataUrl ||
-            "";
-
-        console.log("[index.js] resolved image", {
-            id: character?.id,
-            name: character?.name,
-            resolved: image ? "[HAS IMAGE]" : "[NO IMAGE]",
-            data: character?.data,
-        });
-
-        return image;
-    }
-    function getCharacterImageCrop(character) {
-        const crop =
-            character?.data?.description?.appearance?.imageCrop ||
-            character?.data?.character_description?.appearance?.imageCrop ||
-            character?.data?.appearance?.imageCrop ||
-            null;
-
-        return {
-            x: Number(crop?.x ?? 50),
-            y: Number(crop?.y ?? 50),
-            zoom: Number(crop?.zoom ?? 1),
-        };
-    }
-
     function isPlayableCharacter(character) {
         return String(character?.kind || "").toLowerCase() !== "npc";
     }
@@ -157,6 +131,68 @@ import { resizeImageFile } from "./image-utils.js";
             currentCharacterAvatarImg.hidden = true;
             currentCharacterAvatarFallback.hidden = false;
             currentCharacterAvatarFallback.textContent = fallbackLetter;
+        }
+    }
+
+    async function handleCreate(kind) {
+        const name = prompt(
+            kind === "npc" ? "Name des NPC:" : "Name des Charakters:",
+        );
+
+        if (!name?.trim()) return;
+
+        const data = {
+            schema_version: 1,
+        };
+
+        if (kind !== "npc") {
+            const race = prompt("Volk:");
+            if (!race?.trim()) return;
+
+            const characterClass = prompt("Klasse:");
+            if (!characterClass?.trim()) return;
+
+            data.race = race.trim();
+            data.class = characterClass.trim();
+            data.level = 1;
+        }
+
+        const payload = {
+            name: name.trim(),
+            kind,
+            data,
+        };
+
+        try {
+            const created = await API.createCharacter(payload);
+
+            setCurrentCharacter(created.id);
+            await loadCharacters();
+
+            const onSheet = location.pathname.endsWith("/sheet.html");
+
+            if (onSheet) {
+                window.dispatchEvent(
+                    new CustomEvent("character:selected", {
+                        detail: {
+                            id: created.id,
+                        },
+                    }),
+                );
+            } else {
+                window.location.href = "/player/sheet.html";
+            }
+
+            setStatus(`Erstellt: ${created.name}`);
+        } catch (err) {
+            if (err.status === 403) {
+                alert("Nur DM/Admin darf NPCs anlegen.");
+                return;
+            }
+
+            console.error(err);
+
+            alert(err?.message || "Du kannst max. 10 Charaktere erstellen.");
         }
     }
 
@@ -336,7 +372,6 @@ import { resizeImageFile } from "./image-utils.js";
             setLoggedInUI(true);
             updateLandingAuthState(true);
             await refreshCurrentUserAndUI();
-            await loadCharacters();
             await renderCharacterCards();
         } catch (e) {
             console.error("[index.js] Fehler nach Login", e);
@@ -426,7 +461,7 @@ import { resizeImageFile } from "./image-utils.js";
             editingCharacterId = null;
             editCharacterForm.hidden = true;
 
-            await loadCharacters();
+            await renderPlayerCharacters();
             await renderCharacterCards();
         } catch (error) {
             console.error(
@@ -458,7 +493,7 @@ import { resizeImageFile } from "./image-utils.js";
             editingCharacterId = null;
             editCharacterForm.hidden = true;
 
-            await loadCharacters();
+            await renderPlayerCharacters();
             await renderCharacterCards();
         } catch (error) {
             console.error(
@@ -561,10 +596,14 @@ import { resizeImageFile } from "./image-utils.js";
         }
 
         try {
+            const user = await startPlayerSession();
+
+            if (!user) {
+                return;
+            }
+
             setLoggedInUI(true);
             updateLandingAuthState(true);
-            await refreshCurrentUserAndUI();
-            await loadCharacters();
             await renderCharacterCards();
         } catch (e) {
             console.error("[index.js] Startup fehlgeschlagen", e);

@@ -2,13 +2,13 @@ import { API } from "./api.js";
 import {
     getCurrentCharacterId,
     loadCharacters,
-    refreshCurrentUserAndUI,
-    renderDrawerTitle,
     setLoggedInUI,
-    setStatus,
 } from "./app.js";
 import { buildSheetNav } from "./nav.js";
 import { logout } from "/shared/auth.js";
+import { setStatus } from "/shared/status.js";
+import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.js";
+
 
 (function () {
     const isAdminPage = location.pathname.endsWith("/admin.html");

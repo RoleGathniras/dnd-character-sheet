@@ -1,13 +1,15 @@
 import { API } from "./api.js";
-import { buildSheetNav } from "/nav.js";
+import { buildSheetNav, scrollToHashWithRetry, } from "/nav.js";
 import { initDrawer } from "/shared/drawer.js";
+import { setStatus } from "/shared/status.js";
+import { renderTopbarCharacterAvatar } from "/player/player-topbar.js";
+import { escapeHtml } from "/shared/html.js";
 import {
-  getCurrentUser as getAuthUser,
-  refreshCurrentUser, login, logout,
-} from "/shared/auth.js";
+  getCurrentCharacterId,
+  setCurrentCharacter,
+} from "/player/character-selection.js";
+export { getCurrentCharacterId, setCurrentCharacter };
 
-let currentCharacterId =
-  Number(localStorage.getItem("dnd_current_character_id")) || null;
 // ============================================================
 // DOM
 // ============================================================
@@ -15,7 +17,6 @@ const drawer = document.getElementById("drawer");
 const backdrop = document.getElementById("backdrop");
 const btnMenu = document.getElementById("btnMenu");
 const btnClose = document.getElementById("btnCloseDrawer");
-const statusEl = document.getElementById("appStatus");
 const btnLogout = document.getElementById("btnLogout");
 const listMine = document.getElementById("listMine");
 const sheetRootEl = document.getElementById("sheetRoot");
@@ -29,74 +30,30 @@ const navList = document.getElementById("navList");
 const currentCharacterAvatar = document.getElementById(
   "currentCharacterAvatar",
 );
-const currentCharacterAvatarImg = document.getElementById(
-  "currentCharacterAvatarImg",
-);
-const currentCharacterAvatarFallback = document.getElementById(
-  "currentCharacterAvatarFallback",
-);
-const topbarCharacterName = document.getElementById("topbarCharacterName");
-const topbarCharacterMeta = document.getElementById("topbarCharacterMeta");
-const topbarCharacterLevel = document.getElementById("topbarCharacterLevel");
-const playerNavDrawer = initDrawer({
-  drawer: navDrawer,
-  backdrop: navBackdrop,
-  openButton: btnNavOpen,
-  closeButton: btnNavClose,
-});
-const playerMainDrawer = initDrawer({
-  drawer,
-  backdrop,
-  openButton: btnMenu,
-  closeButton: btnClose,
-});
+const usesLegacyDrawer =
+  location.pathname.endsWith("/admin.html") ||
+  location.pathname.endsWith("/player_rules.html");
+
+const playerNavDrawer = usesLegacyDrawer
+  ? initDrawer({
+    drawer: navDrawer,
+    backdrop: navBackdrop,
+    openButton: btnNavOpen,
+    closeButton: btnNavClose,
+  })
+  : null;
+
+const playerMainDrawer = usesLegacyDrawer
+  ? initDrawer({
+    drawer,
+    backdrop,
+    openButton: btnMenu,
+    closeButton: btnClose,
+  })
+  : null;
 // ============================================================
 // EXPORTS
 // ============================================================
-
-export function getCurrentCharacterId() {
-  return currentCharacterId;
-}
-
-export function getCurrentUser() {
-  return getAuthUser();
-}
-
-export function setStatus(msg) {
-  if (!statusEl) return;
-  statusEl.textContent = msg;
-}
-
-export function setCurrentCharacter(id) {
-  currentCharacterId = id ? Number(id) : null;
-
-  if (currentCharacterId) {
-    localStorage.setItem(
-      "dnd_current_character_id",
-      String(currentCharacterId),
-    );
-    localStorage.setItem("selectedCharacterId", String(currentCharacterId));
-  } else {
-    localStorage.removeItem("dnd_current_character_id");
-    localStorage.removeItem("selectedCharacterId");
-  }
-}
-
-export function renderDrawerTitle() {
-  const el = document.getElementById("drawerUserTitle");
-  const currentUser = getAuthUser();
-  if (!el) return;
-
-  if (!currentUser) {
-    el.textContent = "Charaktere";
-    return;
-  }
-
-  const username = currentUser.username ?? "???";
-  const role = currentUser.role ?? "";
-  el.textContent = role ? `${username} (${role})` : username;
-}
-
 export function setLoggedInUI(isLoggedIn) {
   setDisplay(btnLogout, isLoggedIn ? "inline-block" : "none");
   setDisplay(btnMenu, isLoggedIn ? "inline-block" : "none");
@@ -116,18 +73,6 @@ export function setLoggedInUI(isLoggedIn) {
 
 }
 
-export async function refreshCurrentUserAndUI() {
-  try {
-    const user = await refreshCurrentUser();
-    renderDrawerTitle();
-    return user;
-  } catch (error) {
-    console.error(error);
-    renderDrawerTitle();
-    throw error;
-  }
-}
-
 export async function loadCharacters() {
   if (!listMine) return [];
 
@@ -136,7 +81,7 @@ export async function loadCharacters() {
   const chars = await API.characters();
 
   const currentCharacter = chars.find(
-    (character) => Number(character.id) === Number(currentCharacterId),
+    (character) => Number(character.id) === Number(getCurrentCharacterId()),
   );
 
   renderTopbarCharacterAvatar(currentCharacter ?? null);
@@ -145,7 +90,7 @@ export async function loadCharacters() {
     const b = document.createElement("button");
     b.className = "drawer__item";
 
-    if (Number(c.id) === Number(currentCharacterId)) {
+    if (Number(c.id) === Number(getCurrentCharacterId())) {
       b.classList.add("is-active");
     }
 
@@ -175,7 +120,7 @@ export async function loadCharacters() {
 
     if (
       c.kind !== "npc" &&
-      Number(c.id) !== Number(currentCharacterId)
+      Number(c.id) !== Number(getCurrentCharacterId())
     ) {
       listMine.appendChild(b);
     }
@@ -183,119 +128,9 @@ export async function loadCharacters() {
   setStatus(`Charaktere geladen: ${chars.length}`);
   return chars;
 }
-
-export function getCharacterImageDataUrl(character) {
-  return (
-    character?.data?.description?.appearance?.imageDataUrl ||
-    character?.data?.character_description?.appearance?.imageDataUrl ||
-    character?.data?.appearance?.imageDataUrl ||
-    ""
-  );
-}
-
-export function getCharacterImageCrop(character) {
-  const crop =
-    character?.data?.description?.appearance?.imageCrop ||
-    character?.data?.character_description?.appearance?.imageCrop ||
-    character?.data?.appearance?.imageCrop ||
-    null;
-
-  return {
-    x: Number(crop?.x ?? 50),
-    y: Number(crop?.y ?? 50),
-    zoom: Number(crop?.zoom ?? 1),
-  };
-}
-
-export function renderTopbarCharacterAvatar(character) {
-  if (
-    !currentCharacterAvatar ||
-    !currentCharacterAvatarImg ||
-    !currentCharacterAvatarFallback
-  ) {
-    return;
-  }
-
-  currentCharacterAvatar.hidden = false;
-
-  if (!character) {
-    currentCharacterAvatarImg.removeAttribute("src");
-    currentCharacterAvatarImg.hidden = true;
-
-    currentCharacterAvatarFallback.hidden = false;
-    currentCharacterAvatarFallback.textContent = "?";
-
-    if (topbarCharacterName) {
-      topbarCharacterName.textContent = "Kein Charakter";
-    }
-
-    if (topbarCharacterMeta) {
-      topbarCharacterMeta.textContent = "—";
-    }
-    if (topbarCharacterLevel) {
-      topbarCharacterLevel.textContent = "—";
-    }
-
-    return;
-  }
-
-  const data = character.data ?? {};
-
-  const imageDataUrl = getCharacterImageDataUrl(character);
-  const crop = getCharacterImageCrop(character);
-
-  const name = String(character.name || "Charakter").trim();
-  const fallbackLetter = name ? name.charAt(0).toUpperCase() : "?";
-
-  const race = String(data.race ?? "").trim();
-  const characterClass = String(data.class ?? "").trim();
-  const level = String(data.level ?? "").trim();
-
-  if (topbarCharacterName) {
-    topbarCharacterName.textContent = name;
-  }
-
-  if (topbarCharacterMeta) {
-    const metaParts = [];
-
-    if (race) metaParts.push(race);
-    if (characterClass) metaParts.push(characterClass);
-
-    topbarCharacterMeta.textContent =
-      metaParts.length > 0 ? metaParts.join(" · ") : "—";
-  }
-  if (topbarCharacterLevel) {
-    topbarCharacterLevel.textContent = level || "—";
-  }
-
-  if (imageDataUrl) {
-    currentCharacterAvatarImg.src = imageDataUrl;
-    currentCharacterAvatarImg.alt = name;
-    currentCharacterAvatarImg.style.objectPosition = `${crop.x}% ${crop.y}%`;
-
-    currentCharacterAvatarImg.hidden = false;
-    currentCharacterAvatarFallback.hidden = true;
-  } else {
-    currentCharacterAvatarImg.removeAttribute("src");
-    currentCharacterAvatarImg.hidden = true;
-
-    currentCharacterAvatarFallback.hidden = false;
-    currentCharacterAvatarFallback.textContent = fallbackLetter;
-  }
-}
 // ============================================================
 // HELPERS
 // ============================================================
-
-function escapeHtml(s) {
-  return String(s)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
 function setDisplay(el, value) {
   if (!el) return;
   el.style.display = value;
@@ -308,114 +143,12 @@ function closeDrawer() {
 function closeNavDrawer() {
   playerNavDrawer?.close();
 }
-
-function scrollToHashIfPresent() {
-  const hash = window.location.hash;
-  if (!hash || hash.length < 2) return;
-
-  const id = decodeURIComponent(hash.slice(1));
-  const target = document.getElementById(id);
-  if (!target) return;
-
-  target.scrollIntoView({ behavior: "smooth", block: "start" });
-  target.focus?.({ preventScroll: true });
-}
-
-function scrollToHashWithRetry(tries = 20) {
-  const hash = window.location.hash;
-  if (!hash || hash.length < 2) return;
-
-  const id = decodeURIComponent(hash.slice(1));
-  const target = document.getElementById(id);
-
-  if (target) {
-    scrollToHashIfPresent();
-    return;
-  }
-
-  if (tries <= 0) return;
-  requestAnimationFrame(() => scrollToHashWithRetry(tries - 1));
-}
-
 // ============================================================
 // CHARACTERS / AUTH
 // ============================================================
-
-export async function handleCreate(kind) {
-  const name = prompt(
-    kind === "npc" ? "Name des NPC:" : "Name des Charakters:",
-  );
-
-  if (!name?.trim()) return;
-
-  const data = {
-    schema_version: 1,
-  };
-
-  if (kind !== "npc") {
-    const race = prompt("Volk:");
-    if (!race?.trim()) return;
-
-    const characterClass = prompt("Klasse:");
-    if (!characterClass?.trim()) return;
-
-    data.race = race.trim();
-    data.class = characterClass.trim();
-    data.level = 1;
-  }
-
-  const payload = {
-    name: name.trim(),
-    kind,
-    data,
-  };
-
-  try {
-    const created = await API.createCharacter(payload);
-
-    setCurrentCharacter(created.id);
-    await loadCharacters();
-
-    const onSheet = location.pathname.endsWith("/sheet.html");
-
-    if (onSheet) {
-      window.dispatchEvent(
-        new CustomEvent("character:selected", {
-          detail: {
-            id: created.id,
-          },
-        }),
-      );
-    } else {
-      window.location.href = "/player/sheet.html";
-    }
-
-    setStatus(`Erstellt: ${created.name}`);
-  } catch (err) {
-    if (err.status === 403) {
-      alert("Nur DM/Admin darf NPCs anlegen.");
-      return;
-    }
-
-    console.error(err);
-
-    alert(err?.message || "Du kannst max. 10 Charaktere erstellen.");
-  }
-}
-
-export function doLogout() {
-  logout();
-  setCurrentCharacter(null);
-  window.location.href = "/index.html";
-}
-
 // ============================================================
 // GLOBAL EVENTS
 // ============================================================
-if (!location.pathname.startsWith("/player/")) {
-  btnLogout?.addEventListener("click", doLogout);
-}
-
 btnAdmin?.addEventListener("click", () => {
   closeDrawer();
   window.location.href = "/admin.html";
@@ -451,10 +184,5 @@ window.addEventListener("hashchange", () => {
 
     setLoggedInUI(!!API.token);
 
-    if (API.token) {
-      loadCharacters().catch((error) => {
-        console.error("Charaktere konnten nicht geladen werden:", error);
-      });
-    }
   }
 })();

@@ -1,11 +1,21 @@
 import { API } from "./api.js";
 import {
     loadCharacters,
-    refreshCurrentUserAndUI,
-    renderTopbarCharacterAvatar,
     setLoggedInUI,
 } from "./app.js";
+import { renderTopbarCharacterAvatar } from "/player/player-topbar.js";
 import { DM_NAV } from "./dm/dm-nav-config.js";
+import { logout } from "/shared/auth.js";
+import { refreshCurrentUserAndUI } from "/shared/drawer-user.js";
+
+document.getElementById("btnLogout")?.addEventListener("click", () => {
+    logout();
+
+    localStorage.removeItem("dnd_current_character_id");
+    localStorage.removeItem("selectedCharacterId");
+
+    window.location.href = "/index.html";
+});
 
 // ============================================================
 // PLAYER RULES
