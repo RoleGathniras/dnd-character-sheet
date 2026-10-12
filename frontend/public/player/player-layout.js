@@ -93,8 +93,8 @@ export function initPlayerLayout() {
     initPlayerTopbar();
     loadPlayerTopbar();
     startPlayerSession().catch(error => {
-    console.error("Player-Session konnte nicht gestartet werden:", error);
-});
+        console.error("Player-Session konnte nicht gestartet werden:", error);
+    });
 }
 
 export async function authenticatePlayer() {
@@ -138,4 +138,23 @@ export function startPlayerSession() {
     }
 
     return playerSessionPromise;
+}
+export function setLoggedInUI(isLoggedIn) {
+    for (const id of ["btnLogout", "btnMenu", "btnNavOpen"]) {
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.style.display = isLoggedIn ? "inline-block" : "none";
+        }
+    }
+
+    const avatar = document.getElementById("currentCharacterAvatar");
+    if (avatar) {
+        avatar.hidden = !isLoggedIn;
+    }
+
+    const sheetRoot = document.getElementById("sheetRoot");
+    if (sheetRoot) {
+        sheetRoot.style.display = isLoggedIn ? "" : "none";
+    }
 }

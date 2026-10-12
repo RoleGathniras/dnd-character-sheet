@@ -1,12 +1,14 @@
 import { API } from "./api.js";
-import {
-    loadCharacters,
-    setLoggedInUI,
-} from "./app.js";
+import { loadCharacters } from "/shared/legacy-character-list.js";
 import { renderTopbarCharacterAvatar } from "/player/player-topbar.js";
 import { DM_NAV } from "./dm/dm-nav-config.js";
 import { logout } from "/shared/auth.js";
 import { refreshCurrentUserAndUI } from "/shared/drawer-user.js";
+import { initDrawer } from "/shared/drawer.js";
+import {
+    buildSheetNav,
+    scrollToHashWithRetry,
+} from "/nav.js";
 
 document.getElementById("btnLogout")?.addEventListener("click", () => {
     logout();
@@ -401,18 +403,61 @@ async function loadCurrentCharacterAvatar() {
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const dmMenuButton = document.getElementById("btnDmMenu");
-    const drawer = document.getElementById("drawer");
-    const backdrop = document.getElementById("backdrop");
-
-    dmMenuButton?.addEventListener("click", () => {
-        drawer?.classList.add("is-open");
-        drawer?.setAttribute("aria-hidden", "false");
-
-        if (backdrop) {
-            backdrop.hidden = false;
-        }
+    const mainDrawer = initDrawer({
+        drawer: document.getElementById("drawer"),
+        backdrop: document.getElementById("backdrop"),
+        openButton: document.getElementById("btnMenu"),
+        closeButton: document.getElementById("btnCloseDrawer"),
     });
+
+    const navigationDrawer = initDrawer({
+        drawer: document.getElementById("navDrawer"),
+        backdrop: document.getElementById("navBackdrop"),
+        openButton: document.getElementById("btnNavOpen"),
+        closeButton: document.getElementById("btnNavClose"),
+    });
+
+    function setLoggedInUI(isLoggedIn) {
+        for (const id of ["btnLogout", "btnMenu", "btnNavOpen"]) {
+            const element = document.getElementById(id);
+
+            if (element) {
+                element.style.display = isLoggedIn ? "inline-block" : "none";
+            }
+        }
+
+        const avatar = document.getElementById("currentCharacterAvatar");
+        if (avatar) {
+            avatar.hidden = !isLoggedIn;
+        }
+
+        const sheetRoot = document.getElementById("sheetRoot");
+        if (sheetRoot) {
+            sheetRoot.style.display = isLoggedIn ? "" : "none";
+        }
+
+        if (!isLoggedIn) {
+            navigationDrawer?.close();
+        }
+    }
+
+    buildSheetNav({
+        navList: document.getElementById("navList"),
+        btnNavOpen: document.getElementById("btnNavOpen"),
+        closeNavDrawer: () => navigationDrawer?.close(),
+        sheetRootEl: document.getElementById("sheetRoot"),
+    });
+
+    scrollToHashWithRetry();
+
+    window.addEventListener("hashchange", () => {
+        scrollToHashWithRetry();
+    });
+
+    document.getElementById("btnDmMenu")
+        ?.addEventListener("click", () => {
+            mainDrawer?.open();
+        });
     document.getElementById("btnDmCampaigns")?.addEventListener("click", () => {
         window.location.href = "/dm/campaigns.html";
     });
@@ -445,7 +490,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             applyRulesRoleUI(user);
 
             if (user.role === "player") {
-                await loadCharacters();
+                await loadCharacters({
+                    closeDrawer: () => mainDrawer?.close(),
+                });
                 await loadCurrentCharacterAvatar();
             } else {
                 buildDmRulesNavigation();

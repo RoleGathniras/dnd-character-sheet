@@ -2,8 +2,8 @@ import { API } from "../api.js";
 import {
     getCurrentCharacterId,
     setCurrentCharacter,
-    setLoggedInUI,
-} from "../app.js";
+} from "/player/character-selection.js";
+import { setLoggedInUI } from "/player/player-layout.js";
 import { jsonToSheet, sheetToJson } from "../mapper.js";
 import { setStatus } from "/shared/status.js";
 import { renderDrawerTitle } from "/shared/drawer-user.js";

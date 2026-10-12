@@ -1,5 +1,5 @@
 import { API } from "../api.js";
-import { getCurrentCharacterId } from "../app.js";
+import { getCurrentCharacterId } from "/player/character-selection.js";
 import { setStatus } from "/shared/status.js";
 
 (function () {

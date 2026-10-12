@@ -1,9 +1,6 @@
 import { API } from "../api.js";
-import {
-    loadCharacters,
-    setCurrentCharacter,
-    setLoggedInUI,
-} from "../app.js";
+import { setCurrentCharacter } from "/player/character-selection.js";
+import { setLoggedInUI } from "/player/player-layout.js";
 import { resizeImageFile } from "./image-utils.js";
 import { renderPlayerCharacters } from "/player/player-characters.js";
 import { setStatus } from "/shared/status.js";
@@ -166,7 +163,7 @@ import {
             const created = await API.createCharacter(payload);
 
             setCurrentCharacter(created.id);
-            await loadCharacters();
+            await renderPlayerCharacters();
 
             const onSheet = location.pathname.endsWith("/sheet.html");
 

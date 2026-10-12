@@ -1,10 +1,11 @@
 import { API } from "./api.js";
+import { getCurrentCharacterId } from "/player/character-selection.js";
+import { loadCharacters } from "/shared/legacy-character-list.js";
+import { initDrawer } from "/shared/drawer.js";
 import {
-    getCurrentCharacterId,
-    loadCharacters,
-    setLoggedInUI,
-} from "./app.js";
-import { buildSheetNav } from "./nav.js";
+    buildSheetNav,
+    scrollToHashWithRetry,
+} from "./nav.js";
 import { logout } from "/shared/auth.js";
 import { setStatus } from "/shared/status.js";
 import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.js";
@@ -13,6 +14,19 @@ import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.
 (function () {
     const isAdminPage = location.pathname.endsWith("/admin.html");
     if (!isAdminPage) return;
+    const mainDrawer = initDrawer({
+        drawer: document.getElementById("drawer"),
+        backdrop: document.getElementById("backdrop"),
+        openButton: document.getElementById("btnMenu"),
+        closeButton: document.getElementById("btnCloseDrawer"),
+    });
+
+    const navigationDrawer = initDrawer({
+        drawer: document.getElementById("navDrawer"),
+        backdrop: document.getElementById("navBackdrop"),
+        openButton: document.getElementById("btnNavOpen"),
+        closeButton: document.getElementById("btnNavClose"),
+    });
     const btnLogout = document.getElementById("btnLogout");
 
     btnLogout?.addEventListener("click", () => {
@@ -23,6 +37,18 @@ import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.
 
         window.location.href = "/index.html";
     });
+
+    document.getElementById("btnPlayerRules")
+        ?.addEventListener("click", () => {
+            mainDrawer?.close();
+            window.location.href = "/player_rules.html";
+        });
+
+    document.getElementById("btnAdmin")
+        ?.addEventListener("click", () => {
+            mainDrawer?.close();
+            window.location.href = "/admin.html";
+        });
 
     const navList = document.getElementById("navList");
     const btnNavOpen = document.getElementById("btnNavOpen");
@@ -40,11 +66,7 @@ import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.
     let currentCharacter = null;
 
     function closeNavDrawerFallback() {
-        const navDrawer = document.getElementById("navDrawer");
-        const navBackdrop = document.getElementById("navBackdrop");
-        navDrawer?.classList.remove("is-open");
-        navDrawer?.setAttribute("aria-hidden", "true");
-        if (navBackdrop) navBackdrop.hidden = true;
+        navigationDrawer?.close();
     }
 
     function escapeHtml(s) {
@@ -151,6 +173,30 @@ import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.
         return row;
     }
 
+    function setLoggedInUI(isLoggedIn) {
+        for (const id of ["btnLogout", "btnMenu", "btnNavOpen"]) {
+            const element = document.getElementById(id);
+
+            if (element) {
+                element.style.display = isLoggedIn ? "inline-block" : "none";
+            }
+        }
+
+        const avatar = document.getElementById("currentCharacterAvatar");
+        if (avatar) {
+            avatar.hidden = !isLoggedIn;
+        }
+
+        const sheetRoot = document.getElementById("sheetRoot");
+        if (sheetRoot) {
+            sheetRoot.style.display = isLoggedIn ? "" : "none";
+        }
+
+        if (!isLoggedIn) {
+            navigationDrawer?.close();
+        }
+    }
+
     async function loadUsersIntoAdmin() {
         if (!adminUsers) return;
 
@@ -209,6 +255,10 @@ import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.
         }
     }
 
+    window.addEventListener("hashchange", () => {
+        scrollToHashWithRetry();
+    });
+
     (async function startupAdmin() {
         buildSheetNav({
             navList,
@@ -216,6 +266,7 @@ import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.
             closeNavDrawer: closeNavDrawerFallback,
             sheetRootEl,
         });
+        scrollToHashWithRetry();
 
         if (!API.token) {
             setLoggedInUI(false);
@@ -228,7 +279,9 @@ import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.
         try {
             setLoggedInUI(true);
             await refreshCurrentUserAndUI();
-            await loadCharacters();
+            await loadCharacters({
+                closeDrawer: () => mainDrawer?.close(),
+            });
 
             const me = await API.me();
             if (me?.role !== "admin") {

@@ -2,7 +2,7 @@ import { API } from "/api.js";
 import {
     getCurrentCharacterId,
     setCurrentCharacter,
-} from "/app.js";
+} from "/player/character-selection.js";
 import { renderTopbarCharacterAvatar } from "/player/player-topbar.js";
 
 export async function fetchPlayerCharacters() {
