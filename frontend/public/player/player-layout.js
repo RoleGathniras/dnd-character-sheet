@@ -14,6 +14,7 @@ import {
     initPlayerTopbar,
     loadPlayerTopbar,
 } from "/player/player-topbar.js";
+let playerSessionPromise = null;
 
 export function initPlayerLayout() {
     // Linker Player-Drawer
@@ -91,6 +92,9 @@ export function initPlayerLayout() {
 
     initPlayerTopbar();
     loadPlayerTopbar();
+    startPlayerSession().catch(error => {
+    console.error("Player-Session konnte nicht gestartet werden:", error);
+});
 }
 
 export async function authenticatePlayer() {
@@ -115,14 +119,23 @@ export async function authenticatePlayer() {
     }
 }
 
-export async function startPlayerSession() {
-    const user = await authenticatePlayer();
+export function startPlayerSession() {
+    if (!playerSessionPromise) {
+        playerSessionPromise = (async () => {
+            const user = await authenticatePlayer();
 
-    if (!user) {
-        return null;
+            if (!user) {
+                return null;
+            }
+
+            await renderPlayerCharacters();
+
+            return user;
+        })().catch(error => {
+            playerSessionPromise = null;
+            throw error;
+        });
     }
 
-    await renderPlayerCharacters();
-
-    return user;
+    return playerSessionPromise;
 }

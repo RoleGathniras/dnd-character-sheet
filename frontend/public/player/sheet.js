@@ -5,7 +5,6 @@ import {
     setLoggedInUI,
 } from "../app.js";
 import { jsonToSheet, sheetToJson } from "../mapper.js";
-import { startPlayerSession } from "/player/player-layout.js";
 import { setStatus } from "/shared/status.js";
 import { renderDrawerTitle } from "/shared/drawer-user.js";
 
@@ -476,12 +475,6 @@ import { renderDrawerTitle } from "/shared/drawer-user.js";
 
         if (API.token) {
             try {
-                const user = await startPlayerSession();
-
-                if (!user) {
-                    return;
-                }
-
                 setLoggedInUI(true);
 
                 const currentCharacterId = getCurrentCharacterId();

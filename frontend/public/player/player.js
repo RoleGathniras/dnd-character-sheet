@@ -6,7 +6,6 @@ import {
 } from "../app.js";
 import { resizeImageFile } from "./image-utils.js";
 import { renderPlayerCharacters } from "/player/player-characters.js";
-import { startPlayerSession } from "/player/player-layout.js";
 import { setStatus } from "/shared/status.js";
 import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.js";
 import {
@@ -596,12 +595,6 @@ import {
         }
 
         try {
-            const user = await startPlayerSession();
-
-            if (!user) {
-                return;
-            }
-
             setLoggedInUI(true);
             updateLandingAuthState(true);
             await renderCharacterCards();

@@ -209,13 +209,25 @@
     </main>
     <script type="module">
         import { mountPlayerDrawers } from "/player/player-drawer.js";
-        import { initPlayerLayout } from "/player/player-layout.js";
+        import {
+            initPlayerLayout,
+            startPlayerSession,
+        } from "/player/player-layout.js";
 
         mountPlayerDrawers();
         initPlayerLayout();
 
-        await import("/app.js");
-        await import("/player/charakter.js");
+        try {
+            const user = await startPlayerSession();
+
+            if (user) {
+                await import("/player/charakter.js");
+            } else {
+                window.location.href = "/index.html";
+            }
+        } catch (error) {
+            console.error("Player-Seite konnte nicht gestartet werden:", error);
+        }
     </script>
 </body>
 
