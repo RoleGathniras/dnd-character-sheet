@@ -1,14 +1,14 @@
-import { API } from "./api.js";
+import { API } from "../api.js";
 import { getCurrentCharacterId } from "/player/character-selection.js";
 import { loadCharacters } from "/shared/legacy-character-list.js";
-import { initDrawer } from "/shared/drawer.js";
+import { initDrawer } from "/drawers/drawer.js";
 import {
     buildSheetNav,
     scrollToHashWithRetry,
-} from "./nav.js";
+} from "../nav.js";
 import { logout } from "/shared/auth.js";
 import { setStatus } from "/shared/status.js";
-import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.js";
+import { renderDrawerTitle, refreshCurrentUserAndUI } from "/drawers/drawer-user.js";
 
 
 (function () {
@@ -41,13 +41,13 @@ import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.
     document.getElementById("btnPlayerRules")
         ?.addEventListener("click", () => {
             mainDrawer?.close();
-            window.location.href = "/player_rules.html";
+            window.location.href = "/shared/player_rules.html";
         });
 
     document.getElementById("btnAdmin")
         ?.addEventListener("click", () => {
             mainDrawer?.close();
-            window.location.href = "/admin.html";
+            window.location.href = "/admin/admin.html";
         });
 
     const navList = document.getElementById("navList");

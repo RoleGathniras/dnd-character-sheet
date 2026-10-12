@@ -4,7 +4,7 @@ export const campaignId = Number(params.get("id"));
 if (campaignId) {
     sessionStorage.setItem("dnd_dm_campaign_id", String(campaignId));
 }
-import { initDrawer } from "/shared/drawer.js";
+import { initDrawer } from "/drawers/drawer.js";
 import { DM_NAV } from "./dm-nav-config.js";
 import { logout } from "/shared/auth.js";
 
@@ -94,7 +94,7 @@ export function initDmMainNavigation() {
             window.location.href = "/dm/campaigns.html";
         });
         document.getElementById("btnPlayerRules")?.addEventListener("click", () => {
-            window.location.href = "/player_rules.html";
+            window.location.href = "/shared/player_rules.html";
         });
     }
 

@@ -30,7 +30,7 @@ function redirectForRole(user) {
     }
 
     if (user?.role === "admin") {
-        window.location.href = "/admin.html";
+        window.location.href = "/admin/admin.html";
         return;
     }
 

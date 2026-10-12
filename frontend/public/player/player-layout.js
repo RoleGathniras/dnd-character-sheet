@@ -1,6 +1,6 @@
 import { API } from "/api.js";
 import { buildSheetNav } from "/nav.js";
-import { initDrawer } from "/shared/drawer.js";
+import { initDrawer } from "/drawers/drawer.js";
 import {
     logout,
     refreshCurrentUser,
@@ -8,7 +8,7 @@ import {
 import {
     initCharacterStatusbar,
     loadCharacterStatusbar,
-} from "/character_statusbar.js";
+} from "/player/character_statusbar.js";
 import { renderPlayerCharacters } from "/player/player-characters.js";
 import {
     initPlayerTopbar,
@@ -34,7 +34,7 @@ export function initPlayerLayout() {
 
     btnPlayerRules?.addEventListener("click", () => {
         playerMainDrawer?.close();
-        window.location.href = "/player_rules.html";
+        window.location.href = "/shared/player_rules.html";
     });
 
     const btnLogout = document.getElementById("btnLogout");

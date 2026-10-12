@@ -1,10 +1,10 @@
-import { API } from "./api.js";
+import { API } from "/api.js";
 import { loadCharacters } from "/shared/legacy-character-list.js";
 import { renderTopbarCharacterAvatar } from "/player/player-topbar.js";
-import { DM_NAV } from "./dm/dm-nav-config.js";
+import { DM_NAV } from "/dm/dm-nav-config.js";
 import { logout } from "/shared/auth.js";
-import { refreshCurrentUserAndUI } from "/shared/drawer-user.js";
-import { initDrawer } from "/shared/drawer.js";
+import { refreshCurrentUserAndUI } from "/drawers/drawer-user.js";
+import { initDrawer } from "/drawers/drawer.js";
 import {
     buildSheetNav,
     scrollToHashWithRetry,
@@ -229,7 +229,7 @@ function openRuleEntry(entry) {
     const filePath = entry.file || PDF_FILE_PATH;
 
     const viewerUrl =
-        `/rule_viewer.html?file=${encodeURIComponent(filePath)}&page=${encodeURIComponent(entry.page)}&title=${encodeURIComponent(entry.title)}`;
+        `/shared/rule_viewer.html?file=${encodeURIComponent(filePath)}&page=${encodeURIComponent(entry.page)}&title=${encodeURIComponent(entry.title)}`;
 
     window.location.href = viewerUrl;
 }

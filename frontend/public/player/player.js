@@ -4,7 +4,7 @@ import { setLoggedInUI } from "/player/player-layout.js";
 import { resizeImageFile } from "./image-utils.js";
 import { renderPlayerCharacters } from "/player/player-characters.js";
 import { setStatus } from "/shared/status.js";
-import { renderDrawerTitle, refreshCurrentUserAndUI } from "/shared/drawer-user.js";
+import { renderDrawerTitle, refreshCurrentUserAndUI } from "/drawers/drawer-user.js";
 import {
     getCharacterImageDataUrl,
     getCharacterImageCrop,

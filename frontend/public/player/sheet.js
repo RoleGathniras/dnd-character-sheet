@@ -6,7 +6,7 @@ import {
 import { setLoggedInUI } from "/player/player-layout.js";
 import { jsonToSheet, sheetToJson } from "../mapper.js";
 import { setStatus } from "/shared/status.js";
-import { renderDrawerTitle } from "/shared/drawer-user.js";
+import { renderDrawerTitle } from "/drawers/drawer-user.js";
 
 (function () {
     const isSheetPage = location.pathname.endsWith("/sheet.html");
