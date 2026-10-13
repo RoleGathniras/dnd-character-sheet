@@ -8,6 +8,8 @@ from app.api.campaigns import router as campaigns_router
 from app.api.characters import router as characters_router
 from app.api.spells import router as spells_router
 from app.api.users import router as users_router
+from app.api.items import router as items_router
+from app.api.item_instances import router as item_instances_router
 
 app = FastAPI(title="DnD Character Sheet API")
 
@@ -25,6 +27,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -35,3 +38,5 @@ app.include_router(campaigns_router)
 app.include_router(users_router)
 app.include_router(characters_router)
 app.include_router(spells_router)
+app.include_router(items_router)
+app.include_router(item_instances_router)

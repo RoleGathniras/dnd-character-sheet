@@ -111,15 +111,24 @@
         <section class="dm-dashboard-status">
             <h2>Spielercharaktere</h2>
 
-            <div class="dm-dashboard-status__box">
-                <p>
-                    Hier werden die Spielercharaktere dieser Kampagne verwaltet.
-                </p>
-            </div>
+            <p id="playersStatus" role="status">Lade Kampagne…</p>
+
+            <form id="addCharacterForm">
+                <label for="characterSelect">Charakter hinzufügen</label>
+                <select id="characterSelect" class="select" required disabled>
+                    <option value="">Bitte auswählen</option>
+                </select>
+
+                <button id="btnAddCharacter" class="btn btn--primary" type="submit" disabled>
+                    Hinzufügen
+                </button>
+            </form>
+
+            <div id="campaignCharacters"></div>
         </section>
     </main>
 
-    <script type="module" src="campaign.js"></script>
+    <script type="module" src="./players.js"></script>
 </body>
 
 </html>

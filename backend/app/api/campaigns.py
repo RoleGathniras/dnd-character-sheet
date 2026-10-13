@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
+from sqlalchemy.exc import IntegrityError
 
 from app.deps import get_current_user, get_session
 from app.models import (
@@ -83,6 +84,11 @@ def create_campaign(
 
     characters = []
 
+    if len(payload.character_ids) != len(set(payload.character_ids)):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ein Charakter darf nicht mehrfach angegeben werden.",
+        )
     for character_id in payload.character_ids:
         character = session.get(Character, character_id)
 
@@ -97,7 +103,20 @@ def create_campaign(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Character {character_id} is not a player character",
             )
+        existing_link = session.exec(
+            select(CampaignCharacter).where(
+                CampaignCharacter.character_id == character_id
+            )
+        ).first()
 
+        if existing_link is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Der Charakter gehört bereits einer Kampagne an. "
+                    "Er muss diese zuerst verlassen."
+                ),
+            )
         characters.append(character)
 
     campaign = Campaign(
@@ -106,19 +125,39 @@ def create_campaign(
         image_data_url=payload.image_data_url,
     )
 
-    session.add(campaign)
-    session.commit()
-    session.refresh(campaign)
+    try:
+        session.add(campaign)
+        session.flush()
 
-    for character in characters:
-        link = CampaignCharacter(
-            campaign_id=campaign.id,
-            character_id=character.id,
+        for character in characters:
+            link = CampaignCharacter(
+                campaign_id=campaign.id,
+                character_id=character.id,
+            )
+            session.add(link)
+
+        session.commit()
+    except IntegrityError as error:
+        session.rollback()
+
+        constraint_name = getattr(
+            getattr(error.orig, "diag", None),
+            "constraint_name",
+            None,
         )
-        session.add(link)
 
-    session.commit()
+        if constraint_name == "uq_campaign_characters_character_id":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Der Charakter gehört bereits einer Kampagne an. "
+                    "Er muss diese zuerst verlassen."
+                ),
+            ) from error
 
+        raise
+
+    session.refresh(campaign)
     return build_campaign_out(campaign, session)
 
 
@@ -167,6 +206,7 @@ def get_campaign(
 
     return build_campaign_out(campaign, session)
 
+
 @router.patch("/{campaign_id}", response_model=CampaignOut)
 def update_campaign(
     campaign_id: int,
@@ -198,6 +238,7 @@ def update_campaign(
     session.refresh(campaign)
 
     return build_campaign_out(campaign, session)
+
 
 @router.delete(
     "/{campaign_id}",
@@ -234,6 +275,7 @@ def delete_campaign(
     session.flush()
     session.delete(campaign)
     session.commit()
+
 
 @router.post(
     "/{campaign_id}/characters/{character_id}",
@@ -273,15 +315,17 @@ def add_character_to_campaign(
             detail="Only player characters can be added to campaigns",
         )
 
-    existing_link = session.get(
-        CampaignCharacter,
-        (campaign_id, character_id),
-    )
+    existing_link = session.exec(
+        select(CampaignCharacter).where(CampaignCharacter.character_id == character_id)
+    ).first()
 
     if existing_link is not None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Character is already part of this campaign",
+            detail=(
+                "Der Charakter gehört bereits einer Kampagne an. "
+                "Er muss diese zuerst verlassen."
+            ),
         )
 
     link = CampaignCharacter(
@@ -290,7 +334,28 @@ def add_character_to_campaign(
     )
 
     session.add(link)
-    session.commit()
+
+    try:
+        session.commit()
+    except IntegrityError as error:
+        session.rollback()
+
+        constraint_name = getattr(
+            getattr(error.orig, "diag", None),
+            "constraint_name",
+            None,
+        )
+
+        if constraint_name == "uq_campaign_characters_character_id":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Der Charakter gehört bereits einer Kampagne an. "
+                    "Er muss diese zuerst verlassen."
+                ),
+            ) from error
+
+        raise
 
     return build_campaign_out(campaign, session)
 

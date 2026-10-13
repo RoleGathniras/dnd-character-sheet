@@ -663,7 +663,6 @@ function initInventory() {
                     field.value = item.desc;
                 }
 
-                renderAllInventoryTables();
                 renderCarryStats();
                 markDirtyAndScheduleSave();
             });
@@ -683,11 +682,14 @@ function initInventory() {
                 const editKey = field.dataset.edit;
 
                 if (editKey === "type") {
-                    const targetType = ITEM_TYPES.includes(field.value) ? field.value : "sonstiges";
+                    const targetType = ITEM_TYPES.includes(field.value)
+                        ? field.value
+                        : "sonstiges";
+
                     moveItemToType(item, fromType, targetType, index);
+                    renderAllInventoryTables();
                 }
 
-                renderAllInventoryTables();
                 renderCarryStats();
                 markDirtyAndScheduleSave();
             });

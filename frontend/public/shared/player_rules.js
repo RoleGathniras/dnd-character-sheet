@@ -1,23 +1,16 @@
 import { API } from "/api.js";
-import { loadCharacters } from "/shared/legacy-character-list.js";
 import { renderTopbarCharacterAvatar } from "/player/player-topbar.js";
 import { DM_NAV } from "/dm/dm-nav-config.js";
 import { logout } from "/shared/auth.js";
-import { refreshCurrentUserAndUI } from "/drawers/drawer-user.js";
 import { initDrawer } from "/drawers/drawer.js";
 import {
     buildSheetNav,
     scrollToHashWithRetry,
 } from "/nav.js";
-
-document.getElementById("btnLogout")?.addEventListener("click", () => {
-    logout();
-
-    localStorage.removeItem("dnd_current_character_id");
-    localStorage.removeItem("selectedCharacterId");
-
-    window.location.href = "/index.html";
-});
+import { createPlayerDrawer } from "/drawers/player-drawer.js";
+import { renderPlayerCharacters } from "/player/player-characters.js";
+import { refreshCurrentUser } from "/shared/auth.js";
+import { renderDrawerTitle } from "/drawers/drawer-user.js";
 
 // ============================================================
 // PLAYER RULES
@@ -403,12 +396,52 @@ async function loadCurrentCharacterAvatar() {
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
+    let user = null;
+
+    if (API.token) {
+        try {
+            user = await refreshCurrentUser();
+        } catch (error) {
+            console.error("Benutzer konnte nicht geladen werden:", error);
+            window.location.href = "/index.html";
+            return;
+        }
+    }
+
+    if (user?.role === "player") {
+        const oldDrawer = document.getElementById("drawer");
+        const oldBackdrop = document.getElementById("backdrop");
+
+        oldBackdrop?.remove();
+
+        if (oldDrawer) {
+            oldDrawer.outerHTML = createPlayerDrawer();
+        }
+    }
+
+    renderDrawerTitle();
+
     const mainDrawer = initDrawer({
         drawer: document.getElementById("drawer"),
         backdrop: document.getElementById("backdrop"),
         openButton: document.getElementById("btnMenu"),
         closeButton: document.getElementById("btnCloseDrawer"),
     });
+
+    document.getElementById("btnLogout")?.addEventListener("click", () => {
+        logout();
+
+        localStorage.removeItem("dnd_current_character_id");
+        localStorage.removeItem("selectedCharacterId");
+
+        window.location.href = "/index.html";
+    });
+
+    const rulesButton = document.getElementById("btnPlayerRules");
+
+    if (rulesButton) {
+        rulesButton.disabled = true;
+    }
 
     const navigationDrawer = initDrawer({
         drawer: document.getElementById("navDrawer"),
@@ -485,15 +518,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (isLoggedIn) {
         try {
-            const user = await refreshCurrentUserAndUI();
+            if (!user) return;
 
             applyRulesRoleUI(user);
 
             if (user.role === "player") {
-                await loadCharacters({
-                    closeDrawer: () => mainDrawer?.close(),
-                });
-                await loadCurrentCharacterAvatar();
+                await renderPlayerCharacters();
             } else {
                 buildDmRulesNavigation();
             }
