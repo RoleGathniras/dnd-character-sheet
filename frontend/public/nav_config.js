@@ -47,9 +47,8 @@ export const NAV = [
       ["sec-add-item", "Gegenstand hinzufügen"],
       ["sec-items-weapons", "Waffen"],
       ["sec-items-armor", "Rüstung"],
-      ["sec-items-ingredients", "Zutaten"],
-      ["sec-items-quest", "Questgegenstände"],
       ["sec-items-other", "Sonstiges"],
+      ["sec-private-storage", "Private Truhe"],
     ],
   },
   {

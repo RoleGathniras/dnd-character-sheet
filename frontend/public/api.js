@@ -192,7 +192,41 @@ export const API = {
             method: "DELETE",
         });
     },
+    // ===== Gegenstandsvorlagen und Inventar =====
 
+    listItemTemplates() {
+        return this.request("/items");
+    },
+
+    listCharacterInventory(characterId) {
+        return this.request(
+            `/item-instances/characters/${characterId}`,
+        );
+    },
+
+    createItemInstance(payload) {
+        return this.request("/item-instances", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+    },
+    listCharacterPrivateStorage(characterId) {
+        return this.request(
+            `/item-instances/characters/${characterId}/private-storage`,
+        );
+    },
+
+    movePersonalItem(instanceId, payload) {
+        return this.request(
+            `/item-instances/${instanceId}/personal-location`,
+            {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            },
+        );
+    },
     // ===== Spells =====
 
     getSpells(level) {

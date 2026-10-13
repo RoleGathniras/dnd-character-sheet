@@ -56,7 +56,6 @@
     <!-- rechterDrawer -->
     <div id="playerNavDrawerMount"></div>
 
-
     <main class="page page--inventory">
         <!-- Geld -->
         <section id="sec-money" data-nav-label="Geld">
@@ -134,44 +133,32 @@
                 </button>
 
                 <div class="collapsibleCard__body" id="addItemBody" hidden>
-                    <div class="formGrid">
-                        <label class="field">
-                            <span class="label">Name</span>
-                            <input id="item_name" type="text" maxlength="80" placeholder="z.B. Langschwert" />
-                        </label>
+                    <form id="addInventoryItemForm">
+                        <div class="formGrid">
+                            <label class="field">
+                                <span class="label">Gegenstand aus dem Katalog</span>
+                                <select id="item_template" required disabled>
+                                    <option value="">Katalog wird geladen…</option>
+                                </select>
+                            </label>
 
-                        <label class="field">
-                            <span class="label">Anzahl</span>
-                            <input id="item_count" type="number" min="1" max="9999" value="1" inputmode="numeric" />
-                        </label>
+                            <label class="field">
+                                <span class="label">Anzahl</span>
+                                <input id="item_count" type="number" min="1" max="9999" step="1" value="1" required
+                                    inputmode="numeric" />
+                            </label>
+                        </div>
 
-                        <label class="field">
-                            <span class="label">Art</span>
-                            <select id="item_type">
-                                <option value="waffe">Waffe</option>
-                                <option value="ruestung">Rüstung</option>
-                                <option value="zutat">Zutat</option>
-                                <option value="quest">Questgegenstand</option>
-                                <option value="sonstiges">Sonstiges</option>
-                            </select>
-                        </label>
+                        <p id="itemTemplatePreview" class="muted small"></p>
 
-                        <label class="field">
-                            <span class="label">Gewicht</span>
-                            <input id="item_weight" type="number" min="0" max="9999.99" step="0.01" inputmode="decimal"
-                                placeholder="z.B. 1.5" />
-                        </label>
+                        <div class="row gap">
+                            <button id="btnAddItem" class="btn" type="submit" disabled>
+                                + Ins Inventar legen
+                            </button>
+                        </div>
 
-                        <label class="field field--full">
-                            <span class="label">Beschreibung</span>
-                            <textarea id="item_desc" rows="6" maxlength="1000"
-                                placeholder="Beschreibung des Gegenstandes…"></textarea>
-                        </label>
-                    </div>
-
-                    <div class="row gap">
-                        <button id="btnAddItem" class="btn" type="button">+ Gegenstand hinzufügen</button>
-                    </div>
+                        <p id="inventoryStatus" role="status"></p>
+                    </form>
                 </div>
             </section>
         </section>
@@ -328,6 +315,39 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </section>
+        </section>
+        <section id="sec-private-storage" data-nav-label="Private Truhe">
+            <section class="card collapsibleCard">
+                <button type="button" class="collapsibleCard__toggle" aria-expanded="false">
+                    <div class="left">
+                        <div class="h2">Private Truhe</div>
+                    </div>
+                    <span class="collapsibleCard__icon" aria-hidden="true">⌃</span>
+                </button>
+
+                <div class="collapsibleCard__body" hidden>
+                    <p class="muted small">
+                        Eingelagerte Gegenstände zählen nicht zur Traglast.
+                    </p>
+
+                    <div class="inventoryTableWrap">
+                        <table class="table table--inventory" aria-label="Private Truhe">
+                            <thead>
+                                <tr>
+                                    <th>Gegenstände</th>
+                                </tr>
+                            </thead>
+                            <tbody id="privateStorageRows">
+                                <tr>
+                                    <td class="muted small">Truhe wird geladen…</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p id="privateStorageStatus" role="status"></p>
                 </div>
             </section>
         </section>

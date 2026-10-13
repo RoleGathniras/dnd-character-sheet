@@ -1,760 +1,544 @@
-import { API } from "../api.js";
-function initInventory() {
-    // =========================================================
-    // DOM
-    // =========================================================
-    const money_pm = document.getElementById("money_pm");
-    const money_gm = document.getElementById("money_gm");
-    const money_sm = document.getElementById("money_sm");
-    const money_em = document.getElementById("money_em");
-    const money_km = document.getElementById("money_km");
+import { API } from "/api.js";
+import { getCurrentCharacterId } from "/player/character-selection.js";
 
-    const currentCarryWeight = document.getElementById("currentCarryWeight");
-    const maxCarryWeight = document.getElementById("maxCarryWeight");
+const characterId = getCurrentCharacterId();
 
-    const item_name = document.getElementById("item_name");
-    const item_count = document.getElementById("item_count");
-    const item_type = document.getElementById("item_type");
-    const item_weight = document.getElementById("item_weight");
-    const item_desc = document.getElementById("item_desc");
-    const btnAddItem = document.getElementById("btnAddItem");
+const form = document.getElementById("addInventoryItemForm");
+const templateSelect = document.getElementById("item_template");
+const quantityInput = document.getElementById("item_count");
+const addButton = document.getElementById("btnAddItem");
+const preview = document.getElementById("itemTemplatePreview");
+const status = document.getElementById("inventoryStatus");
+const privateStorageRows = document.getElementById("privateStorageRows");
+const privateStorageStatus = document.getElementById("privateStorageStatus");
 
-    const inventoryWeaponsRows = document.getElementById("inventoryWeaponsRows");
-    const inventoryArmorRows = document.getElementById("inventoryArmorRows");
-    const inventoryIngredientsRows = document.getElementById("inventoryIngredientsRows");
-    const inventoryQuestRows = document.getElementById("inventoryQuestRows");
-    const inventoryOtherRows = document.getElementById("inventoryOtherRows");
-    const addItemCard = document.getElementById("addItemCard");
-    const btnToggleAddItem = document.getElementById("btnToggleAddItem");
-    const addItemBody = document.getElementById("addItemBody");
+const moneyInputs = Object.fromEntries(
+    ["pm", "gm", "sm", "em", "km"].map(key => [
+        key,
+        document.getElementById(`money_${key}`),
+    ]),
+);
 
-    const MAX_MONEY_VALUE = 99999999;
-    const MAX_ITEM_NAME_LENGTH = 80;
-    const MAX_ITEM_DESC_LENGTH = 1000;
-    const MAX_ITEM_COUNT = 9999;
-    const MAX_ITEM_WEIGHT = 9999.99;
-    const MAX_INVENTORY_ITEMS_TOTAL = 500;
-    if (
-        !money_pm || !money_gm || !money_sm || !money_em || !money_km ||
-        !currentCarryWeight || !maxCarryWeight ||
-        !item_name || !item_count || !item_type || !item_weight || !item_desc || !btnAddItem ||
-        !inventoryWeaponsRows || !inventoryArmorRows || !inventoryIngredientsRows || !inventoryQuestRows || !inventoryOtherRows ||
-        !addItemCard || !btnToggleAddItem || !addItemBody
-    ) {
-        console.warn("[inventory.js] Missing required DOM elements. Script skipped.");
+const tables = {
+    weapon: document.getElementById("inventoryWeaponsRows"),
+    armor: document.getElementById("inventoryArmorRows"),
+    other: document.getElementById("inventoryOtherRows"),
+};
+
+const categoryLabels = {
+    weapon: "Waffe",
+    armor: "Rüstung",
+    other: "Sonstiges",
+};
+
+const currencyLabels = {
+    cp: "KM",
+    sp: "SM",
+    ep: "EM",
+    gp: "GM",
+    pp: "PM",
+};
+
+const numberFormat = new Intl.NumberFormat("de-DE", {
+    maximumFractionDigits: 3,
+});
+
+let character = null;
+let templates = [];
+let instances = [];
+let adding = false;
+let ready = false;
+
+let moneyTimer = null;
+let savingMoney = false;
+let moneyRevision = 0;
+let savedMoneyRevision = 0;
+
+let privateInstances = [];
+let transferring = false;
+let transferRefreshFailed = false;
+
+function showStatus(message) {
+    status.textContent = message;
+}
+
+function updateAddButton() {
+    addButton.disabled =
+        !ready || adding || !templateSelect.value;
+}
+
+function updateTemplatePreview() {
+    const template = templates.find(
+        entry => entry.id === Number(templateSelect.value),
+    );
+
+    preview.textContent = template
+        ? `${categoryLabels[template.category]} · ` +
+        `${numberFormat.format(Number(template.weight_lb))} Pfd pro Stück · ` +
+        `${numberFormat.format(Number(template.cost_amount))} ` +
+        `${currencyLabels[template.cost_currency]}`
+        : "";
+
+    updateAddButton();
+}
+
+function renderTemplates() {
+    templateSelect.replaceChildren(
+        new Option(
+            templates.length
+                ? "Bitte Gegenstand auswählen"
+                : "Keine verfügbaren Vorlagen",
+            "",
+        ),
+    );
+
+    for (const template of templates) {
+        templateSelect.add(new Option(
+            `${template.name} · ${categoryLabels[template.category]}`,
+            String(template.id),
+        ));
+    }
+
+    templateSelect.disabled = templates.length === 0;
+    updateTemplatePreview();
+}
+
+function appendDetail(container, text) {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = text;
+    container.appendChild(paragraph);
+}
+function appendTransferControls(container, item, targetLocation) {
+    const form = document.createElement("form");
+    form.className = "row gap";
+
+    const label = document.createElement("label");
+    label.textContent = "Menge ";
+
+    const input = document.createElement("input");
+    input.type = "number";
+    input.min = "1";
+    input.max = String(item.quantity);
+    input.step = "1";
+    input.value = String(item.quantity);
+    input.required = true;
+    input.setAttribute("aria-label", `Transfermenge für ${item.snapshot.name}`);
+
+    const button = document.createElement("button");
+    button.type = "submit";
+    button.className = "btn";
+    button.textContent = targetLocation === "private_storage"
+        ? "In private Truhe"
+        : "Ins Inventar";
+
+    input.disabled = transferring || transferRefreshFailed;
+    button.disabled = transferring || transferRefreshFailed;
+
+    label.appendChild(input);
+    form.append(label, button);
+    container.appendChild(form);
+
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        if (
+            transferring ||
+            transferRefreshFailed ||
+            !form.reportValidity()
+        ) return;
+
+        const quantity = Number(input.value);
+
+        if (
+            !Number.isInteger(quantity) ||
+            quantity < 1 ||
+            quantity > item.quantity
+        ) return;
+
+        transferring = true;
+        showTransferStatus("Gegenstand wird verschoben…");
+
+        document.querySelectorAll(
+            "form[data-item-transfer] input, form[data-item-transfer] button",
+        ).forEach(element => {
+            element.disabled = true;
+        });
+
+        let changed = false;
+
+        try {
+            await API.movePersonalItem(item.id, {
+                target_location: targetLocation,
+                expected_version: item.version,
+                quantity,
+            });
+
+            changed = true;
+        } catch (error) {
+            console.error(error);
+            showTransferStatus(error.message || "Transfer fehlgeschlagen.");
+        }
+
+        // Auch nach einem Konflikt die aktuellen Mengen/Versionen laden.
+        try {
+            const loaded = await Promise.all([
+                API.listCharacterInventory(characterId),
+                API.listCharacterPrivateStorage(characterId),
+            ]);
+
+            [instances, privateInstances] = loaded;
+            transferRefreshFailed = false;
+
+            if (changed) {
+                showTransferStatus("Gegenstand verschoben.");
+            }
+        } catch (error) {
+            console.error(error);
+            transferRefreshFailed = true;
+            showTransferStatus(
+                "Anzeige konnte nicht aktualisiert werden. " +
+                "Bitte Seite neu laden, bevor du weitere Transfers ausführst.",
+            );
+        } finally {
+            transferring = false;
+            renderInventory();
+            renderPrivateStorage();
+        }
+    });
+
+    form.dataset.itemTransfer = "1";
+}
+
+function showTransferStatus(message) {
+    showStatus(message);
+    privateStorageStatus.textContent = message;
+}
+
+function renderPrivateStorage() {
+    privateStorageRows.replaceChildren();
+
+    if (!privateInstances.length) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.className = "muted small";
+        cell.textContent = "Die private Truhe ist leer.";
+        row.appendChild(cell);
+        privateStorageRows.appendChild(row);
         return;
     }
 
-    // =========================================================
-    // State
-    // =========================================================
-    const ITEM_TYPES = ["waffe", "ruestung", "zutat", "quest", "sonstiges"];
+    for (const item of privateInstances) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        const details = document.createElement("details");
+        const summary = document.createElement("summary");
 
-    let currentCharacter = null;
-    let boundCharacterId = null;
+        summary.textContent =
+            `${item.snapshot.name} · Anzahl: ${item.quantity} · ` +
+            `${numberFormat.format(
+                Number(item.snapshot.weight_lb) * item.quantity,
+            )} Pfd`;
 
-    let saveTimer = null;
-    let isSaving = false;
-    let pendingSave = false;
+        details.appendChild(summary);
 
-    // =========================================================
-    // Persist Shape
-    // =========================================================
-    function emptyPersistInventory() {
-        return {
-            v: 1,
-            money: {
-                pm: 0,
-                gm: 0,
-                sm: 0,
-                em: 0,
-                km: 0,
-            },
-            items: {
-                waffe: [],
-                ruestung: [],
-                zutat: [],
-                quest: [],
-                sonstiges: [],
-            }
-        };
-    }
-
-    const inventoryState = emptyPersistInventory();
-
-    function applyPersistInventory(persist) {
-        const p = persist && typeof persist === "object" ? persist : emptyPersistInventory();
-
-        inventoryState.money.pm = toNonNegativeNumber(p.money?.pm);
-        inventoryState.money.gm = toNonNegativeNumber(p.money?.gm);
-        inventoryState.money.sm = toNonNegativeNumber(p.money?.sm);
-        inventoryState.money.em = toNonNegativeNumber(p.money?.em);
-        inventoryState.money.km = toNonNegativeNumber(p.money?.km);
-
-        let remaining = MAX_INVENTORY_ITEMS_TOTAL;
-
-        for (const type of ITEM_TYPES) {
-            const rawItems = Array.isArray(p.items?.[type]) ? p.items[type] : [];
-            const normalizedItems = rawItems.map(normalizeItem).slice(0, remaining);
-
-            inventoryState.items[type] = normalizedItems;
-            remaining -= normalizedItems.length;
+        if (item.snapshot.description) {
+            appendDetail(details, item.snapshot.description);
         }
-    }
 
-    function toPersistInventory() {
-        return structuredClone(inventoryState);
-    }
+        appendTransferControls(details, item, "inventory");
 
-    // =========================================================
-    // General Helpers
-    // =========================================================
-    function toNonNegativeNumber(value) {
-        const n = Number(value);
-        if (!Number.isFinite(n) || n < 0) return 0;
-        return n;
+        cell.appendChild(details);
+        row.appendChild(cell);
+        privateStorageRows.appendChild(row);
     }
+}
+function renderInventory() {
+    for (const [category, tbody] of Object.entries(tables)) {
+        tbody.replaceChildren();
 
-    function toPositiveInteger(value, fallback = 1) {
-        const n = Math.floor(Number(value));
-        if (!Number.isFinite(n) || n < 1) return fallback;
-        return n;
-    }
-
-    function normalizeItem(raw) {
-        return {
-            id: String(raw?.id || createItemId()),
-            name: limitText(raw?.name, MAX_ITEM_NAME_LENGTH),
-            count: toItemCount(raw?.count, 1),
-            type: ITEM_TYPES.includes(raw?.type) ? raw.type : "sonstiges",
-            weight: toItemWeight(raw?.weight),
-            desc: String(raw?.desc || "").slice(0, MAX_ITEM_DESC_LENGTH),
-            isExpanded: false,
-        };
-    }
-
-    function createItemId() {
-        if (window.crypto?.randomUUID) return window.crypto.randomUUID();
-        return "item-" + Date.now() + "-" + Math.random().toString(16).slice(2);
-    }
-
-    function escapeHtml(str) {
-        return String(str)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;");
-    }
-
-    function getSelectedCharacterId() {
-        return (
-            localStorage.getItem("dnd_current_character_id") ||
-            localStorage.getItem("selectedCharacterId") ||
-            ""
+        const items = instances.filter(
+            item => item.snapshot.category === category,
         );
-    }
-
-    function setSelectedCharacterId(id) {
-        if (id) {
-            localStorage.setItem("dnd_current_character_id", String(id));
-            localStorage.setItem("selectedCharacterId", String(id));
-        } else {
-            localStorage.removeItem("dnd_current_character_id");
-            localStorage.removeItem("selectedCharacterId");
-        }
-    }
-
-    function getHttpStatus(err) {
-        return (
-            err?.status ??
-            err?.response?.status ??
-            err?.cause?.status ??
-            err?.data?.status ??
-            null
-        );
-    }
-
-    function isConflict409(err) {
-        const s = String(err ?? "");
-        return getHttpStatus(err) === 409 || s.includes("409") || s.includes("Conflict");
-    }
-
-    function ensureCharacterData() {
-        if (!currentCharacter) return null;
-        currentCharacter.data = currentCharacter.data && typeof currentCharacter.data === "object"
-            ? currentCharacter.data
-            : {};
-        return currentCharacter.data;
-    }
-
-    function writeStateIntoCharacter() {
-        const data = ensureCharacterData();
-        if (!data) return;
-        data.inventory = toPersistInventory();
-    }
-
-    function markDirtyAndScheduleSave() {
-        writeStateIntoCharacter();
-        pendingSave = true;
-
-        if (!currentCharacter || !boundCharacterId) return;
-
-        if (saveTimer) clearTimeout(saveTimer);
-        saveTimer = setTimeout(() => {
-            void saveNow();
-        }, 650);
-    }
-
-    async function saveNow() {
-        if (!currentCharacter) return;
-        if (!pendingSave) return;
-        if (isSaving) return;
-
-        const selectedNow = Number(getSelectedCharacterId() || 0);
-        if (!selectedNow || selectedNow !== boundCharacterId) {
-            pendingSave = false;
-            return;
-        }
-
-        isSaving = true;
-        pendingSave = false;
-
-        const id = Number(currentCharacter.id);
-
-        try {
-            writeStateIntoCharacter();
-
-            const payload = {
-                data: currentCharacter.data,
-                updated_at: currentCharacter.updated_at,
-            };
-
-            currentCharacter = await API.patchCharacter(id, payload);
-        } catch (e) {
-            if (isConflict409(e)) {
-                try {
-                    const myInventory = toPersistInventory();
-                    const latest = await API.getCharacter(id);
-
-                    latest.data = latest.data && typeof latest.data === "object" ? latest.data : {};
-                    latest.data.inventory = myInventory;
-
-                    const payload2 = {
-                        data: latest.data,
-                        updated_at: latest.updated_at,
-                    };
-
-                    currentCharacter = await API.patchCharacter(id, payload2);
-                } catch (e2) {
-                    console.error("[inventory.js] Save failed after 409 retry.", e2);
-                }
-            } else {
-                console.error("[inventory.js] Save failed.", e);
-            }
-        } finally {
-            isSaving = false;
-
-            if (pendingSave) {
-                if (saveTimer) clearTimeout(saveTimer);
-                saveTimer = setTimeout(() => void saveNow(), 650);
-            }
-        }
-    }
-    function clamp(value, min, max) {
-        return Math.min(Math.max(value, min), max);
-    }
-
-    function limitText(value, maxLength) {
-        return String(value ?? "").trim().slice(0, maxLength);
-    }
-
-    function toItemCount(value, fallback = 1) {
-        const n = Math.floor(Number(value));
-        if (!Number.isFinite(n)) return fallback;
-        return clamp(n, 1, MAX_ITEM_COUNT);
-    }
-
-    function toItemWeight(value) {
-        const n = Number(value);
-        if (!Number.isFinite(n) || n < 0) return 0;
-        return Math.min(n, MAX_ITEM_WEIGHT);
-    }
-    // =========================================================
-    // Character / Strength / Carry
-    // =========================================================
-    function getStrengthScore(character) {
-        const n = Number(character?.data?.str);
-        if (!Number.isFinite(n) || n <= 0) return 0;
-        return n;
-    }
-
-    function calculateCarryCapacityFromStrength(score) {
-        // Aktuell nach deiner Vorgabe: aus Konstitutionswert berechnen.
-        // Falls du später doch STR oder eine andere Hausregel willst:
-        // nur diese Funktion anpassen.
-        if (!Number.isFinite(score) || score <= 0) return 0;
-        return score * 15;
-    }
-
-    function getCurrentTotalWeight() {
-        let total = 0;
-
-        for (const type of ITEM_TYPES) {
-            for (const item of inventoryState.items[type]) {
-                total += toNonNegativeNumber(item.weight) * toPositiveInteger(item.count, 1);
-            }
-        }
-
-        return Number(total.toFixed(2));
-    }
-
-    function renderCarryStats() {
-        currentCarryWeight.value = String(getCurrentTotalWeight());
-
-        const strScore = getStrengthScore(currentCharacter);
-        const carry = calculateCarryCapacityFromStrength(strScore);
-        maxCarryWeight.value = String(carry);
-    }
-
-    // =========================================================
-    // Money
-    // =========================================================
-    function toMoneyValue(value) {
-        const n = Math.floor(Number(value));
-        if (!Number.isFinite(n) || n < 0) return 0;
-        return Math.min(n, MAX_MONEY_VALUE);
-    }
-    function fillMoneyInputs() {
-        money_pm.value = inventoryState.money.pm || "";
-        money_gm.value = inventoryState.money.gm || "";
-        money_sm.value = inventoryState.money.sm || "";
-        money_em.value = inventoryState.money.em || "";
-        money_km.value = inventoryState.money.km || "";
-    }
-
-    function bindMoneyInputs() {
-        function saveMoney() {
-            inventoryState.money.pm = toMoneyValue(money_pm.value);
-            inventoryState.money.gm = toMoneyValue(money_gm.value);
-            inventoryState.money.sm = toMoneyValue(money_sm.value);
-            inventoryState.money.em = toMoneyValue(money_em.value);
-            inventoryState.money.km = toMoneyValue(money_km.value);
-
-            money_pm.value = inventoryState.money.pm || "";
-            money_gm.value = inventoryState.money.gm || "";
-            money_sm.value = inventoryState.money.sm || "";
-            money_em.value = inventoryState.money.em || "";
-            money_km.value = inventoryState.money.km || "";
-
-            markDirtyAndScheduleSave();
-        }
-
-        money_pm.addEventListener("input", saveMoney);
-        money_gm.addEventListener("input", saveMoney);
-        money_sm.addEventListener("input", saveMoney);
-        money_em.addEventListener("input", saveMoney);
-        money_km.addEventListener("input", saveMoney);
-    }
-
-    // =========================================================
-    // Add Item Form
-    // =========================================================
-    function clearAddItemForm() {
-        item_name.value = "";
-        item_count.value = "1";
-        item_type.value = "waffe";
-        item_weight.value = "";
-        item_desc.value = "";
-    }
-
-    function readItemForm() {
-        return normalizeItem({
-            id: createItemId(),
-            name: item_name.value,
-            count: item_count.value,
-            type: item_type.value,
-            weight: item_weight.value,
-            desc: item_desc.value,
-        });
-    }
-
-    function bindAddItem() {
-        btnAddItem.addEventListener("click", () => {
-            const item = readItemForm();
-
-            if (!item.name.trim()) {
-                item_name.focus();
-                return;
-            }
-            if (getTotalInventoryItemCount() >= MAX_INVENTORY_ITEMS_TOTAL) {
-                alert(`Maximal ${MAX_INVENTORY_ITEMS_TOTAL} Inventar-Einträge erlaubt.`);
-                return;
-            }
-
-            inventoryState.items[item.type].push(item);
-
-            clearAddItemForm();
-            renderAllInventoryTables();
-            renderCarryStats();
-            markDirtyAndScheduleSave();
-        });
-    }
-
-
-    // =========================================================
-    // Inventory Rendering
-    // =========================================================
-    function getRowsElementForType(type) {
-        switch (type) {
-            case "waffe":
-                return inventoryWeaponsRows;
-            case "ruestung":
-                return inventoryArmorRows;
-            case "zutat":
-                return inventoryIngredientsRows;
-            case "quest":
-                return inventoryQuestRows;
-            case "sonstiges":
-                return inventoryOtherRows;
-            default:
-                return inventoryOtherRows;
-        }
-    }
-
-    function getEmptyTextForType(type) {
-        switch (type) {
-            case "waffe":
-                return "Noch keine Waffen eingetragen.";
-            case "ruestung":
-                return "Noch keine Rüstungen eingetragen.";
-            case "zutat":
-                return "Noch keine Zutaten eingetragen.";
-            case "quest":
-                return "Noch keine Questgegenstände eingetragen.";
-            default:
-                return "Noch keine sonstigen Gegenstände eingetragen.";
-        }
-    }
-
-    function renderInventoryTable(type) {
-        const tbody = getRowsElementForType(type);
-        const items = inventoryState.items[type] ?? [];
-
-        tbody.innerHTML = "";
 
         if (!items.length) {
-            tbody.innerHTML = `
-            <tr class="rowHint">
-                <td colspan="4" class="muted small">${escapeHtml(getEmptyTextForType(type))}</td>
-            </tr>
-        `;
-            return;
-        }
-
-        items.forEach((item, index) => {
-            const totalItemWeight = Number((item.weight * item.count).toFixed(2));
-
             const row = document.createElement("tr");
-            row.className = "inventory-row";
-            row.dataset.type = type;
-            row.dataset.index = String(index);
-
-            row.innerHTML = `
-            <td colspan="4">
-                <div class="inventory-card">
-                    <div class="inventory-card__top">
-                        <button type="button" class="inventory-item__name" data-action="toggle-desc">
-                            ${escapeHtml(item.name || "-")}
-                        </button>
-
-                        <button
-                            type="button"
-                            class="btn btn--ghost btn--mini inventory-card__delete"
-                            data-action="delete-item"
-                            aria-label="Gegenstand löschen"
-                        >
-                            ✕
-                        </button>
-
-                        <div class="inventory-card__meta">
-                            <span>Anzahl: ${escapeHtml(item.count)}</span>
-                            <span>Gewicht: ${escapeHtml(totalItemWeight)}</span>
-                            <span>Art: ${escapeHtml(item.type)}</span>
-                        </div>
-                    </div>
-                </div>
-            </td>
-        `;
+            const cell = document.createElement("td");
+            cell.colSpan = 4;
+            cell.className = "muted small";
+            cell.textContent = "Keine Gegenstände vorhanden.";
+            row.appendChild(cell);
             tbody.appendChild(row);
+            continue;
+        }
 
-            const descRow = document.createElement("tr");
-            descRow.className = "inventory-desc-row";
-            descRow.dataset.type = type;
-            descRow.dataset.index = String(index);
-            descRow.hidden = !item.isExpanded;
+        for (const item of items) {
+            const snapshot = item.snapshot;
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = 4;
 
-            descRow.innerHTML = `
-            <td colspan="4">
-                <div class="inventory-desc-card">
-                    <div class="formGrid">
-                        <label class="field">
-                            <span class="label">Name</span>
-                            <input type="text" maxlength="80" data-edit="name" value="${escapeHtml(item.name)}" />
-                        </label>
+            const details = document.createElement("details");
+            const summary = document.createElement("summary");
 
-                        <label class="field">
-                            <span class="label">Anzahl</span>
-                            <input
-                                type="number"
-                                min="1"
-                                max="9999"
-                                inputmode="numeric"
-                                data-edit="count"
-                                value="${escapeHtml(item.count)}"
-                            />
-                        </label>
+            const totalWeight =
+                Number(snapshot.weight_lb) * item.quantity;
 
-                        <label class="field">
-                            <span class="label">Art</span>
-                            <select data-edit="type">
-                                <option value="waffe" ${item.type === "waffe" ? "selected" : ""}>Waffe</option>
-                                <option value="ruestung" ${item.type === "ruestung" ? "selected" : ""}>Rüstung</option>
-                                <option value="zutat" ${item.type === "zutat" ? "selected" : ""}>Zutat</option>
-                                <option value="quest" ${item.type === "quest" ? "selected" : ""}>Questgegenstand</option>
-                                <option value="sonstiges" ${item.type === "sonstiges" ? "selected" : ""}>Sonstiges</option>
-                            </select>
-                        </label>
+            summary.textContent =
+                `${snapshot.name} · Anzahl: ${item.quantity} · ` +
+                `${numberFormat.format(totalWeight)} Pfd`;
 
-                        <label class="field">
-                            <span class="label">Gewicht</span>
-                            <input
-                                type="number"
-                                min="0"
-                                max="9999.99"
-                                step="0.01"
-                                inputmode="decimal"
-                                data-edit="weight"
-                                value="${escapeHtml(item.weight)}"
-                            />
-                        </label>
+            details.appendChild(summary);
 
-                        <label class="field field--full">
-                            <span class="label">Beschreibung</span>
-                            <textarea rows="5" maxlength="1000" data-edit="desc">${escapeHtml(item.desc)}</textarea>
-                        </label>
-                    </div>
-                </div>
-            </td>
-        `;
-            tbody.appendChild(descRow);
-        });
-    }
+            appendDetail(
+                details,
+                `Einzelgewicht: ${numberFormat.format(Number(snapshot.weight_lb))
+                } Pfd`,
+            );
 
-    function renderAllInventoryTables() {
-        for (const type of ITEM_TYPES) {
-            renderInventoryTable(type);
+            if (snapshot.weapon) {
+                appendDetail(
+                    details,
+                    `Schaden: ${snapshot.weapon.damage_dice.replace("d", "W")
+                    } ${snapshot.weapon.damage_type}`,
+                );
+
+                if (snapshot.weapon.properties.length) {
+                    appendDetail(
+                        details,
+                        `Eigenschaften: ${snapshot.weapon.properties.join(", ")}`,
+                    );
+                }
+            }
+
+            if (snapshot.armor) {
+                const armor = snapshot.armor;
+                let acText = armor.armor_type === "shield"
+                    ? `RK-Bonus: +${armor.ac_value}`
+                    : `Rüstungsklasse: ${armor.ac_value}`;
+
+                if (armor.ac_modifier) {
+                    acText += ` + ${armor.ac_modifier.toUpperCase()}-Modifikator`;
+                }
+
+                if (armor.modifier_cap !== null) {
+                    acText += ` (Modifikator maximal +${armor.modifier_cap})`;
+                }
+
+                appendDetail(details, acText);
+
+                if (armor.strength_required !== null) {
+                    appendDetail(
+                        details,
+                        `Benötigte Stärke: ${armor.strength_required}`,
+                    );
+                }
+
+                if (armor.stealth_disadvantage) {
+                    appendDetail(details, "Nachteil auf Heimlichkeit");
+                }
+            }
+
+            if (snapshot.description) {
+                const description = document.createElement("p");
+                description.textContent = snapshot.description;
+                description.style.whiteSpace = "pre-wrap";
+                details.appendChild(description);
+            }
+            appendTransferControls(details, item, "private_storage");
+            cell.appendChild(details);
+            row.appendChild(cell);
+            tbody.appendChild(row);
         }
     }
 
-    // =========================================================
-    // Inventory Actions
-    // =========================================================
-    function moveItemToType(item, fromType, toType, fromIndex) {
-        if (fromType === toType) return;
+    renderCarryStats();
+}
 
-        inventoryState.items[fromType].splice(fromIndex, 1);
-        item.type = toType;
-        item.isExpanded = true;
-        inventoryState.items[toType].push(item);
+function renderCarryStats() {
+    const total = instances.reduce(
+        (sum, item) =>
+            sum + Number(item.snapshot.weight_lb) * item.quantity,
+        0,
+    );
+
+    const strength = Number(character?.data?.str ?? 0);
+
+    document.getElementById("currentCarryWeight").value =
+        String(Number(total.toFixed(3)));
+
+    document.getElementById("maxCarryWeight").value =
+        String(Number.isFinite(strength) && strength > 0
+            ? strength * 15
+            : 0);
+}
+
+function readMoneyInputs() {
+    return Object.fromEntries(
+        Object.entries(moneyInputs).map(([key, input]) => [
+            key,
+            Math.min(
+                99999999,
+                Math.max(0, Math.floor(Number(input.value) || 0)),
+            ),
+        ]),
+    );
+}
+
+async function saveMoney() {
+    if (savingMoney || savedMoneyRevision === moneyRevision) return;
+
+    savingMoney = true;
+    const revision = moneyRevision;
+    const money = readMoneyInputs();
+
+    try {
+        for (let attempt = 0; attempt < 2; attempt++) {
+            const latest = await API.getCharacter(characterId);
+            const data = structuredClone(latest.data ?? {});
+
+            // Nur Münzen ändern, andere Charakterdaten erhalten.
+            data.inventory = {
+                ...(data.inventory ?? {}),
+                money,
+            };
+
+            try {
+                character = await API.patchCharacter(characterId, {
+                    data,
+                    updated_at: latest.updated_at,
+                });
+                break;
+            } catch (error) {
+                if (error.status !== 409 || attempt === 1) throw error;
+            }
+        }
+
+        savedMoneyRevision = revision;
+        renderCarryStats();
+        showStatus("Münzen gespeichert.");
+    } catch (error) {
+        console.error(error);
+        showStatus(
+            "Münzen konnten nicht gespeichert werden. " +
+            "Bitte einen Münzwert erneut ändern, um es nochmals zu versuchen.",
+        );
+    } finally {
+        savingMoney = false;
+
+        if (moneyRevision > revision) {
+            clearTimeout(moneyTimer);
+            moneyTimer = setTimeout(() => void saveMoney(), 650);
+        }
     }
-    function toggleCollapsible(toggleBtn) {
-        if (!toggleBtn) return;
+}
 
-        const card = toggleBtn.closest(".collapsibleCard");
-        if (!card) return;
+for (const input of Object.values(moneyInputs)) {
+    input.disabled = true;
 
-        const body = card.querySelector(".collapsibleCard__body, .inventorySectionBody");
+    input.addEventListener("input", () => {
+        moneyRevision += 1;
+        clearTimeout(moneyTimer);
+        moneyTimer = setTimeout(() => void saveMoney(), 650);
+    });
+}
+
+templateSelect.addEventListener("change", updateTemplatePreview);
+
+form.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!ready || adding || !form.reportValidity()) return;
+
+    const templateId = Number(templateSelect.value);
+    const quantity = Number(quantityInput.value);
+
+    if (
+        !templates.some(template => template.id === templateId) ||
+        !Number.isInteger(quantity) ||
+        quantity < 1 ||
+        quantity > 9999
+    ) {
+        showStatus("Bitte einen Gegenstand und eine gültige Anzahl wählen.");
+        return;
+    }
+
+    adding = true;
+    updateAddButton();
+    showStatus("Gegenstand wird hinzugefügt…");
+
+    try {
+        const created = await API.createItemInstance({
+            template_id: templateId,
+            character_id: characterId,
+            quantity,
+        });
+
+        // Die erfolgreiche Antwort enthält das gespeicherte Exemplar.
+        instances.push(created);
+        renderInventory();
+        showStatus(`${created.snapshot.name} hinzugefügt.`);
+    } catch (error) {
+        console.error(error);
+        showStatus(error.message || "Hinzufügen fehlgeschlagen.");
+    } finally {
+        adding = false;
+        updateAddButton();
+    }
+});
+
+document.querySelector("main.page--inventory")
+    .addEventListener("click", event => {
+        const button = event.target.closest(".collapsibleCard__toggle");
+        if (!button) return;
+
+        const card = button.closest(".collapsibleCard");
+        const body = card?.querySelector(".collapsibleCard__body");
         if (!body) return;
 
-        const isOpen = toggleBtn.getAttribute("aria-expanded") === "true";
-
-        toggleBtn.setAttribute("aria-expanded", String(!isOpen));
+        const isOpen = button.getAttribute("aria-expanded") === "true";
+        button.setAttribute("aria-expanded", String(!isOpen));
         body.hidden = isOpen;
         card.classList.toggle("is-open", !isOpen);
-    }
-    function bindCollapsibleSections() {
-        document.addEventListener("click", (e) => {
-            const toggleBtn = e.target.closest(".collapsibleCard__toggle");
-            if (!toggleBtn) return;
+    });
 
-            toggleCollapsible(toggleBtn);
-        });
-    }
-
-    function bindInventoryTableEvents() {
-        const allBodies = [
-            inventoryWeaponsRows,
-            inventoryArmorRows,
-            inventoryIngredientsRows,
-            inventoryQuestRows,
-            inventoryOtherRows,
-        ];
-
-        allBodies.forEach((tbody) => {
-            tbody.addEventListener("click", (e) => {
-                const baseRow = e.target.closest("tr[data-type][data-index]");
-                if (!baseRow) return;
-
-                const type = baseRow.dataset.type;
-                const index = Number(baseRow.dataset.index);
-                const item = inventoryState.items[type]?.[index];
-                if (!item) return;
-
-                const actionEl = e.target.closest("[data-action]");
-                if (!actionEl) return;
-
-                const action = actionEl.dataset.action;
-
-                if (action === "delete-item") {
-                    inventoryState.items[type].splice(index, 1);
-                    renderAllInventoryTables();
-                    renderCarryStats();
-                    markDirtyAndScheduleSave();
-                    return;
-                }
-
-                if (action === "toggle-desc") {
-                    item.isExpanded = !item.isExpanded;
-                    renderAllInventoryTables();
-                }
-            });
-
-            tbody.addEventListener("input", (e) => {
-                const field = e.target.closest("[data-edit]");
-                if (!field) return;
-
-                const descRow = e.target.closest("tr[data-type][data-index]");
-                if (!descRow) return;
-
-                const type = descRow.dataset.type;
-                const index = Number(descRow.dataset.index);
-                const item = inventoryState.items[type]?.[index];
-                if (!item) return;
-
-                const editKey = field.dataset.edit;
-
-                if (editKey === "name") {
-                    item.name = limitText(field.value, MAX_ITEM_NAME_LENGTH);
-                    field.value = item.name;
-                }
-
-                if (editKey === "count") {
-                    item.count = toItemCount(field.value, 1);
-                    field.value = String(item.count);
-                }
-
-                if (editKey === "weight") {
-                    item.weight = toItemWeight(field.value);
-                    field.value = String(item.weight);
-                }
-
-                if (editKey === "desc") {
-                    item.desc = String(field.value ?? "").slice(0, MAX_ITEM_DESC_LENGTH);
-                    field.value = item.desc;
-                }
-
-                renderCarryStats();
-                markDirtyAndScheduleSave();
-            });
-
-            tbody.addEventListener("change", (e) => {
-                const field = e.target.closest("[data-edit]");
-                if (!field) return;
-
-                const descRow = e.target.closest("tr[data-type][data-index]");
-                if (!descRow) return;
-
-                const fromType = descRow.dataset.type;
-                const index = Number(descRow.dataset.index);
-                const item = inventoryState.items[fromType]?.[index];
-                if (!item) return;
-
-                const editKey = field.dataset.edit;
-
-                if (editKey === "type") {
-                    const targetType = ITEM_TYPES.includes(field.value)
-                        ? field.value
-                        : "sonstiges";
-
-                    moveItemToType(item, fromType, targetType, index);
-                    renderAllInventoryTables();
-                }
-
-                renderCarryStats();
-                markDirtyAndScheduleSave();
-            });
-        });
-    }
-    function getTotalInventoryItemCount() {
-        let total = 0;
-        for (const type of ITEM_TYPES) {
-            total += inventoryState.items[type]?.length ?? 0;
-        }
-        return total;
-    }
-
-    // =========================================================
-    // Load / Hydrate
-    // =========================================================
-    async function loadCharacterAndHydrate() {
-        const id = getSelectedCharacterId();
-
-        if (!id) {
-            boundCharacterId = null;
-            currentCharacter = null;
-            applyPersistInventory(emptyPersistInventory());
-            fillMoneyInputs();
-            renderAllInventoryTables();
-            renderCarryStats();
-            return;
-        }
-
-        try {
-            const c = await API.getCharacter(Number(id));
-            currentCharacter = c;
-            boundCharacterId = c.id;
-
-            const persist = c?.data?.inventory ?? emptyPersistInventory();
-            applyPersistInventory(persist);
-
-            fillMoneyInputs();
-            renderAllInventoryTables();
-            renderCarryStats();
-        } catch (e) {
-            console.error("[inventory.js] Failed to load character. Running in-memory only.", e);
-
-            boundCharacterId = null;
-            currentCharacter = null;
-
-            applyPersistInventory(emptyPersistInventory());
-            fillMoneyInputs();
-            renderAllInventoryTables();
-            renderCarryStats();
-        }
-    }
-
-    // =========================================================
-    // Startup
-    // =========================================================
-    function startup() {
-        bindMoneyInputs();
-        bindAddItem();
-        bindCollapsibleSections();
-        bindInventoryTableEvents();
-
-        return loadCharacterAndHydrate();
-    }
-
-    startup();
+// Im neuen Modell sind Zutaten und Questgegenstände zunächst "Sonstiges".
+for (const id of ["sec-items-ingredients", "sec-items-quest"]) {
+    document.getElementById(id)?.remove();
 }
-initInventory();
+
+async function startup() {
+    if (!characterId) {
+        showStatus("Bitte zuerst einen Charakter auswählen.");
+        return;
+    }
+
+    showStatus("Inventar wird geladen…");
+
+    try {
+        const loaded = await Promise.all([
+            API.getCharacter(characterId),
+            API.listItemTemplates(),
+            API.listCharacterInventory(characterId),
+            API.listCharacterPrivateStorage(characterId),
+        ]);
+
+        [character, templates, instances, privateInstances] = loaded;
+
+        for (const [key, input] of Object.entries(moneyInputs)) {
+            input.value = String(
+                character.data?.inventory?.money?.[key] ?? 0,
+            );
+            input.disabled = false;
+        }
+
+        ready = true;
+        renderTemplates();
+        renderInventory();
+        renderPrivateStorage();
+        showStatus("Inventar geladen.");
+    } catch (error) {
+        console.error(error);
+        showStatus(error.message || "Inventar konnte nicht geladen werden.");
+    }
+}
+
+void startup();
