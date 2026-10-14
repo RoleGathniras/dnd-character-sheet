@@ -64,7 +64,8 @@ function showStatus(message) {
 
 function updateAddButton() {
     addButton.disabled =
-        !ready || adding || !templateSelect.value;
+        !ready || adding || transferring ||
+        transferRefreshFailed || !templateSelect.value;
 }
 
 function updateTemplatePreview() {
@@ -108,6 +109,120 @@ function appendDetail(container, text) {
     paragraph.textContent = text;
     container.appendChild(paragraph);
 }
+function canonicalJson(value) {
+    if (Array.isArray(value)) {
+        return `[${value.map(canonicalJson).join(",")}]`;
+    }
+
+    if (value !== null && typeof value === "object") {
+        return `{${Object.keys(value).sort().map(key =>
+            `${JSON.stringify(key)}:${canonicalJson(value[key])}`
+        ).join(",")}}`;
+    }
+
+    return JSON.stringify(value);
+}
+
+function appendMergeControls(container, source, items) {
+    const targets = items.filter(target =>
+        target.id !== source.id &&
+        target.template_id === source.template_id &&
+        target.location === source.location &&
+        target.character_id === source.character_id &&
+        target.campaign_id === source.campaign_id &&
+        target.quantity + source.quantity <= 9999 &&
+        canonicalJson(target.snapshot) === canonicalJson(source.snapshot)
+    );
+
+    if (!targets.length) return;
+
+    const mergeForm = document.createElement("form");
+    mergeForm.className = "row gap";
+    mergeForm.dataset.itemTransfer = "1";
+
+    const select = document.createElement("select");
+    select.setAttribute("aria-label", "Zielstapel zum Zusammenführen");
+
+    for (const target of targets) {
+        select.add(new Option(
+            `Stapel #${target.id} · ${target.quantity} Stück`,
+            String(target.id),
+        ));
+    }
+
+    const button = document.createElement("button");
+    button.type = "submit";
+    button.className = "btn";
+    button.textContent = "Zusammenführen";
+
+    select.disabled = transferring || transferRefreshFailed;
+    button.disabled = transferring || transferRefreshFailed;
+
+    mergeForm.append(select, button);
+    container.appendChild(mergeForm);
+
+    mergeForm.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        if (transferring || adding || transferRefreshFailed) return;
+
+        const target = targets.find(
+            item => item.id === Number(select.value),
+        );
+        if (!target) return;
+
+        transferring = true;
+        updateAddButton();
+        showTransferStatus("Stapel werden zusammengeführt…");
+
+        document.querySelectorAll(
+            "form[data-item-transfer] input, " +
+            "form[data-item-transfer] select, " +
+            "form[data-item-transfer] button",
+        ).forEach(element => {
+            element.disabled = true;
+        });
+
+        let changed = false;
+
+        try {
+            await API.mergeItemInstances(target.id, {
+                source_id: source.id,
+                expected_source_version: source.version,
+                expected_target_version: target.version,
+            });
+            changed = true;
+        } catch (error) {
+            console.error(error);
+            showTransferStatus(error.message || "Zusammenführen fehlgeschlagen.");
+        }
+
+        try {
+            [instances, privateInstances] = await Promise.all([
+                API.listCharacterInventory(characterId),
+                API.listCharacterPrivateStorage(characterId),
+            ]);
+
+            transferRefreshFailed = false;
+
+            if (changed) {
+                showTransferStatus("Stapel zusammengeführt.");
+            }
+        } catch (error) {
+            console.error(error);
+            transferRefreshFailed = true;
+            showTransferStatus(
+                "Anzeige konnte nicht aktualisiert werden. Bitte Seite neu laden.",
+            );
+        } finally {
+            transferring = false;
+            updateAddButton();
+            renderInventory();
+            renderPrivateStorage();
+        }
+    });
+}
+
 function appendTransferControls(container, item, targetLocation) {
     const form = document.createElement("form");
     form.className = "row gap";
@@ -143,6 +258,7 @@ function appendTransferControls(container, item, targetLocation) {
 
         if (
             transferring ||
+            adding ||
             transferRefreshFailed ||
             !form.reportValidity()
         ) return;
@@ -156,10 +272,13 @@ function appendTransferControls(container, item, targetLocation) {
         ) return;
 
         transferring = true;
+        updateAddButton();
         showTransferStatus("Gegenstand wird verschoben…");
 
         document.querySelectorAll(
-            "form[data-item-transfer] input, form[data-item-transfer] button",
+            "form[data-item-transfer] input, " +
+            "form[data-item-transfer] select, " +
+            "form[data-item-transfer] button",
         ).forEach(element => {
             element.disabled = true;
         });
@@ -201,6 +320,7 @@ function appendTransferControls(container, item, targetLocation) {
             );
         } finally {
             transferring = false;
+            updateAddButton();
             renderInventory();
             renderPrivateStorage();
         }
@@ -246,6 +366,7 @@ function renderPrivateStorage() {
         }
 
         appendTransferControls(details, item, "inventory");
+        appendMergeControls(details, item, privateInstances);
 
         cell.appendChild(details);
         row.appendChild(cell);
@@ -345,6 +466,7 @@ function renderInventory() {
                 details.appendChild(description);
             }
             appendTransferControls(details, item, "private_storage");
+            appendMergeControls(details, item, instances);
             cell.appendChild(details);
             row.appendChild(cell);
             tbody.appendChild(row);
@@ -446,7 +568,11 @@ templateSelect.addEventListener("change", updateTemplatePreview);
 
 form.addEventListener("submit", async event => {
     event.preventDefault();
-    if (!ready || adding || !form.reportValidity()) return;
+
+    if (
+        !ready || adding || transferring ||
+        transferRefreshFailed || !form.reportValidity()
+    ) return;
 
     const templateId = Number(templateSelect.value);
     const quantity = Number(quantityInput.value);

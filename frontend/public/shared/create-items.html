@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gegenstand erstellen</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/styles/shared.css">
+</head>
+
+<body>
+    <header class="appbar">
+        <a id="backLink" class="btn" href="/index.html">Zurück</a>
+        <strong>Gegenstand erstellen</strong>
+    </header>
+
+    <main class="page">
+        <section class="card">
+            <h1>Neue Gegenstandsvorlage</h1>
+            <p>
+                Erstelle eine Vorlage, die du anschließend im Inventar
+                auswählen kannst.
+            </p>
+
+            <form id="createItemForm">
+                <fieldset id="itemFields" disabled>
+                    <legend>Gegenstand</legend>
+
+                    <label for="category">Kategorie</label>
+                    <select id="category" name="category">
+                        <option value="weapon">Waffe</option>
+                        <option value="armor">Rüstung</option>
+                        <option value="other">Sonstiges</option>
+                    </select>
+
+                    <div id="commonFields"></div>
+
+                    <fieldset id="weaponFields">
+                        <legend>Waffendetails</legend>
+                        <div id="weaponInputs"></div>
+                    </fieldset>
+
+                    <fieldset id="armorFields" hidden disabled>
+                        <legend>Rüstungsdetails</legend>
+                        <div id="armorInputs"></div>
+                    </fieldset>
+
+                    <label for="description">Beschreibung (optional)</label>
+                    <textarea id="description" name="description" maxlength="5000" rows="5"></textarea>
+
+                    <button class="btn" type="submit">
+                        Vorlage erstellen
+                    </button>
+                </fieldset>
+            </form>
+
+            <p id="createItemStatus" role="status" aria-live="polite"></p>
+        </section>
+    </main>
+
+    <script type="module" src="./create-items.js"></script>
+</body>
+
+</html>

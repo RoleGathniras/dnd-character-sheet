@@ -295,8 +295,16 @@ class WeaponDetails(SQLModel, table=True):
         max_length=30,
     )
 
-    range_normal: Optional[int] = Field(default=None, gt=0)
-    range_long: Optional[int] = Field(default=None, gt=0)
+    range_normal: Optional[Decimal] = Field(
+        default=None,
+        gt=0,
+        sa_column=Column(Numeric(8, 1), nullable=True),
+    )
+    range_long: Optional[Decimal] = Field(
+        default=None,
+        gt=0,
+        sa_column=Column(Numeric(8, 1), nullable=True),
+    )
 
     properties: list[str] = Field(
         default_factory=list,
@@ -328,6 +336,27 @@ class ItemInstance(SQLModel, table=True):
             ")",
             name="ck_item_instances_location",
         ),
+        CheckConstraint(
+            "equipped_hands IS NULL OR equipped_hands IN (1, 2)",
+            name="ck_item_instances_equipped_hands",
+        ),
+        CheckConstraint(
+            "equipped_hands IS NULL OR location = 'inventory'",
+            name="ck_item_instances_equipped_inventory",
+        ),
+        CheckConstraint(
+            "attack_slot IS NULL OR attack_slot BETWEEN 1 AND 5",
+            name="ck_item_instances_attack_slot",
+        ),
+        CheckConstraint(
+            "attack_slot IS NULL OR equipped_hands IS NOT NULL",
+            name="ck_item_instances_attack_slot_equipped",
+        ),
+        UniqueConstraint(
+            "character_id",
+            "attack_slot",
+            name="uq_item_instances_character_attack_slot",
+        ),
     )
 
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -355,6 +384,8 @@ class ItemInstance(SQLModel, table=True):
     )
 
     quantity: int = Field(default=1, ge=1)
+    equipped_hands: Optional[int] = Field(default=None)
+    attack_slot: Optional[int] = Field(default=None)
     version: int = Field(default=1, ge=1)
 
     created_at: datetime = Field(default_factory=utcnow, nullable=False)

@@ -1646,6 +1646,50 @@ input[readonly] {
   outline-offset: 2px;
 }
 
+.page--actions .attackNameGroup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.4rem;
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.page--actions .attackNameGroup>input {
+  width: 100%;
+  min-width: 0;
+}
+
+.page--actions [data-weapon-controls] {
+  display: contents;
+}
+
+.page--actions [data-weapon-controls]>.btn {
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  font-size: 1.2rem;
+}
+
+.page--actions .attackWeaponPicker {
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+}
+
+.page--actions .attackWeaponPicker[hidden] {
+  display: none !important;
+}
+
+.page--actions .attackWeaponPicker select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.page--actions input[id$="_range"] {
+  font-size: 0.75rem;
+  padding-inline: 0.35rem;
+}
+
 /* =========================================================
    Aktionen – Klappkarten
    ========================================================= */

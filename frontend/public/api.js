@@ -198,6 +198,14 @@ export const API = {
         return this.request("/items");
     },
 
+    createItemTemplate(payload) {
+        return this.request("/items", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+    },
+
     listCharacterInventory(characterId) {
         return this.request(
             `/item-instances/characters/${characterId}`,
@@ -226,6 +234,21 @@ export const API = {
                 body: JSON.stringify(payload),
             },
         );
+    },
+    mergeItemInstances(targetId, payload) {
+        return this.request(`/item-instances/${targetId}/merge`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+    },
+
+    updateItemEquipment(instanceId, payload) {
+        return this.request(`/item-instances/${instanceId}/equipment`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
     },
     // ===== Spells =====
 

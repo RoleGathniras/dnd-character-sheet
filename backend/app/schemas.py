@@ -133,8 +133,18 @@ class WeaponDetailsInput(BaseModel):
         pattern=r"^[1-9]\d*d[1-9]\d*$",
     )
 
-    range_normal: Optional[int] = Field(default=None, gt=0)
-    range_long: Optional[int] = Field(default=None, gt=0)
+    range_normal: Optional[Decimal] = Field(
+        default=None,
+        gt=0,
+        max_digits=8,
+        decimal_places=1,
+    )
+    range_long: Optional[Decimal] = Field(
+        default=None,
+        gt=0,
+        max_digits=8,
+        decimal_places=1,
+    )
 
     properties: list[str] = Field(default_factory=list, max_length=30)
 
@@ -283,10 +293,12 @@ class ItemInstanceOut(BaseModel):
     campaign_id: Optional[int]
 
     quantity: int
+    equipped_hands: Optional[int] = None
     version: int
 
     created_at: datetime
     updated_at: datetime
+    attack_slot: Optional[int] = None
 
 
 class ItemPersonalMove(BaseModel):
@@ -329,3 +341,26 @@ class ItemCampaignCreate(BaseModel):
     template_id: int = Field(gt=0)
     campaign_id: int = Field(gt=0)
     quantity: int = Field(default=1, ge=1, le=9999)
+
+
+class ItemInstanceMerge(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_id: int = Field(gt=0)
+    expected_source_version: int = Field(ge=1)
+    expected_target_version: int = Field(ge=1)
+
+
+class ItemEquipmentUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    equipped_hands: Optional[int] = Field(ge=1, le=2)
+    attack_slot: Optional[int] = Field(default=None, ge=1, le=5)
+    expected_version: int = Field(ge=1)
+
+    @model_validator(mode="after")
+    def validate_attack_slot(self):
+        if self.attack_slot is not None and self.equipped_hands is None:
+            raise ValueError("Eine Angriffskarte benötigt eine ausgerüstete Waffe.")
+
+        return self

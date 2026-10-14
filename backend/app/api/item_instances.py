@@ -7,6 +7,7 @@ from fastapi import (
     status,
 )
 from sqlmodel import Session, select
+from sqlalchemy.exc import IntegrityError
 
 from app.api.items import build_item_out
 from app.deps import get_current_user, get_session
@@ -29,6 +30,8 @@ from app.schemas import (
     ItemCampaignDeposit,
     ItemCampaignWithdraw,
     ItemCampaignCreate,
+    ItemInstanceMerge,
+    ItemEquipmentUpdate,
 )
 
 from copy import deepcopy
@@ -122,6 +125,8 @@ def transfer_item_quantity(
     now = utcnow()
 
     if amount == instance.quantity:
+        instance.equipped_hands = None
+        instance.attack_slot = None
         instance.location = target_location
         instance.character_id = target_character_id
         instance.campaign_id = target_campaign_id
@@ -626,3 +631,259 @@ def delete_campaign_item(
         raise
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/{target_id}/merge",
+    response_model=ItemInstanceOut,
+)
+def merge_item_instances(
+    target_id: int,
+    payload: ItemInstanceMerge,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    if target_id == payload.source_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Quell- und Zielstapel müssen unterschiedlich sein.",
+        )
+
+    try:
+        # Immer die kleinere ID zuerst sperren.
+        locked = {}
+
+        for item_id in sorted([target_id, payload.source_id]):
+            instance = session.exec(
+                select(ItemInstance).where(ItemInstance.id == item_id).with_for_update()
+            ).first()
+
+            if instance is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Gegenstandsstapel nicht gefunden.",
+                )
+
+            locked[item_id] = instance
+
+        target = locked[target_id]
+        source = locked[payload.source_id]
+
+        # Rechte für beide Stapel prüfen, bevor Details verglichen werden.
+        for instance in (target, source):
+            allowed = False
+
+            if instance.location in (
+                ItemLocation.inventory,
+                ItemLocation.private_storage,
+            ):
+                character = session.get(
+                    Character,
+                    instance.character_id,
+                )
+
+                allowed = character is not None and (
+                    current_user.role == Role.admin
+                    or character.owner_id == current_user.id
+                )
+
+            elif instance.location == ItemLocation.campaign_storage:
+                campaign = session.get(
+                    Campaign,
+                    instance.campaign_id,
+                )
+
+                allowed = campaign is not None and (
+                    current_user.role == Role.admin
+                    or (
+                        current_user.role == Role.dm
+                        and campaign.dm_id == current_user.id
+                    )
+                )
+
+            if not allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Gegenstandsstapel nicht gefunden.",
+                )
+
+        if (
+            source.version != payload.expected_source_version
+            or target.version != payload.expected_target_version
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=("Ein Stapel wurde inzwischen geändert. Bitte neu laden."),
+            )
+
+        same_storage = (
+            source.location == target.location
+            and source.character_id == target.character_id
+            and source.campaign_id == target.campaign_id
+        )
+
+        if not same_storage:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Die Stapel müssen am selben Lagerort liegen.",
+            )
+
+        if (
+            source.template_id != target.template_id
+            or source.snapshot != target.snapshot
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Nur identische Gegenstände können gestapelt werden.",
+            )
+        total_quantity = source.quantity + target.quantity
+
+        if total_quantity > 9999:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Ein Stapel darf höchstens 9999 Stück enthalten.",
+            )
+
+        if source.equipped_hands is not None and target.equipped_hands is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Bitte vor dem Zusammenführen eine der beiden Waffen ablegen.",
+            )
+
+        if source.equipped_hands is not None:
+            source_slot = source.attack_slot
+
+            # Kartennummer zuerst freigeben, damit der Unique-Constraint
+            # beim Übertragen auf den Zielstapel nicht verletzt wird.
+            source.attack_slot = None
+            session.add(source)
+            session.flush()
+
+            target.equipped_hands = source.equipped_hands
+            target.attack_slot = source_slot
+
+        target.quantity = total_quantity
+        target.version += 1
+        target.updated_at = utcnow()
+
+        session.add(target)
+        session.delete(source)
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+
+    session.refresh(target)
+    return target
+
+
+@router.patch(
+    "/{instance_id}/equipment",
+    response_model=ItemInstanceOut,
+)
+def update_item_equipment(
+    instance_id: int,
+    payload: ItemEquipmentUpdate,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    try:
+        instance = session.exec(
+            select(ItemInstance).where(ItemInstance.id == instance_id).with_for_update()
+        ).first()
+
+        if instance is None or instance.location != ItemLocation.inventory:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Gegenstand im Inventar nicht gefunden.",
+            )
+
+        character = session.get(Character, instance.character_id)
+
+        if character is None or (
+            current_user.role != Role.admin and character.owner_id != current_user.id
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Gegenstand im Inventar nicht gefunden.",
+            )
+
+        if instance.version != payload.expected_version:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Der Gegenstand wurde inzwischen geändert. Bitte neu laden.",
+            )
+
+        weapon = instance.snapshot.get("weapon")
+
+        if instance.snapshot.get("category") != "weapon" or not weapon:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Nur Waffen können hier ausgerüstet werden.",
+            )
+
+        hands = payload.equipped_hands
+
+        if hands is not None:
+            requirement = weapon.get("hand_requirement")
+            allowed_hands = {
+                "one": (1,),
+                "two": (2,),
+                "versatile": (1, 2),
+            }.get(requirement, ())
+
+            if hands not in allowed_hands:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Diese Nutzung passt nicht zur benötigten Handanzahl.",
+                )
+
+        slot = payload.attack_slot if hands is not None else None
+
+        if slot is not None:
+            occupied = session.exec(
+                select(ItemInstance).where(
+                    ItemInstance.character_id == character.id,
+                    ItemInstance.attack_slot == slot,
+                    ItemInstance.id != instance.id,
+                )
+            ).first()
+
+            if occupied is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Diese Angriffskarte ist bereits belegt.",
+                )
+
+        if instance.equipped_hands != hands or instance.attack_slot != slot:
+            instance.equipped_hands = hands
+            instance.attack_slot = slot
+            instance.version += 1
+            instance.updated_at = utcnow()
+            session.add(instance)
+
+        session.commit()
+
+    except IntegrityError as error:
+        session.rollback()
+
+        constraint = getattr(
+            getattr(error.orig, "diag", None),
+            "constraint_name",
+            None,
+        )
+
+        if constraint == "uq_item_instances_character_attack_slot":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Diese Angriffskarte wurde inzwischen belegt. Bitte neu laden.",
+            ) from error
+
+        raise
+
+    except Exception:
+        session.rollback()
+        raise
+
+    session.refresh(instance)
+    return instance

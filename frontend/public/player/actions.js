@@ -11,6 +11,10 @@ import { setStatus } from "/shared/status.js";
   let attackSaveTimer = null;
   let editingActionId = null;
   let expandedActionId = null;
+  let inventoryWeapons = [];
+  let equipmentBusy = false;
+  let attackSaveQueue = Promise.resolve();
+  const attackWeaponKeys = {};
 
   function setValue(id, value) {
     const el = document.getElementById(id);
@@ -85,57 +89,55 @@ import { setStatus } from "/shared/status.js";
       setValue(`attack_${i}_bonus`, attackBonus);
     }
   }
-  async function saveAttacks() {
-    if (!currentCharacter) return;
+  function saveAttacks() {
+    if (!currentCharacter) return Promise.resolve(false);
 
-    try {
-      const latestCharacter = await API.getCharacter(currentCharacter.id);
+    const characterId = currentCharacter.id;
+    const attackData = {};
 
-      const attackData = {};
-
-      for (let i = 1; i <= 5; i++) {
-        attackData[`attack_${i}_type`] = getValue(`attack_${i}_type`);
-
-        attackData[`attack_${i}_abil`] = getValue(`attack_${i}_abil`);
-
-        attackData[`attack_${i}_prof`] = Boolean(getValue(`attack_${i}_prof`));
-
-        attackData[`attack_${i}_misc`] = toNum(getValue(`attack_${i}_misc`));
-
-        attackData[`attack_${i}_range`] = getValue(`attack_${i}_range`);
-
-        attackData[`attack_${i}_damage`] = getValue(`attack_${i}_damage`);
-      }
-
-      const newData = {
-        ...(latestCharacter.data ?? {}),
-        ...attackData,
-      };
-
-      const updatedCharacter = await API.patchCharacter(latestCharacter.id, {
-        data: newData,
-        updated_at: latestCharacter.updated_at,
-      });
-
-      currentCharacter = updatedCharacter;
-
-      window.dispatchEvent(
-        new CustomEvent("character:updated", {
-          detail: {
-            character: updatedCharacter,
-          },
-        }),
-      );
-
-      setStatus("Auto-Save ✅");
-    } catch (error) {
-      console.error(
-        "[actions] Angriffe konnten nicht gespeichert werden",
-        error,
-      );
-
-      setStatus("Speichern fehlgeschlagen ❌");
+    for (let i = 1; i <= 5; i++) {
+      attackData[`attack_${i}_type`] = getValue(`attack_${i}_type`);
+      attackData[`attack_${i}_abil`] = getValue(`attack_${i}_abil`);
+      attackData[`attack_${i}_prof`] = Boolean(getValue(`attack_${i}_prof`));
+      attackData[`attack_${i}_misc`] = toNum(getValue(`attack_${i}_misc`));
+      attackData[`attack_${i}_range`] = getValue(`attack_${i}_range`);
+      attackData[`attack_${i}_damage`] = getValue(`attack_${i}_damage`);
+      attackData[`attack_${i}_weapon_key`] = attackWeaponKeys[i] ?? null;
     }
+
+    attackSaveQueue = attackSaveQueue.then(async () => {
+      try {
+        for (let attempt = 0; attempt < 2; attempt++) {
+          const latest = await API.getCharacter(characterId);
+
+          try {
+            currentCharacter = await API.patchCharacter(characterId, {
+              data: {
+                ...(latest.data ?? {}),
+                ...attackData,
+              },
+              updated_at: latest.updated_at,
+            });
+            break;
+          } catch (error) {
+            if (error.status !== 409 || attempt === 1) throw error;
+          }
+        }
+
+        window.dispatchEvent(new CustomEvent("character:updated", {
+          detail: { character: currentCharacter },
+        }));
+
+        setStatus("Auto-Save ✅");
+        return true;
+      } catch (error) {
+        console.error("[actions] Angriffe konnten nicht gespeichert werden", error);
+        setStatus("Angriffe konnten nicht gespeichert werden ❌");
+        return false;
+      }
+    });
+
+    return attackSaveQueue;
   }
   function scheduleAttackSave() {
     if (attackSaveTimer) {
@@ -897,10 +899,306 @@ import { setStatus } from "/shared/status.js";
     });
     btnDelete?.addEventListener("click", deleteCurrentAction);
   }
+  function weaponKey(item) {
+    function canonical(value) {
+      if (Array.isArray(value)) {
+        return `[${value.map(canonical).join(",")}]`;
+      }
+
+      if (value !== null && typeof value === "object") {
+        return `{${Object.keys(value).sort().map(key =>
+          `${JSON.stringify(key)}:${canonical(value[key])}`
+        ).join(",")}}`;
+      }
+
+      return JSON.stringify(value);
+    }
+
+    return canonical({
+      template_id: item.template_id,
+      snapshot: item.snapshot,
+      hands: item.equipped_hands,
+    });
+  }
+
+  function weaponRange(weapon) {
+    if (weapon.range_normal == null) return "Nicht hinterlegt";
+
+    const format = new Intl.NumberFormat("de-DE", {
+      maximumFractionDigits: 1,
+    });
+
+    let text = `${format.format(Number(weapon.range_normal))} m`;
+
+    if (weapon.range_long != null) {
+      text += ` / ${format.format(Number(weapon.range_long))} m`;
+    }
+
+    return text;
+  }
+
+  function clearAttackCard(slot) {
+    for (const field of ["type", "abil", "range", "damage"]) {
+      setValue(`attack_${slot}_${field}`, "");
+    }
+
+    setValue(`attack_${slot}_prof`, false);
+    setValue(`attack_${slot}_misc`, 0);
+    attackWeaponKeys[slot] = null;
+  }
+
+  function applyEquippedWeapons() {
+    const data = currentCharacter?.data ?? {};
+
+    for (let slot = 1; slot <= 5; slot++) {
+      const item = inventoryWeapons.find(entry =>
+        entry.attack_slot === slot &&
+        entry.equipped_hands != null
+      );
+
+      const name = document.getElementById(`attack_${slot}_type`);
+      const range = document.getElementById(`attack_${slot}_range`);
+
+      name.readOnly = Boolean(item);
+      range.readOnly = Boolean(item);
+
+      if (!item) {
+        // Alte manuelle Angriffe erhalten. Nur frühere Waffenbelegungen leeren.
+        if (attackWeaponKeys[slot] || data[`attack_${slot}_weapon_key`]) {
+          clearAttackCard(slot);
+        }
+        continue;
+      }
+
+      const key = weaponKey(item);
+      const previousKey =
+        attackWeaponKeys[slot] ?? data[`attack_${slot}_weapon_key`];
+
+      if (previousKey !== key) {
+        clearAttackCard(slot);
+
+        const weapon = item.snapshot.weapon;
+        const dice =
+          weapon.hand_requirement === "versatile" &&
+            item.equipped_hands === 2
+            ? weapon.versatile_damage
+            : weapon.damage_dice;
+
+        setValue(
+          `attack_${slot}_damage`,
+          `${(dice ?? "").replace("d", "W")} ${weapon.damage_type}`,
+        );
+      }
+
+      attackWeaponKeys[slot] = key;
+      setValue(`attack_${slot}_type`, item.snapshot.name);
+      setValue(`attack_${slot}_range`, weaponRange(item.snapshot.weapon));
+    }
+
+    recalcAttacks();
+  }
+
+  function renderWeaponControls() {
+    for (let slot = 1; slot <= 5; slot++) {
+      const row = document.getElementById(`attack_${slot}_type`)
+        .closest(".attacksRow");
+
+      let nameGroup = row.querySelector(".attackNameGroup");
+
+      if (!nameGroup) {
+        nameGroup = document.createElement("div");
+        nameGroup.className = "attackNameGroup";
+
+        const nameInput = document.getElementById(`attack_${slot}_type`);
+        nameInput.before(nameGroup);
+        nameGroup.appendChild(nameInput);
+      }
+
+      let controls = nameGroup.querySelector("[data-weapon-controls]");
+
+      if (!controls) {
+        controls = document.createElement("div");
+        controls.dataset.weaponControls = "1";
+        nameGroup.appendChild(controls);
+      }
+
+      controls.replaceChildren();
+
+      const equipped = inventoryWeapons.find(item =>
+        item.attack_slot === slot && item.equipped_hands != null
+      );
+
+      if (equipped) {
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "btn";
+        remove.textContent = "✕";
+        remove.setAttribute("aria-label", `${equipped.snapshot.name} ablegen`);
+        remove.title = "Waffe ablegen";
+        remove.disabled = equipmentBusy;
+
+        remove.addEventListener("click", () => {
+          void changeCardEquipment(slot, equipped, null);
+        });
+
+        controls.appendChild(remove);
+        continue;
+      }
+
+      const open = document.createElement("button");
+      open.type = "button";
+      open.className = "btn";
+      open.textContent = "+";
+      open.title = "Waffe ausrüsten";
+      open.setAttribute("aria-label", `Waffe für Angriffskarte ${slot} ausrüsten`);
+      open.disabled = equipmentBusy;
+      controls.appendChild(open);
+
+      const picker = document.createElement("div");
+      picker.className = "row gap";
+      picker.classList.add("attackWeaponPicker");
+      picker.hidden = true;
+
+      const select = document.createElement("select");
+      select.setAttribute("aria-label", `Waffe für Angriffskarte ${slot}`);
+
+      const available = inventoryWeapons.filter(item => item.attack_slot == null);
+
+      select.add(new Option("Waffe auswählen", ""));
+
+      for (const item of available) {
+        select.add(new Option(
+          `${item.snapshot.name} · Stapel #${item.id}`,
+          String(item.id),
+        ));
+      }
+
+      const hands = document.createElement("select");
+      hands.setAttribute("aria-label", "Handnutzung");
+
+      const equip = document.createElement("button");
+      equip.type = "button";
+      equip.className = "btn";
+      equip.textContent = "Ausrüsten";
+      equip.disabled = true;
+
+      select.addEventListener("change", () => {
+        const item = available.find(entry => entry.id === Number(select.value));
+        hands.replaceChildren();
+        equip.disabled = !item;
+
+        if (!item) return;
+
+        const requirement = item.snapshot.weapon.hand_requirement;
+
+        if (["one", "versatile"].includes(requirement)) {
+          hands.add(new Option("Einhändig", "1"));
+        }
+        if (["two", "versatile"].includes(requirement)) {
+          hands.add(new Option("Zweihändig", "2"));
+        }
+      });
+
+      equip.addEventListener("click", () => {
+        const item = available.find(entry => entry.id === Number(select.value));
+        if (item) void changeCardEquipment(slot, item, Number(hands.value));
+      });
+
+      open.addEventListener("click", () => {
+        picker.hidden = !picker.hidden;
+      });
+
+      picker.append(select, hands, equip);
+      controls.appendChild(picker);
+    }
+  }
+
+  async function refreshWeaponCards() {
+    const inventory = await API.listCharacterInventory(currentCharacter.id);
+
+    inventoryWeapons = inventory.filter(item =>
+      item.snapshot.category === "weapon" &&
+      item.snapshot.weapon
+    );
+
+    applyEquippedWeapons();
+    renderWeaponControls();
+  }
+
+  async function changeCardEquipment(slot, item, hands) {
+    if (equipmentBusy) return;
+
+    // Eine vorhandene manuelle Karte nicht ohne Hinweis überschreiben.
+    if (
+      hands !== null &&
+      getValue(`attack_${slot}_type`) &&
+      !confirm("Den bisherigen Angriff in dieser Karte durch die Waffe ersetzen?")
+    ) return;
+
+    equipmentBusy = true;
+
+    const section = document.getElementById("sec-attacks");
+    section.querySelectorAll("input, select, button").forEach(element => {
+      element.disabled = true;
+    });
+
+    try {
+      clearTimeout(attackSaveTimer);
+      attackSaveTimer = null;
+
+      if (!await saveAttacks()) {
+        throw new Error("Bitte zuerst die Angriffsänderungen erfolgreich speichern.");
+      }
+
+      await API.updateItemEquipment(item.id, {
+        equipped_hands: hands,
+        attack_slot: hands === null ? null : slot,
+        expected_version: item.version,
+      });
+
+      await refreshWeaponCards();
+
+      if (!await saveAttacks()) {
+        throw new Error(
+          "Waffenzuordnung gespeichert, aber Angriffsänderungen nicht gespeichert.",
+        );
+      }
+
+      setStatus(hands === null ? "Waffe abgelegt." : "Waffe ausgerüstet.");
+    } catch (error) {
+      console.error("[actions] Waffenzuordnung fehlgeschlagen", error);
+
+      try {
+        await refreshWeaponCards();
+      } catch (refreshError) {
+        console.error(refreshError);
+        setStatus("Waffenstand unbekannt. Bitte Seite neu laden.");
+        return;
+      }
+
+      setStatus(error.message || "Waffenzuordnung fehlgeschlagen.");
+    } finally {
+      equipmentBusy = false;
+      section.querySelectorAll("input, select, button").forEach(element => {
+        element.disabled = false;
+      });
+      renderWeaponControls();
+    }
+  }
+
   (async function startupActions() {
     bindAttackCalculation();
     bindActionEditor();
 
     await loadCharacter();
+
+    if (currentCharacter) {
+      try {
+        await refreshWeaponCards();
+      } catch (error) {
+        console.error(error);
+        setStatus("Inventar konnte nicht geladen werden. Bitte Seite neu laden.");
+      }
+    }
   })();
 })();
